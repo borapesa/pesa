@@ -18,6 +18,8 @@ import type {
 /**
  * Abstract base class every provider adapter must implement.
  *
+ * @since 0.1.0
+ *
  * The SDK calls only these methods — no provider-specific logic ever
  * leaks into application code.
  *

@@ -2,7 +2,7 @@
 title: "Interface: DisburseResult"
 ---
 
-Defined in: [packages/pesa/src/types/disbursement.ts:65](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L65)
+Defined in: [packages/pesa/src/types/disbursement.ts:65](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L65)
 
 Result returned after initiating a disbursement.
 
@@ -25,7 +25,7 @@ if (result.status === 'SUCCESS') {
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="disbursementid"></a> `disbursementId` | `string` | Provider-assigned disbursement ID. | [packages/pesa/src/types/disbursement.ts:67](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L67) |
-| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. Escape hatch. | [packages/pesa/src/types/disbursement.ts:78](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L78) |
-| <a id="reference"></a> `reference` | `string` | Your reference, echoed back. | [packages/pesa/src/types/disbursement.ts:69](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L69) |
-| <a id="status"></a> `status` | `"SUCCESS"` \| `"FAILED"` \| `"QUEUED"` | Disbursement status. - `SUCCESS` — funds sent - `QUEUED` — processing, poll for updates - `FAILED` — definitively failed | [packages/pesa/src/types/disbursement.ts:76](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L76) |
+| <a id="disbursementid"></a> `disbursementId` | `string` | Provider-assigned disbursement ID. | [packages/pesa/src/types/disbursement.ts:67](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L67) |
+| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. Escape hatch. | [packages/pesa/src/types/disbursement.ts:78](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L78) |
+| <a id="reference"></a> `reference` | `string` | Your reference, echoed back. | [packages/pesa/src/types/disbursement.ts:69](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L69) |
+| <a id="status"></a> `status` | `"SUCCESS"` \| `"FAILED"` \| `"QUEUED"` | Disbursement status. - `SUCCESS` — funds sent - `QUEUED` — processing, poll for updates - `FAILED` — definitively failed | [packages/pesa/src/types/disbursement.ts:76](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L76) |

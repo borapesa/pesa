@@ -3,6 +3,10 @@ title: Plugins
 description: Retry, idempotency, logging, webhook verification, and writing custom plugins.
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout variant="info">Added in v0.1.0</Callout>
+
 Plugins intercept requests and webhook events at specific points in the lifecycle. They are plain objects passed in the `plugins` array of `PesaConfig`. **Order matters** — plugins are composed in sequence.
 
 ```ts

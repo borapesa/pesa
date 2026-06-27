@@ -3,6 +3,10 @@ title: Architecture
 description: How Bora Pesa is designed — factory pattern, provider abstraction, plugin pipeline, and event store.
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout variant="info">Added in v0.1.0</Callout>
+
 Bora Pesa is architecturally inspired by [better-auth](https://better-auth.com). A single factory function wires together a payment provider, plugins, and an event store into a fully configured instance.
 
 ## The factory

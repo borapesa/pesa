@@ -2,7 +2,7 @@
 title: "Interface: PreviewResult"
 ---
 
-Defined in: [packages/pesa/src/types/preview.ts:22](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/preview.ts#L22)
+Defined in: [packages/pesa/src/types/preview.ts:22](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/preview.ts#L22)
 
 Result of a preview / dry-run validation before committing an action.
 
@@ -27,7 +27,7 @@ if (pesa.previewOrder) {
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="fee"></a> `fee?` | `number` | Expected transaction fee in TZS, if available. | [packages/pesa/src/types/preview.ts:26](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/preview.ts#L26) |
-| <a id="message"></a> `message?` | `string` | Optional human-readable message (e.g., error details). | [packages/pesa/src/types/preview.ts:28](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/preview.ts#L28) |
-| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. | [packages/pesa/src/types/preview.ts:30](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/preview.ts#L30) |
-| <a id="valid"></a> `valid` | `boolean` | Whether the payload is valid. | [packages/pesa/src/types/preview.ts:24](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/preview.ts#L24) |
+| <a id="fee"></a> `fee?` | `number` | Expected transaction fee in TZS, if available. | [packages/pesa/src/types/preview.ts:26](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/preview.ts#L26) |
+| <a id="message"></a> `message?` | `string` | Optional human-readable message (e.g., error details). | [packages/pesa/src/types/preview.ts:28](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/preview.ts#L28) |
+| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. | [packages/pesa/src/types/preview.ts:30](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/preview.ts#L30) |
+| <a id="valid"></a> `valid` | `boolean` | Whether the payload is valid. | [packages/pesa/src/types/preview.ts:24](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/preview.ts#L24) |

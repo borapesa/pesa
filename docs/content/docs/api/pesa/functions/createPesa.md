@@ -6,12 +6,9 @@ title: "Function: createPesa()"
 function createPesa(config): PesaInstance;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:221](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L221)
+Defined in: [packages/pesa/src/pesa.ts:225](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/pesa.ts#L225)
 
 The single entry point for the entire Bora Pesa SDK.
-
-Returns a fully configured [PesaInstance](../interfaces/PesaInstance) with provider logic,
-plugin pipeline, and event store wired together.
 
 ## Parameters
 
@@ -22,6 +19,13 @@ plugin pipeline, and event store wired together.
 ## Returns
 
 [`PesaInstance`](../interfaces/PesaInstance)
+
+## Since
+
+0.1.0
+
+Returns a fully configured [PesaInstance](../interfaces/PesaInstance) with provider logic,
+plugin pipeline, and event store wired together.
 
 ## Example
 

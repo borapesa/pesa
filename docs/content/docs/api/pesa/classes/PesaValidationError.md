@@ -2,7 +2,7 @@
 title: "Class: PesaValidationError"
 ---
 
-Defined in: [packages/pesa/src/errors.ts:44](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/errors.ts#L44)
+Defined in: [packages/pesa/src/errors.ts:44](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/errors.ts#L44)
 
 Thrown when payload validation fails (client error).
 
@@ -18,7 +18,7 @@ Thrown when payload validation fails (client error).
 new PesaValidationError(message): PesaValidationError;
 ```
 
-Defined in: [packages/pesa/src/errors.ts:45](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/errors.ts#L45)
+Defined in: [packages/pesa/src/errors.ts:45](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/errors.ts#L45)
 
 #### Parameters
 
@@ -38,4 +38,4 @@ Defined in: [packages/pesa/src/errors.ts:45](https://github.com/borapesa/pesa/bl
 
 | Property | Modifier | Type | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/errors.ts#L12) |
+| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/errors.ts#L12) |

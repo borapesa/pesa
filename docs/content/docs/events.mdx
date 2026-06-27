@@ -3,6 +3,10 @@ title: Event System
 description: Webhooks, event persistence, and typed event handlers in Bora Pesa.
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout variant="info">Added in v0.1.0</Callout>
+
 Every verified webhook is normalized into a [`PaymentEvent`](/docs/api/pesa/interfaces/PaymentEvent), persisted to the event store, and emitted to registered handlers. This is the **source of truth** for all payment activity in your application.
 
 ## The lifecycle

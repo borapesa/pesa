@@ -29,6 +29,8 @@ import { validateCreateOrderPayload, validateDisbursePayload } from './validate'
 /**
  * Fully configured payments SDK instance — returned by {@link createPesa}.
  *
+ * @since 0.1.0
+ *
  * ## Core operations
  *
  * ```ts
@@ -173,6 +175,8 @@ export interface PesaInstance {
 
 /**
  * The single entry point for the entire Bora Pesa SDK.
+ *
+ * @since 0.1.0
  *
  * Returns a fully configured {@link PesaInstance} with provider logic,
  * plugin pipeline, and event store wired together.

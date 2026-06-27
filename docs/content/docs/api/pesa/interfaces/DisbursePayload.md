@@ -2,7 +2,7 @@
 title: "Interface: DisbursePayload"
 ---
 
-Defined in: [packages/pesa/src/types/disbursement.ts:28](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L28)
+Defined in: [packages/pesa/src/types/disbursement.ts:28](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L28)
 
 Payload for sending a disbursement (B2C / wallet-out).
 
@@ -13,11 +13,11 @@ customer's mobile money wallet.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="amount"></a> `amount` | `number` | Amount in whole TZS. Must be > 0. | [packages/pesa/src/types/disbursement.ts:30](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L30) |
-| <a id="currency"></a> `currency` | `"TZS"` | Currency code. Currently only `'TZS'`. | [packages/pesa/src/types/disbursement.ts:32](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L32) |
-| <a id="recipient"></a> `recipient` | \{ `name?`: `string`; `network?`: [`MobileNetwork`](../type-aliases/MobileNetwork); `phone`: `string`; \} | Recipient details. | [packages/pesa/src/types/disbursement.ts:34](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L34) |
-| `recipient.name?` | `string` | Recipient's full name (optional but recommended). | [packages/pesa/src/types/disbursement.ts:38](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L38) |
-| `recipient.network?` | [`MobileNetwork`](../type-aliases/MobileNetwork) | Target mobile money network. | [packages/pesa/src/types/disbursement.ts:40](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L40) |
-| `recipient.phone` | `string` | Mobile money phone number in MSISDN format: `255XXXXXXXXX`. | [packages/pesa/src/types/disbursement.ts:36](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L36) |
-| <a id="reference"></a> `reference` | `string` | Your internal reference. Must be unique. | [packages/pesa/src/types/disbursement.ts:43](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L43) |
-| <a id="remarks"></a> `remarks?` | `string` | Optional remarks / narration for the payout. | [packages/pesa/src/types/disbursement.ts:45](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/types/disbursement.ts#L45) |
+| <a id="amount"></a> `amount` | `number` | Amount in whole TZS. Must be > 0. | [packages/pesa/src/types/disbursement.ts:30](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L30) |
+| <a id="currency"></a> `currency` | `"TZS"` | Currency code. Currently only `'TZS'`. | [packages/pesa/src/types/disbursement.ts:32](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L32) |
+| <a id="recipient"></a> `recipient` | \{ `name?`: `string`; `network?`: [`MobileNetwork`](../type-aliases/MobileNetwork); `phone`: `string`; \} | Recipient details. | [packages/pesa/src/types/disbursement.ts:34](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L34) |
+| `recipient.name?` | `string` | Recipient's full name (optional but recommended). | [packages/pesa/src/types/disbursement.ts:38](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L38) |
+| `recipient.network?` | [`MobileNetwork`](../type-aliases/MobileNetwork) | Target mobile money network. | [packages/pesa/src/types/disbursement.ts:40](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L40) |
+| `recipient.phone` | `string` | Mobile money phone number in MSISDN format: `255XXXXXXXXX`. | [packages/pesa/src/types/disbursement.ts:36](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L36) |
+| <a id="reference"></a> `reference` | `string` | Your internal reference. Must be unique. | [packages/pesa/src/types/disbursement.ts:43](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L43) |
+| <a id="remarks"></a> `remarks?` | `string` | Optional remarks / narration for the payout. | [packages/pesa/src/types/disbursement.ts:45](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/disbursement.ts#L45) |
