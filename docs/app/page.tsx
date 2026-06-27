@@ -1,9 +1,53 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import Link from 'next/link';
+import { CopyButton } from './copy-button';
+
+const features = [
+  {
+    title: 'Provider-agnostic',
+    desc: 'Swap Selcom for ClickPesa with a one-line config change. No provider-specific code in your app.',
+  },
+  {
+    title: 'TypeScript-first',
+    desc: 'Fully typed contracts. Zero any in public APIs. Autocomplete in your editor for every method.',
+  },
+  {
+    title: 'Zero-config defaults',
+    desc: 'SQLite event store, BogusProvider for local dev. No infrastructure required to get started.',
+  },
+];
 
 export default function Page() {
   return (
     <HomeLayout>
+      <style>{`
+        .btn-primary {
+          display: inline-flex; align-items: center; padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem; border: none; font-weight: 500; font-size: 1rem;
+          text-decoration: none; cursor: pointer;
+          background: var(--color-fd-primary); color: var(--color-fd-primary-foreground);
+          transition: opacity 0.15s, transform 0.15s;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-primary:active { opacity: 0.8; transform: translateY(0); }
+
+        .btn-outline {
+          display: inline-flex; align-items: center; padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem; border: 1px solid var(--color-fd-border); font-size: 1rem;
+          font-weight: 500; text-decoration: none; cursor: pointer;
+          color: var(--color-fd-foreground); background: transparent;
+          transition: background 0.15s, border-color 0.15s, transform 0.15s;
+        }
+        .btn-outline:hover { background: var(--color-fd-accent); border-color: var(--color-fd-primary); transform: translateY(-1px); }
+        .btn-outline:active { transform: translateY(0); }
+
+        .install-block {
+          display: flex; align-items: center; gap: 0.5rem;
+          background: var(--color-fd-secondary); border-radius: 0.5rem;
+          padding: 0.625rem 1rem; font-size: 0.875rem; font-family: monospace;
+        }
+        .install-block code { font-size: inherit; }
+      `}</style>
       <main
         style={{
           display: 'flex',
@@ -30,7 +74,7 @@ export default function Page() {
         <p
           style={{
             fontSize: '1.25rem',
-            color: 'var(--fd-muted-foreground)',
+            color: 'var(--color-fd-muted-foreground)',
             maxWidth: '40rem',
             marginBottom: '1rem',
           }}
@@ -39,36 +83,14 @@ export default function Page() {
         </p>
 
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem' }}>
-          <Link
-            href="/docs"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.5rem',
-              background: 'var(--fd-primary)',
-              color: 'var(--fd-primary-foreground)',
-              fontWeight: 500,
-              textDecoration: 'none',
-            }}
-          >
+          <Link href="/docs" className="btn-primary">
             Read the docs
           </Link>
-
           <a
             href="https://github.com/borapesa/pesa"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '0.5rem',
-              border: '1px solid var(--fd-border)',
-              fontWeight: 500,
-              textDecoration: 'none',
-              color: 'inherit',
-            }}
+            className="btn-outline"
           >
             GitHub &rarr;
           </a>
@@ -84,26 +106,13 @@ export default function Page() {
             marginBottom: '4rem',
           }}
         >
-          {[
-            {
-              title: 'Provider-agnostic',
-              desc: 'Swap Selcom for ClickPesa with a one-line config change. No provider-specific code in your app.',
-            },
-            {
-              title: 'TypeScript-first',
-              desc: 'Fully typed contracts. Zero any in public APIs. Autocomplete in your editor for every method.',
-            },
-            {
-              title: 'Zero-config defaults',
-              desc: 'SQLite event store, BogusProvider for local dev. No infrastructure required to get started.',
-            },
-          ].map(({ title, desc }) => (
+          {features.map(({ title, desc }) => (
             <div
               key={title}
               style={{
                 padding: '1.5rem',
                 borderRadius: '0.5rem',
-                border: '1px solid var(--fd-border)',
+                border: '1px solid var(--color-fd-border)',
               }}
             >
               <h3 style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '1.1rem' }}>
@@ -112,7 +121,7 @@ export default function Page() {
               <p
                 style={{
                   fontSize: '0.875rem',
-                  color: 'var(--fd-muted-foreground)',
+                  color: 'var(--color-fd-muted-foreground)',
                   lineHeight: 1.6,
                 }}
               >
@@ -122,16 +131,10 @@ export default function Page() {
           ))}
         </div>
 
-        <code
-          style={{
-            background: 'var(--fd-secondary)',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.25rem',
-            fontSize: '0.875rem',
-          }}
-        >
-          pnpm add @borapesa/pesa @borapesa/clickpesa
-        </code>
+        <div className="install-block">
+          <code>pnpm add @borapesa/pesa</code>
+          <CopyButton text="pnpm add @borapesa/pesa" />
+        </div>
       </main>
     </HomeLayout>
   );
