@@ -2,7 +2,7 @@
 title: "Interface: PesaHandlerTarget"
 ---
 
-Defined in: [packages/pesa/src/handler.ts:10](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/handler.ts#L10)
+Defined in: [packages/pesa/src/handler.ts:10](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/handler.ts#L10)
 
 Minimal interface for the pesa instance that the handler needs.
 Defined here (not imported from pesa.ts) to avoid circular dependencies.
@@ -15,7 +15,7 @@ Defined here (not imported from pesa.ts) to avoid circular dependencies.
 createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:11](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/handler.ts#L11)
+Defined in: [packages/pesa/src/handler.ts:11](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/handler.ts#L11)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [packages/pesa/src/handler.ts:11](https://github.com/borapesa/pesa/b
 getPaymentStatus(orderId): Promise<PaymentStatus>;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:12](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/handler.ts#L12)
+Defined in: [packages/pesa/src/handler.ts:12](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/handler.ts#L12)
 
 #### Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/pesa/src/handler.ts:12](https://github.com/borapesa/pesa/b
 handleWebhook(rawBody, headers): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:13](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/handler.ts#L13)
+Defined in: [packages/pesa/src/handler.ts:13](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/handler.ts#L13)
 
 #### Parameters
 
@@ -76,7 +76,7 @@ Defined in: [packages/pesa/src/handler.ts:13](https://github.com/borapesa/pesa/b
 on(event, handler): void;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:14](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/handler.ts#L14)
+Defined in: [packages/pesa/src/handler.ts:14](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/handler.ts#L14)
 
 #### Parameters
 

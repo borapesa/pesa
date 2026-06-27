@@ -2,7 +2,7 @@
 title: "Class: ClickPesaProvider"
 ---
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:84](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L84)
+Defined in: [providers/clickpesa/src/clickpesa.ts:84](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L84)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [providers/clickpesa/src/clickpesa.ts:84](https://github.com/borapes
 new ClickPesaProvider(config): ClickPesaProvider;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:91](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L91)
+Defined in: [providers/clickpesa/src/clickpesa.ts:91](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L91)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ BasePaymentProvider.constructor
 
 | Property | Modifier | Type | Default value | Description | Overrides | Defined in |
 | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
-| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'clickpesa'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/clickpesa/src/clickpesa.ts:85](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L85) |
+| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'clickpesa'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/clickpesa/src/clickpesa.ts:85](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L85) |
 
 ## Methods
 
@@ -82,7 +82,7 @@ BasePaymentProvider.cancelOrder
 createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:200](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L200)
+Defined in: [providers/clickpesa/src/clickpesa.ts:200](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L200)
 
 Initiate a checkout / USSD push / redirect.
 
@@ -114,7 +114,7 @@ BasePaymentProvider.createOrder
 disburse(payload): Promise<DisburseResult>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:346](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L346)
+Defined in: [providers/clickpesa/src/clickpesa.ts:346](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L346)
 
 B2C / wallet-out disbursement.
 
@@ -144,7 +144,7 @@ BasePaymentProvider.disburse
 getNameLookup(phoneOrAccount): Promise<NameLookupResult>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:429](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L429)
+Defined in: [providers/clickpesa/src/clickpesa.ts:429](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L429)
 
 Resolve the account holder name for a phone or account number.
 
@@ -180,7 +180,7 @@ BasePaymentProvider.getNameLookup
 getPaymentStatus(orderId): Promise<PaymentStatus>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:261](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L261)
+Defined in: [providers/clickpesa/src/clickpesa.ts:261](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L261)
 
 Poll or fetch the current payment status for an order.
 
@@ -208,7 +208,7 @@ BasePaymentProvider.getPaymentStatus
 handleWebhook(rawBody, headers): Promise<PaymentEvent>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:285](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L285)
+Defined in: [providers/clickpesa/src/clickpesa.ts:285](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L285)
 
 Parse + verify an incoming webhook.
 
@@ -279,7 +279,7 @@ BasePaymentProvider.listOrders
 previewDisburse(payload): Promise<PreviewResult>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:408](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L408)
+Defined in: [providers/clickpesa/src/clickpesa.ts:408](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L408)
 
 Preview / dry-run a disbursement before committing.
 
@@ -313,7 +313,7 @@ BasePaymentProvider.previewDisburse
 previewOrder(payload): Promise<PreviewResult>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:387](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L387)
+Defined in: [providers/clickpesa/src/clickpesa.ts:387](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L387)
 
 Preview / dry-run a payment before committing.
 
@@ -387,7 +387,7 @@ validateCredentials(): Promise<{
 }>;
 ```
 
-Defined in: [providers/clickpesa/src/clickpesa.ts:378](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/providers/clickpesa/src/clickpesa.ts#L378)
+Defined in: [providers/clickpesa/src/clickpesa.ts:378](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/providers/clickpesa/src/clickpesa.ts#L378)
 
 Validate that a provider config works (health check).
 

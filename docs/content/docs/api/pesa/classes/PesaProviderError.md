@@ -2,7 +2,7 @@
 title: "Class: PesaProviderError"
 ---
 
-Defined in: [packages/pesa/src/errors.ts:52](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/errors.ts#L52)
+Defined in: [packages/pesa/src/errors.ts:52](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/errors.ts#L52)
 
 Thrown when the provider returns an error response (provider error).
 
@@ -21,7 +21,7 @@ new PesaProviderError(
    providerRaw?): PesaProviderError;
 ```
 
-Defined in: [packages/pesa/src/errors.ts:53](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/errors.ts#L53)
+Defined in: [packages/pesa/src/errors.ts:53](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/errors.ts#L53)
 
 #### Parameters
 
@@ -43,6 +43,6 @@ Defined in: [packages/pesa/src/errors.ts:53](https://github.com/borapesa/pesa/bl
 
 | Property | Modifier | Type | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/errors.ts#L12) |
-| <a id="providerraw"></a> `providerRaw?` | `readonly` | `unknown` | - | [packages/pesa/src/errors.ts:56](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/errors.ts#L56) |
-| <a id="statuscode"></a> `statusCode` | `readonly` | `number` | - | [packages/pesa/src/errors.ts:55](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/errors.ts#L55) |
+| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/errors.ts#L12) |
+| <a id="providerraw"></a> `providerRaw?` | `readonly` | `unknown` | - | [packages/pesa/src/errors.ts:56](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/errors.ts#L56) |
+| <a id="statuscode"></a> `statusCode` | `readonly` | `number` | - | [packages/pesa/src/errors.ts:55](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/errors.ts#L55) |

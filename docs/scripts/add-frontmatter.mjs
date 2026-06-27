@@ -122,6 +122,10 @@ Bora Pesa API reference — auto-generated from JSDoc.
 | --- | --- |
 ${rows}
 `);
+// Write meta.json to enforce sidebar ordering from PACKAGES config
+const metaOrder = PACKAGES.map((p) => slugify(p.name));
+writeFileSync(join(API_DIR, 'meta.json'), JSON.stringify({ pages: metaOrder }, null, 2) + '\n');
+
 console.log('done');
 
 // ── Helpers ──────────────────────────────────────────────────────
