@@ -2,3 +2,5 @@ packages:
   - "packages/*"
   - "providers/*"
   - "examples/*"
+allowBuilds:
+  better-sqlite3: true
