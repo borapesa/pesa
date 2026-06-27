@@ -1,0 +1,71 @@
+---
+title: Bora Pesa
+description: A unified, open-source payments SDK for Tanzania — one API, all providers.
+---
+
+## Quick Start
+
+```bash
+pnpm add @borapesa/pesa @borapesa/clickpesa
+```
+
+```ts
+import { createPesa } from '@borapesa/pesa';
+import { ClickPesaProvider } from '@borapesa/clickpesa';
+import { retryPlugin, loggingPlugin } from '@borapesa/pesa/plugins';
+
+const pesa = createPesa({
+  provider: new ClickPesaProvider({
+    baseUrl:  'https://api.clickpesa.com',
+    clientId: process.env.CLICKPESA_CLIENT_ID!,
+    apiKey:   process.env.CLICKPESA_API_KEY!,
+  }),
+  plugins: [
+    retryPlugin({ maxAttempts: 3 }),
+    loggingPlugin({ level: 'info' }),
+  ],
+});
+
+// Initiate a payment
+const order = await pesa.createOrder({
+  amount:    15000, // TZS 15,000
+  currency:  'TZS',
+  reference: 'order_abc123',
+  customer:  { name: 'Juma Ali', phone: '255712345678' },
+});
+
+// React to events
+pesa.on('PAYMENT_SUCCESS', async (event) => {
+  await db.orders.update({
+    id:     event.reference,
+    status: 'paid',
+  });
+});
+```
+
+## Providers
+
+| Provider | Package | Auth |
+|---|---|---|
+| ClickPesa | `@borapesa/clickpesa` | Bearer token |
+| Selcom | `@borapesa/selcom` | HMAC-SHA256 |
+| AzamPay | `@borapesa/azampay` | OAuth2 |
+| DPO | `@borapesa/dpo` | Token redirect |
+| Pesapal | `@borapesa/pesapal` | OAuth2 + IPN |
+
+## Frameworks
+
+| Framework | Package |
+|---|---|
+| Next.js | `@borapesa/nextjs` |
+| Express / Fastify | `@borapesa/express` |
+| ElysiaJS | `@borapesa/elysia` |
+| NestJS | `@borapesa/nestjs` |
+
+### Raw HTTP
+
+No adapter needed — mount directly on any fetch-compatible server:
+
+```ts
+Bun.serve({ fetch: pesa.mount });
+```
