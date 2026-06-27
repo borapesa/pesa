@@ -1,6 +1,23 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CopyButton } from './copy-button';
+
+export const metadata: Metadata = {
+  title: 'Bora Pesa',
+  description: 'The unified, open-source payments SDK for Tanzania — one API, all providers.',
+  openGraph: {
+    title: 'Bora Pesa',
+    description: 'The unified, open-source payments SDK for Tanzania — one API, all providers.',
+    images: [{ url: '/og', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Bora Pesa',
+    description: 'The unified, open-source payments SDK for Tanzania — one API, all providers.',
+    images: ['/og'],
+  },
+};
 
 const features = [
   {
@@ -61,16 +78,19 @@ export default function Page() {
           gap: '1rem',
         }}
       >
-        <h1
-          style={{
-            fontSize: '3.5rem',
-            fontWeight: 800,
-            letterSpacing: '-0.02em',
-            marginBottom: '0.5rem',
-          }}
-        >
-          Bora Pesa
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+          <img src="/borapesa.svg" alt="Bora Pesa" width={64} height={64} />
+          <h1
+            style={{
+              fontSize: '3.5rem',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              margin: 0,
+            }}
+          >
+            Bora Pesa
+          </h1>
+        </div>
 
         <p
           style={{
