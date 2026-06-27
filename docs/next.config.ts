@@ -5,6 +5,7 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  trailingSlash: true,
   // Rewrites for llms.txt / *.md endpoints
   async rewrites() {
     return [

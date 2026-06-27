@@ -3,6 +3,7 @@
   "tsconfig": "./typedoc.tsconfig.json",
   "entryPoints": ["../packages/pesa/src/index.ts", "../providers/clickpesa/src/index.ts"],
   "entryPointStrategy": "expand",
+  "entryModule": "index",
   "out": "./content/docs/api",
   "plugin": ["typedoc-plugin-markdown"],
   "cleanOutputDir": true,

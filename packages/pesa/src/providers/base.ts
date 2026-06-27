@@ -114,7 +114,7 @@ export abstract class BasePaymentProvider {
   /**
    * Refund a completed payment.
    *
-   * @throws PesaUnsupportedError if the provider does not support refunds.
+   * @throws `PesaUnsupportedError` — if the provider does not support refunds.
    */
   refund?(_orderId: string, _amount?: number): Promise<RefundResult> {
     throw new PesaUnsupportedError(`${this.name} does not support refunds`);
@@ -123,7 +123,7 @@ export abstract class BasePaymentProvider {
   /**
    * Cancel a pending or in-progress order.
    *
-   * @throws PesaUnsupportedError if the provider does not support cancellation.
+   * @throws `PesaUnsupportedError` — if the provider does not support cancellation.
    */
   cancelOrder?(_orderId: string): Promise<CancelOrderResult> {
     throw new PesaUnsupportedError(`${this.name} does not support cancelling orders`);
@@ -135,7 +135,7 @@ export abstract class BasePaymentProvider {
    * Useful for startup checks or `/health` endpoints.
    *
    * @returns `{ valid: true }` if credentials are correct.
-   * @throws PesaUnsupportedError if the provider does not support validation.
+   * @throws `PesaUnsupportedError` — if the provider does not support validation.
    */
   validateCredentials?(): Promise<{ valid: boolean; message?: string }> {
     throw new PesaUnsupportedError(`${this.name} does not support credential validation`);
@@ -146,7 +146,7 @@ export abstract class BasePaymentProvider {
    *
    * Returns expected fees and validity without charging the customer.
    *
-   * @throws PesaUnsupportedError if the provider does not support preview.
+   * @throws `PesaUnsupportedError` — if the provider does not support preview.
    */
   previewOrder?(_payload: CreateOrderPayload): Promise<PreviewResult> {
     throw new PesaUnsupportedError(`${this.name} does not support payment preview`);
@@ -155,7 +155,7 @@ export abstract class BasePaymentProvider {
   /**
    * Preview / dry-run a disbursement before committing.
    *
-   * @throws PesaUnsupportedError if the provider does not support preview.
+   * @throws `PesaUnsupportedError` — if the provider does not support preview.
    */
   previewDisburse?(_payload: DisbursePayload): Promise<PreviewResult> {
     throw new PesaUnsupportedError(`${this.name} does not support disbursement preview`);
@@ -166,7 +166,7 @@ export abstract class BasePaymentProvider {
    *
    * Useful for verifying recipient identity before disbursing.
    *
-   * @throws PesaUnsupportedError if the provider does not support name lookup.
+   * @throws `PesaUnsupportedError` — if the provider does not support name lookup.
    */
   getNameLookup?(_phoneOrAccount: string): Promise<NameLookupResult> {
     throw new PesaUnsupportedError(`${this.name} does not support name lookup`);
@@ -175,7 +175,7 @@ export abstract class BasePaymentProvider {
   /**
    * List payment orders for a date range.
    *
-   * @throws PesaUnsupportedError if the provider does not support listing orders.
+   * @throws `PesaUnsupportedError` — if the provider does not support listing orders.
    */
   listOrders?(_params: ListOrdersParams): Promise<ListOrdersResult> {
     throw new PesaUnsupportedError(`${this.name} does not support listing orders`);

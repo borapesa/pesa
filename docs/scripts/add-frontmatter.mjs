@@ -1,7 +1,94 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
 
 const API_DIR = join(import.meta.dirname, '..', 'content', 'docs', 'api');
+
+// ── Package config — add new packages here ──────────────────────
+const PACKAGES = [
+  { dir: 'packages/pesa/src', name: '@borapesa/pesa', desc: 'Core — types, factory, event store, plugins' },
+  { dir: 'providers/clickpesa/src', name: '@borapesa/clickpesa', desc: 'ClickPesa provider adapter' },
+];
+
+// ── Step 1: Flatten directory structure ─────────────────────────
+
+for (const pkg of PACKAGES) {
+  const oldDir = join(API_DIR, pkg.dir);
+  const newDir = join(API_DIR, slugify(pkg.name));
+  try {
+    if (statSync(oldDir).isDirectory()) {
+      try { rmSync(newDir, { recursive: true }); } catch {}
+      renameSync(oldDir, newDir);
+      console.log(`  ${pkg.dir} → ${slugify(pkg.name)}`);
+    }
+  } catch { /* skip */ }
+}
+
+// Clean up empty parent dirs
+for (const dir of ['packages', 'providers']) {
+  try { rmSync(join(API_DIR, dir), { recursive: true }); } catch {}
+}
+
+// ── Step 2: Fix links and titles ─────────────────────────────────
+
+function processFile(path) {
+  let content = readFileSync(path, 'utf-8');
+  if (content.startsWith('---')) return;
+
+  // Fix cross-package links using the PACKAGES config
+  for (const pkg of PACKAGES) {
+    const name = slugify(pkg.name);
+    // Relative links from other packages
+    content = content.replace(new RegExp(`\\]\\(\\.\\./${pkg.dir.replace(/\//g, '\\/')}/`, 'g'), `](../${name}/`);
+    // Absolute-ish links within same directory
+    content = content.replace(new RegExp(`\\]\\(${pkg.dir.replace(/\//g, '\\/')}/`, 'g'), `](${name}/`);
+    // Index page titles
+    content = content.replace(`title: "${pkg.dir}"`, `title: "${pkg.name}"`);
+    // Root index links: [packages/pesa/src](core/index) → [@borapesa/pesa](core)
+    content = content.replace(
+      new RegExp(`\\[${pkg.dir.replace(/\//g, '\\/')}\\]\\(${name}/index\\)`, 'g'),
+      `[${pkg.name}](${name})`,
+    );
+  }
+
+  // Extract title from first H1, then map to package display name
+  const h1Match = content.match(/^# (.+)/m);
+  let title = h1Match ? h1Match[1].trim() : 'API';
+  for (const pkg of PACKAGES) {
+    if (title === pkg.dir || title.startsWith(pkg.dir)) {
+      title = pkg.name;
+      break;
+    }
+  }
+
+  // Remove H1 (Fumadocs renders frontmatter title)
+  content = content.replace(/^# .+\n\n?/, '');
+
+  // Merge "#### Throws" sections
+  content = content.replace(/(#### Throws\n\n[^\n]+(\n\n)?)+/g, (match) => {
+    const items = match.split('#### Throws\n\n').filter(Boolean);
+    return `#### Throws\n\n${items.join('\n\n')}\n\n`;
+  });
+
+  // Merge "## Throws" sections
+  const parts = content.split('\n## Throws\n');
+  if (parts.length > 2) {
+    const before = parts[0];
+    const allThrows = parts.slice(1).map((p) => {
+      const nextSection = p.indexOf('\n## ');
+      return nextSection >= 0 ? p.substring(0, nextSection).trim() : p.trim();
+    }).filter(Boolean).join('\n\n');
+    const lastPart = parts[parts.length - 1];
+    const afterIdx = lastPart.indexOf('\n## ');
+    const after = afterIdx >= 0 ? `\n\n${lastPart.substring(afterIdx).trim()}` : '';
+    content = `${before}\n## Throws\n\n${allThrows}${after}`;
+  }
+
+  // Strip .md from links
+  content = content.replace(/\.md\)/g, ')');
+
+  const withFrontmatter = `---\ntitle: "${title}"\n---\n\n${content}`;
+  writeFileSync(path, withFrontmatter);
+}
 
 function walk(dir) {
   const entries = readdirSync(dir);
@@ -10,18 +97,35 @@ function walk(dir) {
     if (statSync(path).isDirectory()) {
       walk(path);
     } else if (extname(path) === '.md') {
-      const content = readFileSync(path, 'utf-8');
-      if (content.startsWith('---')) continue; // already has frontmatter
-
-      const lines = content.split('\n');
-      const title = (lines[0] || 'API').replace(/^#+\s*/, '').trim();
-
-      const withFrontmatter = `---\ntitle: "${title}"\n---\n\n${content}`;
-      writeFileSync(path, withFrontmatter);
-      console.log(`  added frontmatter: ${path.split('/api/')[1]}`);
+      processFile(path);
     }
   }
 }
 
 walk(API_DIR);
+
+// Overwrite root index with clean, correct links
+const rows = PACKAGES.map((pkg) =>
+  `| [${pkg.name}](${slugify(pkg.name)}) | ${pkg.desc || ''} |`
+).join('\n');
+
+const rootIndex = join(API_DIR, 'index.md');
+writeFileSync(rootIndex, `---
+title: "Overview"
+---
+
+Bora Pesa API reference — auto-generated from JSDoc.
+
+## Packages
+
+| Package | Description |
+| --- | --- |
+${rows}
+`);
 console.log('done');
+
+// ── Helpers ──────────────────────────────────────────────────────
+
+function slugify(name) {
+  return name.replace('@borapesa/', '');
+}

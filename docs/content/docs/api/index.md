@@ -1,12 +1,12 @@
 ---
-title: "borapesa"
+title: "Overview"
 ---
 
-# borapesa
+Bora Pesa API reference — auto-generated from JSDoc.
 
-## Modules
+## Packages
 
-| Module | Description |
-| ------ | ------ |
-| [packages/pesa/src](packages/pesa/src/index.md) | - |
-| [providers/clickpesa/src](providers/clickpesa/src/index.md) | - |
+| Package | Description |
+| --- | --- |
+| [@borapesa/pesa](pesa) | Core — types, factory, event store, plugins |
+| [@borapesa/clickpesa](clickpesa) | ClickPesa provider adapter |

@@ -1,0 +1,22 @@
+---
+title: "Type Alias: ProviderName"
+---
+
+```ts
+type ProviderName = "selcom" | "azampay" | "clickpesa" | "dpo" | "pesapal" | "bogus";
+```
+
+Defined in: [packages/pesa/src/types/core.ts:59](https://github.com/borapesa/pesa/blob/b650282517ee25488b2499acb1ca4114c3e14358/packages/pesa/src/types/core.ts#L59)
+
+All supported payment providers.
+
+Extensible via module augmentation. The `'bogus'` provider is a
+test double — it doesn't represent a real payment gateway.
+
+## Example
+
+```ts
+import type { ProviderName } from '@borapesa/pesa';
+
+const provider: ProviderName = 'selcom';
+```
