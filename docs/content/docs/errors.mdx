@@ -1,0 +1,86 @@
+---
+title: Error Handling
+description: Understanding PesaError, when to retry, and how to handle provider errors.
+---
+
+All errors thrown by Bora Pesa extend [`PesaError`](/docs/api/pesa/classes/PesaError). Use `instanceof` checks to handle specific error types.
+
+## Error hierarchy
+
+```
+PesaError (base)
+├── PesaValidationError    ← Bad input (amount ≤ 0, invalid phone, empty reference)
+├── PesaNetworkError       ← Provider unreachable (DNS, timeout, connection refused)
+├── PesaProviderError      ← Provider returned an error (HTTP 4xx/5xx, API error)
+├── PesaWebhookError       ← Webhook signature verification failed
+└── PesaUnsupportedError   ← Provider doesn't implement this optional operation
+```
+
+## Handling errors
+
+```ts
+import { PesaValidationError, PesaNetworkError, PesaProviderError } from '@borapesa/pesa';
+
+try {
+  const order = await pesa.createOrder({
+    amount:    15000,
+    currency:  'TZS',
+    reference: 'order_001',
+    customer:  { name: 'Juma', phone: '255712345678' },
+  });
+} catch (err) {
+  if (err instanceof PesaValidationError) {
+    // Bad input — fix the payload. Don't retry.
+    console.error('Invalid payload:', err.message);
+    return { error: err.message };
+
+  } else if (err instanceof PesaNetworkError) {
+    // Provider unreachable — retry with backoff
+    console.error('Network error:', err.message);
+    await scheduleRetry('order_001');
+
+  } else if (err instanceof PesaProviderError) {
+    // Provider returned an error — check status code
+    if (err.statusCode >= 500) {
+      // Server error — retry
+      await scheduleRetry('order_001');
+    } else {
+      // Client error — don't retry
+      console.error('Provider rejected request:', err.message);
+    }
+  }
+}
+```
+
+## When to retry
+
+| Error | Retry? | Reason |
+|---|---|---|
+| `PesaNetworkError` | ✅ Yes | Transient — network will recover |
+| `PesaProviderError` (5xx) | ✅ Yes | Provider is temporarily down |
+| `PesaProviderError` (4xx) | ❌ No | Bad credentials, invalid request — retrying won't help |
+| `PesaValidationError` | ❌ No | Fix the payload before resending |
+| `PesaWebhookError` | ❌ No | Invalid signature — likely a forged webhook |
+| `PesaUnsupportedError` | ❌ No | Provider doesn't support this operation — use feature detection |
+
+## Feature detection
+
+Some operations are optional — not all providers support refunds, previews, or cancellations. Check before calling:
+
+```ts
+if (pesa.refund) {
+  await pesa.refund('order_123', 5000);
+}
+
+if (pesa.previewOrder) {
+  const preview = await pesa.previewOrder({ ... });
+  console.log('Fee:', preview.fee);
+}
+
+if (pesa.validateCredentials) {
+  const health = await pesa.validateCredentials();
+  console.log('Provider OK:', health.valid);
+}
+```
+
+An unsupported operation will be `undefined` on the instance rather than throwing at call time.

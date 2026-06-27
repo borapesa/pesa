@@ -1,0 +1,104 @@
+---
+title: Architecture
+description: How Bora Pesa is designed — factory pattern, provider abstraction, plugin pipeline, and event store.
+---
+
+Bora Pesa is architecturally inspired by [better-auth](https://better-auth.com). A single factory function wires together a payment provider, plugins, and an event store into a fully configured instance.
+
+## The factory
+
+[`createPesa()`](/docs/api/pesa/functions/createPesa) is the only entry point. It takes a config object and returns a [`PesaInstance`](/docs/api/pesa/interfaces/PesaInstance):
+
+```
+createPesa({ provider, plugins?, db?, webhooks? })
+
+        │
+        ▼
+
+┌─────────────────────────────────┐
+│          PesaInstance           │
+│                                 │
+│  .createOrder(payload)          │
+│  .getPaymentStatus(orderId)     │
+│  .disburse(payload)             │
+│  .handleWebhook(body, headers)  │
+│  .on(event, handler)            │
+│  .mount                         │
+└─────────────────────────────────┘
+```
+
+## Provider abstraction
+
+Every payment provider implements [`BasePaymentProvider`](/docs/api/pesa/classes/BasePaymentProvider) — an abstract class with four required methods:
+
+| Method | Purpose |
+|---|---|
+| `createOrder(payload)` | Initiate a checkout / USSD push / redirect |
+| `getPaymentStatus(orderId)` | Poll or fetch current status |
+| `handleWebhook(body, headers)` | Parse + verify an incoming webhook |
+| `disburse(payload)` | B2C / wallet-out disbursement |
+
+Seven optional methods cover previews, refunds, cancellations, name lookups, credential validation, and order listing. Providers override what they support; the rest throw `PesaUnsupportedError`.
+
+**Application code never imports provider-specific logic.** Swap Selcom for ClickPesa with a one-line config change. The SDK calls only `BasePaymentProvider` methods — no provider internals ever leak.
+
+## Plugin pipeline
+
+Plugins intercept provider requests and webhook events at specific lifecycle points:
+
+```
+app calls pesa.createOrder(payload)
+  ├─ 1. validateCreateOrderPayload()     ← SDK-level input validation
+  ├─ 2. beforeRequest hooks (once)       ← idempotency, logging
+  ├─ 3. for attempt in 0..3:
+  │   ├─ provider.createOrder()
+  │   └─ afterResponse hooks             ← retry decision, logging
+  └─ returns result
+
+webhook arrives:
+  ├─ 1. Provider verifies signature
+  ├─ 2. SDK assigns UUID
+  ├─ 3. Plugin onPaymentEvent hooks      ← webhook verification, logging
+  ├─ 4. Event persisted to store
+  └─ 5. pesa.on() handlers fire
+```
+
+Plugins are composed **in order** in the `plugins` array. Order matters — place `idempotencyPlugin` before `retryPlugin`.
+
+## Event store
+
+Every verified webhook is normalized into a [`PaymentEvent`](/docs/api/pesa/interfaces/PaymentEvent) and persisted. This is the **source of truth** for all payment activity.
+
+The default adapter is SQLite (`better-sqlite3`) — zero configuration, works in any Node.js environment. Swap for Turso ("libSQL"), PostgreSQL, Prisma, or Drizzle via the `db` config field.
+
+```ts
+const pesa = createPesa({
+  provider: new ClickPesaProvider({ ... }),
+  db: new LibSQLAdapter({ url: process.env.TURSO_DATABASE_URL! }),
+});
+```
+
+## HTTP mount
+
+Every `pesa` instance exposes a generic `(Request) => Response` handler. Framework adapters are thin wrappers around this handler — they add idiomatic route mounting but contain no business logic.
+
+```
+              ┌──────────────┐
+Bun.serve() ──┤              │
+Next.js    ──┤   pesa.mount  ├── POST /order
+Express    ──┤ (fetch-like)  ├── GET  /status/:orderId
+Elysia     ──┤              ├── POST /webhook
+              └──────────────┘
+```
+
+## Design decisions
+
+These are locked for v1.0 and should not change without an RFC:
+
+| Decision | Rationale |
+|---|---|
+| **TZS only, whole integers** | TZS has no subunits in digital payments. `15000` = TZS 15,000. Floats are a bug surface. |
+| **MSISDN phone format** | `255XXXXXXXXX`. Local `07XX` rejected at validation. Matches every Tanzanian payment API. |
+| **Auth out of scope** | Pesa is payment infrastructure. Use better-auth or your own auth system. |
+| **Secrets never reach the client** | The `@borapesa/client` package contains zero provider credentials. All provider API calls happen server-side. |
+| **AMBIGUOUS is a first-class status** | Selcom returns this when the transaction outcome is unknown. Normalizing it to `PENDING` or `FAILED` would lose information. Applications should poll. |

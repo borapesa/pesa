@@ -137,7 +137,7 @@ const rootIndex = join(API_DIR, 'index.md');
 writeFileSync(
   rootIndex,
   `---
-title: "Overview"
+title: "API Reference"
 ---
 
 Bora Pesa API reference — auto-generated from JSDoc.

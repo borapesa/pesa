@@ -45,6 +45,7 @@ export default function Page() {
           display: flex; align-items: center; gap: 0.5rem;
           background: var(--color-fd-secondary); border-radius: 0.5rem;
           padding: 0.625rem 1rem; font-size: 0.875rem; font-family: monospace;
+          margin-bottom: 1rem;
         }
         .install-block code { font-size: inherit; }
       `}</style>
@@ -81,6 +82,11 @@ export default function Page() {
         >
           The unified, open-source payments SDK for Tanzania. One API — all providers.
         </p>
+
+        <div className="install-block">
+          <code>pnpm add @borapesa/pesa</code>
+          <CopyButton text="pnpm add @borapesa/pesa" />
+        </div>
 
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem' }}>
           <Link href="/docs" className="btn-primary">
@@ -129,11 +135,6 @@ export default function Page() {
               </p>
             </div>
           ))}
-        </div>
-
-        <div className="install-block">
-          <code>pnpm add @borapesa/pesa</code>
-          <CopyButton text="pnpm add @borapesa/pesa" />
         </div>
       </main>
     </HomeLayout>

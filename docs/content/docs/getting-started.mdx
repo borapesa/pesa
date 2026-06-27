@@ -1,0 +1,106 @@
+---
+title: Getting Started
+description: Install Bora Pesa and process your first payment in under 5 minutes.
+---
+
+## Installation
+
+```bash
+pnpm add @borapesa/pesa
+```
+
+The core package includes a [BogusProvider](/docs/api/pesa/classes/BasePaymentProvider) for local development — no credentials, no network, no sandbox registration. When you're ready for production, install a provider adapter:
+
+```bash
+pnpm add @borapesa/clickpesa
+```
+
+## Your first payment
+
+```ts
+import { createPesa } from '@borapesa/pesa';
+import { BogusPaymentProvider } from '@borapesa/pesa/testing';
+
+// 1. Create an instance — that's it, no config needed for dev
+const pesa = createPesa({
+  provider: new BogusPaymentProvider({ defaultBehavior: 'success' }),
+});
+
+// 2. Initiate a payment
+const order = await pesa.createOrder({
+  amount:    15000,             // TZS 15,000 — whole integers only
+  currency:  'TZS',
+  reference: 'order_abc123',   // Your internal order ID — must be unique
+  customer:  {
+    name:  'Juma Ali',
+    phone: '255712345678',     // MSISDN format: 255XXXXXXXXX
+  },
+});
+
+console.log(order.status);       // 'SUCCESS'
+console.log(order.orderId);      // Provider-assigned transaction ID
+```
+
+## React to events
+
+Bora Pesa emits typed events after every verified webhook:
+
+```ts
+pesa.on('PAYMENT_SUCCESS', async (event) => {
+  // event.reference — your order ID
+  // event.amount    — TZS amount
+  // event.provider  — which provider processed it
+  await db.orders.update({
+    where: { id: event.reference },
+    data:  { status: 'paid' },
+  });
+});
+```
+
+## Going to production
+
+Swap the BogusProvider for a real provider. Everything else stays the same:
+
+```ts
+import { ClickPesaProvider } from '@borapesa/clickpesa';
+
+const pesa = createPesa({
+  provider: new ClickPesaProvider({
+    baseUrl:  'https://api.clickpesa.com',
+    clientId: process.env.CLICKPESA_CLIENT_ID!,
+    apiKey:   process.env.CLICKPESA_API_KEY!,
+  }),
+  plugins: [
+    retryPlugin({ maxAttempts: 3 }),
+    loggingPlugin({ level: 'info' }),
+  ],
+});
+```
+
+## Mount on your server
+
+Every `pesa` instance exposes an HTTP handler. Mount it directly or use a framework adapter:
+
+```ts
+// Raw — works with any fetch-compatible server
+Bun.serve({ fetch: pesa.mount });
+
+// Next.js (with @borapesa/nextjs)
+// app/api/pesa/[...all]/route.ts
+import { toNextJsHandler } from '@borapesa/nextjs';
+import { pesa } from '@/lib/pesa';
+export const { GET, POST } = toNextJsHandler(pesa);
+```
+
+The handler exposes three endpoints:
+- `POST /order` — create a payment
+- `GET /status/:orderId` — query status
+- `POST /webhook` — receive provider callbacks
+
+## Next steps
+
+- [Architecture](/docs/architecture) — understand the design
+- [Event System](/docs/events) — webhooks, persistence, and event handlers
+- [Plugins](/docs/plugins) — retry, idempotency, logging, and custom plugins
+- [Error Handling](/docs/errors) — the error hierarchy and when to retry
+- [API Reference](/docs/api) — auto-generated from JSDoc

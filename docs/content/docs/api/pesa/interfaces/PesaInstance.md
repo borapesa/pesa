@@ -2,7 +2,7 @@
 title: "Interface: PesaInstance"
 ---
 
-Defined in: [packages/pesa/src/pesa.ts:86](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L86)
+Defined in: [packages/pesa/src/pesa.ts:86](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L86)
 
 Fully configured payments SDK instance — returned by [createPesa](../functions/createPesa).
 
@@ -64,8 +64,8 @@ Bun.serve({ fetch: pesa.mount });
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="mount"></a> `mount` | (`request`) => `Promise`\<`Response`\> | Generic fetch-like handler. Works with any framework. Routes: `POST /order`, `GET /status/:orderId`, `POST /webhook`. | [packages/pesa/src/pesa.ts:171](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L171) |
-| <a id="provider"></a> `provider` | [`BasePaymentProvider`](../classes/BasePaymentProvider) | The underlying provider adapter. | [packages/pesa/src/pesa.ts:164](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L164) |
+| <a id="mount"></a> `mount` | (`request`) => `Promise`\<`Response`\> | Generic fetch-like handler. Works with any framework. Routes: `POST /order`, `GET /status/:orderId`, `POST /webhook`. | [packages/pesa/src/pesa.ts:171](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L171) |
+| <a id="provider"></a> `provider` | [`BasePaymentProvider`](../classes/BasePaymentProvider) | The underlying provider adapter. | [packages/pesa/src/pesa.ts:164](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L164) |
 
 ## Methods
 
@@ -75,7 +75,7 @@ Bun.serve({ fetch: pesa.mount });
 optional cancelOrder(orderId): Promise<CancelOrderResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:144](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L144)
+Defined in: [packages/pesa/src/pesa.ts:144](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L144)
 
 Cancel a pending or in-progress order. `undefined` if unsupported.
 
@@ -97,7 +97,7 @@ Cancel a pending or in-progress order. `undefined` if unsupported.
 createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:99](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L99)
+Defined in: [packages/pesa/src/pesa.ts:99](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L99)
 
 Initiate a checkout / USSD push / redirect.
 
@@ -136,7 +136,7 @@ The SDK validates the payload before forwarding to the provider
 disburse(payload): Promise<DisburseResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:118](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L118)
+Defined in: [packages/pesa/src/pesa.ts:118](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L118)
 
 B2C / wallet-out disbursement.
 
@@ -174,7 +174,7 @@ The SDK validates the payload before forwarding to the provider.
 optional getNameLookup(phoneOrAccount): Promise<NameLookupResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:156](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L156)
+Defined in: [packages/pesa/src/pesa.ts:156](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L156)
 
 Resolve account holder name. `undefined` if unsupported.
 
@@ -196,7 +196,7 @@ Resolve account holder name. `undefined` if unsupported.
 getPaymentStatus(orderId): Promise<PaymentStatus>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:107](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L107)
+Defined in: [packages/pesa/src/pesa.ts:107](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L107)
 
 Poll or fetch current payment status.
 
@@ -228,7 +228,7 @@ Poll or fetch current payment status.
 handleWebhook(rawBody, headers): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:126](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L126)
+Defined in: [packages/pesa/src/pesa.ts:126](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L126)
 
 Handle an incoming webhook. Called by framework adapters.
 
@@ -254,7 +254,7 @@ Flow: provider verification → UUID assignment → plugin hooks
 optional listOrders(params): Promise<ListOrdersResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:159](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L159)
+Defined in: [packages/pesa/src/pesa.ts:159](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L159)
 
 List payment orders. `undefined` if unsupported.
 
@@ -276,7 +276,7 @@ List payment orders. `undefined` if unsupported.
 on(event, handler): void;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:136](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L136)
+Defined in: [packages/pesa/src/pesa.ts:136](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L136)
 
 Register a handler for a payment event type.
 
@@ -302,7 +302,7 @@ Multiple handlers can be registered for the same event type.
 optional previewDisburse(payload): Promise<PreviewResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:153](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L153)
+Defined in: [packages/pesa/src/pesa.ts:153](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L153)
 
 Preview / dry-run a disbursement. `undefined` if unsupported.
 
@@ -324,7 +324,7 @@ Preview / dry-run a disbursement. `undefined` if unsupported.
 optional previewOrder(payload): Promise<PreviewResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:150](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L150)
+Defined in: [packages/pesa/src/pesa.ts:150](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L150)
 
 Preview / dry-run a payment. `undefined` if unsupported.
 
@@ -346,7 +346,7 @@ Preview / dry-run a payment. `undefined` if unsupported.
 optional refund(orderId, amount?): Promise<RefundResult>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:141](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L141)
+Defined in: [packages/pesa/src/pesa.ts:141](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L141)
 
 Refund a completed payment. `undefined` if unsupported.
 
@@ -372,7 +372,7 @@ optional validateCredentials(): Promise<{
 }>;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:147](https://github.com/borapesa/pesa/blob/89c5b2383c6b1da743b0434254dc2d5edd11b0f2/packages/pesa/src/pesa.ts#L147)
+Defined in: [packages/pesa/src/pesa.ts:147](https://github.com/borapesa/pesa/blob/703ad04940b87d46533e9a8c6c257b94e3c1cbe3/packages/pesa/src/pesa.ts#L147)
 
 Validate provider credentials (health check). `undefined` if unsupported.
 

@@ -1,0 +1,120 @@
+---
+title: Plugins
+description: Retry, idempotency, logging, webhook verification, and writing custom plugins.
+---
+
+Plugins intercept requests and webhook events at specific points in the lifecycle. They are plain objects passed in the `plugins` array of `PesaConfig`. **Order matters** — plugins are composed in sequence.
+
+```ts
+import { createPesa } from '@borapesa/pesa';
+import { retryPlugin, idempotencyPlugin, loggingPlugin } from '@borapesa/pesa/plugins';
+
+const pesa = createPesa({
+  provider: new ClickPesaProvider({ ... }),
+  plugins: [
+    idempotencyPlugin(),   // must be before retryPlugin
+    retryPlugin({ maxAttempts: 3 }),
+    loggingPlugin({ level: 'info' }),
+  ],
+});
+```
+
+## Built-in plugins
+
+### `retryPlugin()`
+
+Retries payments on in-progress statuses (`AMBIGUOUS`, `PROCESSING`, `QUEUED`) with configurable backoff.
+
+```ts
+retryPlugin({
+  maxAttempts: 3,                    // default: 3
+  backoff: 'exponential',           // 'exponential' | 'linear' | 'fixed'
+  baseDelayMs: 1000,                // default: 1000
+})
+```
+
+| Backoff | Formula | Delay sequence (base=1000) |
+|---|---|---|
+| `exponential` | `base * 2^attempt` | 1s, 2s, 4s |
+| `linear` | `base * (attempt + 1)` | 1s, 2s, 3s |
+| `fixed` | `base` | 1s, 1s, 1s |
+
+### `idempotencyPlugin()`
+
+Prevents duplicate charges on network retries. Keys on `operation + reference` — the same reference sent to the same operation twice throws an error.
+
+```ts
+idempotencyPlugin({ store: 'memory' }); // default: in-memory set
+```
+
+Place this **before** `retryPlugin` in the array. The retry loop in `createPesa` won't re-run `beforeRequest` hooks on retries, so idempotency checks only fire once per logical request.
+
+### `loggingPlugin()`
+
+Structured logs for all SDK operations. Redacts phone numbers and email addresses from payloads.
+
+```ts
+loggingPlugin({
+  level: 'info',           // 'debug' | 'info' | 'warn' | 'error'
+  logger: console,         // swap for Pino, Winston, etc.
+})
+```
+
+Logs include: operation name, status, duration in ms, and sanitized payload.
+
+### `webhookVerifyPlugin()`
+
+Enforces the `BORAPESA_WEBHOOK_SECRET` environment variable in production. Throws if it's missing.
+
+```ts
+webhookVerifyPlugin('my-secret'); // or reads from process.env.BORAPESA_WEBHOOK_SECRET
+```
+
+Provider-specific cryptographic verification is handled by the provider adapter. This plugin adds an application-layer guard.
+
+## Plugin interface
+
+Write custom plugins by implementing the [`PesaPlugin`](/docs/api/pesa/interfaces/PesaPlugin) interface:
+
+```ts
+interface PesaPlugin {
+  name: string;
+
+  // Intercept outgoing request
+  beforeRequest?: (ctx: RequestContext) => Promise<RequestContext>;
+
+  // Intercept provider response — set ctx.retry = true to trigger retry
+  afterResponse?: (ctx: ResponseContext) => Promise<ResponseContext>;
+
+  // React to verified, about-to-be-persisted events
+  onPaymentEvent?: (event: PaymentEvent) => Promise<void>;
+
+  // Called once at startup with the assembled PesaInstance
+  init?: (pesa: PesaInstance) => void;
+}
+```
+
+## Example: SMS notification plugin
+
+```ts
+const smsPlugin: PesaPlugin = {
+  name: 'sms-notify',
+
+  async onPaymentEvent(event) {
+    if (event.type !== 'PAYMENT_SUCCESS') return;
+
+    await fetch('https://sms-gateway.example.com/send', {
+      method: 'POST',
+      body: JSON.stringify({
+        phone: event.metadata?.customerPhone,
+        message: `Payment of TZS ${event.amount} confirmed. Ref: ${event.reference}`,
+      }),
+    });
+  },
+};
+
+const pesa = createPesa({
+  provider: new ClickPesaProvider({ ... }),
+  plugins: [smsPlugin, retryPlugin()],
+});
+```
