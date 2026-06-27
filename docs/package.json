@@ -5,6 +5,7 @@
   "description": "Bora Pesa documentation site — powered by Fumadocs",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "pnpm --filter @borapesa/pesa build && pnpm run docs:api",
     "build": "next build",
     "start": "next start",
     "docs:api": "typedoc && node scripts/add-frontmatter.mjs"

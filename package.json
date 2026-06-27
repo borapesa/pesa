@@ -17,6 +17,7 @@
     "lint": "biome lint .",
     "test": "turbo run test",
     "coverage": "turbo run coverage",
+    "docs:build": "pnpm --filter @borapesa/pesa build && pnpm --filter @borapesa/docs run docs:api && pnpm --filter @borapesa/docs build",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean",
     "changeset": "changeset",
