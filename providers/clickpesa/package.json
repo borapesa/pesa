@@ -1,0 +1,43 @@
+{
+  "name": "@borapesa/clickpesa",
+  "version": "0.1.0",
+  "description": "ClickPesa provider adapter for Bora Pesa",
+  "license": "MIT",
+  "author": "Bora Pesa contributors",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "clickpesa",
+    "payments",
+    "tanzania",
+    "mobile-money"
+  ],
+  "packageManager": "pnpm@10.33.3",
+  "dependencies": {
+    "@borapesa/pesa": "workspace:*",
+    "uuid": "^14.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
