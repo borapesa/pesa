@@ -122,11 +122,15 @@ export class BogusPaymentProvider extends BasePaymentProvider {
     // Bogus webhooks always contain a reference in a JSON body
     let reference = 'bogus_ref';
     let status: PaymentStatus = 'SUCCESS';
+    let amount = 0;
+    let currency = 'TZS';
 
     try {
       const body = typeof _rawBody === 'string' ? JSON.parse(_rawBody) : JSON.parse(_rawBody.toString());
       reference = body.reference ?? reference;
       status = body.status ?? status;
+      amount = body.amount ?? amount;
+      currency = body.currency ?? currency;
     } catch {
       // raw body, use defaults
     }
@@ -136,8 +140,8 @@ export class BogusPaymentProvider extends BasePaymentProvider {
       type: status === 'SUCCESS' ? 'PAYMENT_SUCCESS' : 'PAYMENT_FAILED',
       orderId: `bogus_${uuid()}`,
       reference,
-      amount: 0,
-      currency: 'TZS',
+      amount,
+      currency: currency as 'TZS',
       status,
       provider: 'bogus',
       timestamp: new Date(),

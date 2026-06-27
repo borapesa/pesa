@@ -17,10 +17,12 @@ import { SQLiteAdapter } from './db/sqlite';
 import type { RequestContext, ResponseContext } from './plugins/types';
 import type { BasePaymentProvider } from './providers/base';
 import { createPesaHandler } from './handler';
+import { validateCreateOrderPayload, validateDisbursePayload } from './validate';
 import {
   PesaUnsupportedError,
   PesaWebhookError,
   PesaNetworkError,
+  PesaValidationError,
   PesaProviderError,
 } from './errors';
 
@@ -116,16 +118,6 @@ export function createPesa(config: PesaConfig): PesaInstance {
   // Event emitter
   const handlers = new Map<PaymentEventType, Set<(event: PaymentEvent) => Promise<void> | void>>();
 
-  // ── Bootstrap plugins ───────────────────────────────────────────────
-
-  // We build the instance reference first, then call init hooks.
-  // The mount handler is set later.
-  const pesa: PesaInstance = {} as PesaInstance;
-
-  for (const plugin of plugins) {
-    plugin.init?.(pesa);
-  }
-
   // ── Plugin pipeline ─────────────────────────────────────────────────
 
   async function runBeforeHooks(
@@ -169,27 +161,33 @@ export function createPesa(config: PesaConfig): PesaInstance {
 
   // ── Operations ──────────────────────────────────────────────────────
 
+  const MAX_RETRIES = 3;
+
   async function createOrder(payload: CreateOrderPayload): Promise<OrderResult> {
+    // Validate before any plugin or provider interaction
+    validateCreateOrderPayload(payload);
+
+    // Run beforeRequest hooks once — retries skip this to avoid
+    // idempotency plugin conflicts and redundant logging.
     const ctx = await runBeforeHooks('createOrder', payload);
 
-    try {
-      const result = await provider.createOrder(payload);
-      const rCtx = await runAfterHooks(ctx, result);
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        // Pass ctx.payload so plugin modifications reach the provider
+        const result = await provider.createOrder(ctx.payload as CreateOrderPayload);
+        const rCtx = await runAfterHooks(ctx, result);
 
-      // Retry logic
-      if (rCtx.retry) {
-        const attempt = (rCtx.metadata.retryAttempt as number) ?? 1;
+        if (!rCtx.retry || attempt >= MAX_RETRIES) return result;
+
         const delay = (rCtx.metadata.retryDelayMs as number) ?? 1000;
-        if (attempt <= 3) {
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          return createOrder(payload);
-        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } catch (err) {
+        throw normalizeError(err);
       }
-
-      return result;
-    } catch (err) {
-      throw normalizeError(err);
     }
+
+    // Should be unreachable — fallback for type safety
+    throw new PesaProviderError('createOrder: max retries exceeded', 502);
   }
 
   async function getPaymentStatus(orderId: string): Promise<PaymentStatus> {
@@ -201,25 +199,24 @@ export function createPesa(config: PesaConfig): PesaInstance {
   }
 
   async function disburse(payload: DisbursePayload): Promise<DisburseResult> {
+    validateDisbursePayload(payload);
     const ctx = await runBeforeHooks('disburse', payload);
 
-    try {
-      const result = await provider.disburse(payload);
-      const rCtx = await runAfterHooks(ctx, result);
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const result = await provider.disburse(ctx.payload as DisbursePayload);
+        const rCtx = await runAfterHooks(ctx, result);
 
-      if (rCtx.retry) {
-        const attempt = (rCtx.metadata.retryAttempt as number) ?? 1;
+        if (!rCtx.retry || attempt >= MAX_RETRIES) return result;
+
         const delay = (rCtx.metadata.retryDelayMs as number) ?? 1000;
-        if (attempt <= 3) {
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          return disburse(payload);
-        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } catch (err) {
+        throw normalizeError(err);
       }
-
-      return result;
-    } catch (err) {
-      throw normalizeError(err);
     }
+
+    throw new PesaProviderError('disburse: max retries exceeded', 502);
   }
 
   async function handleWebhook(
@@ -241,15 +238,16 @@ export function createPesa(config: PesaConfig): PesaInstance {
       event.id = uuid();
     }
 
-    // 3. Persist to event store
-    await db.saveEvent(event);
-
-    // 4. Run plugin hooks
+    // 3. Run plugin hooks BEFORE persisting — webhook verification plugins
+    //    can reject the event before it touches the database.
     for (const plugin of plugins) {
       if (plugin.onPaymentEvent) {
         await plugin.onPaymentEvent(event);
       }
     }
+
+    // 4. Persist to event store (only after all plugins have accepted it)
+    await db.saveEvent(event);
 
     // 5. Emit to user-registered handlers
     const eventHandlers = handlers.get(event.type);
@@ -306,13 +304,24 @@ export function createPesa(config: PesaConfig): PesaInstance {
 
   instance.mount = createPesaHandler(instance);
 
+  // ── Bootstrap plugins ───────────────────────────────────────────────
+
+  // Call init hooks after assembly so plugins receive the real instance.
+  for (const plugin of plugins) {
+    plugin.init?.(instance);
+  }
+
   return instance;
 }
 
 // ── Error normalization ────────────────────────────────────────────────
 
 function normalizeError(err: unknown): Error {
-  if (err instanceof PesaWebhookError || err instanceof PesaUnsupportedError) {
+  // Pass through known Pesa errors so callers can use instanceof checks
+  if (err instanceof PesaWebhookError ||
+      err instanceof PesaUnsupportedError ||
+      err instanceof PesaNetworkError ||
+      err instanceof PesaValidationError) {
     return err;
   }
   if (err instanceof TypeError && err.message.includes('fetch')) {

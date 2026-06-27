@@ -100,11 +100,25 @@ export class ClickPesaProvider extends BasePaymentProvider {
 
   // ── Auth (internal) ──────────────────────────────────────────────
 
+  private authPromise: Promise<string> | null = null;
+
   private async authenticate(): Promise<string> {
     if (this.token && Date.now() < this.tokenExpiresAt) {
       return this.token;
     }
 
+    // Promise-based lock: concurrent callers share a single auth request
+    if (this.authPromise) return this.authPromise;
+
+    this.authPromise = this.fetchToken();
+    try {
+      return await this.authPromise;
+    } finally {
+      this.authPromise = null;
+    }
+  }
+
+  private async fetchToken(): Promise<string> {
     const res = await fetch(`${this.config.baseUrl}/third-parties/generate-token`, {
       method: 'POST',
       headers: {
@@ -205,7 +219,9 @@ export class ClickPesaProvider extends BasePaymentProvider {
     );
 
     return {
-      orderId: res.id,
+      // Use orderReference as orderId — ClickPesa's status query API
+      // accepts the merchant reference, not the internal transaction ID.
+      orderId: payload.reference,
       reference: payload.reference,
       status: this.normalizeStatus(res.status),
       ussdPushInitiated: true,
@@ -233,7 +249,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
     );
 
     return {
-      orderId: res.orderReference,
+      orderId: payload.reference,
       reference: payload.reference,
       status: 'PENDING',
       checkoutUrl: res.checkoutLink,
@@ -290,20 +306,25 @@ export class ClickPesaProvider extends BasePaymentProvider {
     const event = payload.event as string | undefined;
     const data = payload.data as Record<string, unknown> | undefined;
 
-    const orderId = (data?.orderReference as string) ?? (data?.id as string) ?? 'unknown';
-    const reference = (data?.orderReference as string) ?? orderId;
+    // orderId must match what createOrder returns — the merchant reference,
+    // since ClickPesa's status query API accepts orderReference, not the
+    // internal transaction UUID.
+    const orderId = (data?.orderReference as string) ?? 'unknown';
+    const reference = orderId;
     const status = this.normalizeStatus((data?.status as string) ?? 'PENDING');
     const amount = Number(data?.collectedAmount ?? data?.amount ?? 0);
     const currency = (data?.collectedCurrency as string) ?? (data?.currency as string) ?? 'TZS';
 
-    // Map ClickPesa event names to PaymentEventType
+    // Map ClickPesa event names to PaymentEventType.
+    // Payout events checked before PAYMENT_FAILED to avoid the `status === 'FAILED'`
+    // branch catching payout failures as PAYMENT_FAILED.
     let type: PaymentEvent['type'] = 'PAYMENT_PENDING';
     if (event === 'PAYMENT RECEIVED' && status === 'SUCCESS') {
       type = 'PAYMENT_SUCCESS';
-    } else if (event === 'PAYMENT FAILED' || status === 'FAILED') {
-      type = 'PAYMENT_FAILED';
     } else if (event === 'PAYOUT INITIATED' || event === 'PAYOUT REFUNDED') {
       type = status === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED';
+    } else if (event === 'PAYMENT FAILED' || status === 'FAILED') {
+      type = 'PAYMENT_FAILED';
     }
 
     return {
@@ -439,8 +460,6 @@ export class ClickPesaProvider extends BasePaymentProvider {
   private async verifyChecksum(body: string, checksum: string): Promise<boolean> {
     if (!this.config.checksumSecret) return true;
 
-    // ClickPesa uses HMAC-SHA256. The checksum is computed as:
-    // HMAC-SHA256(checksumSecret, body)
     try {
       const encoder = new TextEncoder();
       const key = await crypto.subtle.importKey(
@@ -451,15 +470,21 @@ export class ClickPesaProvider extends BasePaymentProvider {
         ['sign'],
       );
       const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
-      const computed = Array.from(new Uint8Array(signature))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+      const hex = new Uint8Array(signature);
+      let computed = '';
+      for (let i = 0; i < hex.length; i++) {
+        computed += hex[i]!.toString(16).padStart(2, '0');
+      }
 
       return computed === checksum.toLowerCase();
-    } catch {
-      // Web Crypto not available (Node < 19). Fall back: accept the webhook.
-      // In production, use Node 19+ or a polyfill.
-      return true;
+    } catch (err) {
+      // Fail closed — if Web Crypto is unavailable, reject the webhook
+      // rather than silently accepting it. Requires Node 19+ or a polyfill.
+      throw new PesaProviderError(
+        `ClickPesa webhook checksum verification unavailable: ${err instanceof Error ? err.message : 'unknown error'}. ` +
+        `Web Crypto API is required (Node 19+).`,
+        500,
+      );
     }
   }
 }

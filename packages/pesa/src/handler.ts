@@ -1,6 +1,7 @@
 import type { CreateOrderPayload, OrderResult, PaymentStatus } from './types/order';
 import type { PaymentEventType, PaymentEvent } from './types/event';
 import { PesaWebhookError } from './errors';
+import { validateCreateOrderPayload } from './validate';
 
 /**
  * Minimal interface for the pesa instance that the handler needs.
@@ -47,6 +48,7 @@ export function createPesaHandler(pesa: PesaHandlerTarget): (request: Request) =
       // POST /order — create a payment order
       if (request.method === 'POST' && path === '/order') {
         const payload = (await request.json()) as CreateOrderPayload;
+        validateCreateOrderPayload(payload);
         const result = await pesa.createOrder(payload);
         return Response.json(result, { status: 201 });
       }

@@ -6,6 +6,7 @@ export type { PesaHandlerTarget } from './handler';
 export { BasePaymentProvider } from './providers/base';
 
 export { PesaError, PesaUnsupportedError, PesaWebhookError, PesaNetworkError, PesaValidationError, PesaProviderError } from './errors';
+export { validateCreateOrderPayload, validateDisbursePayload } from './validate';
 
 export type {
   TZSAmount,
