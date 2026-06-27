@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "docs:api": "typedoc && node scripts/add-frontmatter.mjs"
   },
   "keywords": [],
   "author": "Bora Pesa contributors",
@@ -28,6 +29,8 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.1",
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "^6.0.3"
   }
 }

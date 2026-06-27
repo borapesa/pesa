@@ -2,6 +2,7 @@ packages:
   - "packages/*"
   - "providers/*"
   - "examples/*"
+  - "docs"
 allowBuilds:
   better-sqlite3: true
   lefthook: true

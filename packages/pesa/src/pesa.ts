@@ -92,17 +92,17 @@ export interface PesaInstance {
    * The SDK validates the payload before forwarding to the provider
    * (amount > 0, valid MSISDN phone, non-empty reference).
    *
-   * @throws {PesaValidationError} if the payload is invalid.
-   * @throws {PesaNetworkError} if the provider is unreachable.
-   * @throws {PesaProviderError} if the provider returns an error.
+   * @throws `PesaValidationError` — if the payload is invalid.
+   * @throws `PesaNetworkError` — if the provider is unreachable.
+   * @throws `PesaProviderError` — if the provider returns an error.
    */
   createOrder(payload: CreateOrderPayload): Promise<OrderResult>;
 
   /**
    * Poll or fetch current payment status.
    *
-   * @throws {PesaNetworkError} if the provider is unreachable.
-   * @throws {PesaProviderError} if the provider returns an error.
+   * @throws `PesaNetworkError` — if the provider is unreachable.
+   * @throws `PesaProviderError` — if the provider returns an error.
    */
   getPaymentStatus(orderId: string): Promise<PaymentStatus>;
 
@@ -111,9 +111,9 @@ export interface PesaInstance {
    *
    * The SDK validates the payload before forwarding to the provider.
    *
-   * @throws {PesaValidationError} if the payload is invalid.
-   * @throws {PesaNetworkError} if the provider is unreachable.
-   * @throws {PesaProviderError} if the provider returns an error.
+   * @throws `PesaValidationError` — if the payload is invalid.
+   * @throws `PesaNetworkError` — if the provider is unreachable.
+   * @throws `PesaProviderError` — if the provider returns an error.
    */
   disburse(payload: DisbursePayload): Promise<DisburseResult>;
 
@@ -215,7 +215,8 @@ export interface PesaInstance {
  * });
  * ```
  *
- * @throws {Error} if the provider is invalid or plugin init fails.
+ * @throws `PesaProviderError` — if the provider config is invalid or unreachable.
+ * @throws `PesaValidationError` — if required config fields are missing.
  */
 export function createPesa(config: PesaConfig): PesaInstance {
   const provider = config.provider;

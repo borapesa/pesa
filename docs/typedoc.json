@@ -1,0 +1,22 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "tsconfig": "./typedoc.tsconfig.json",
+  "entryPoints": ["../packages/pesa/src/index.ts", "../providers/clickpesa/src/index.ts"],
+  "entryPointStrategy": "expand",
+  "out": "./content/docs/api",
+  "plugin": ["typedoc-plugin-markdown"],
+  "cleanOutputDir": true,
+  "readme": "none",
+  "entryFileName": "index",
+  "indexFormat": "table",
+  "parametersFormat": "table",
+  "propertiesFormat": "table",
+  "enumMembersFormat": "table",
+  "typeDeclarationFormat": "table",
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "useCodeBlocks": true,
+  "expandObjects": true,
+  "exclude": ["**/node_modules/**", "**/*.test.ts"],
+  "skipErrorChecking": true
+}
