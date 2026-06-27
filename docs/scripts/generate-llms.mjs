@@ -9,9 +9,7 @@ const OUT_DIR = join(import.meta.dirname, '..', 'out');
 const CONTENT_DIR = join(import.meta.dirname, '..', 'content', 'docs');
 function walk(dir, depth = 0) {
   let output = '';
-  const entries = readdirSync(dir).filter(
-    (e) => !e.startsWith('.') && e !== 'meta.json',
-  );
+  const entries = readdirSync(dir).filter((e) => !e.startsWith('.') && e !== 'meta.json');
 
   // Sort: directories first, then files alphabetically
   entries.sort((a, b) => {
@@ -32,9 +30,7 @@ function walk(dir, depth = 0) {
     } else if (entry.endsWith('.md') || entry.endsWith('.mdx')) {
       if (entry === 'index.md' || entry === 'index.mdx') continue; // skip index pages
       const content = readFileSync(full, 'utf-8');
-      const titleMatch =
-        content.match(/^title:\s*"?([^"\n]+)"?/m) ||
-        content.match(/^#\s+(.+)/m);
+      const titleMatch = content.match(/^title:\s*"?([^"\n]+)"?/m) || content.match(/^#\s+(.+)/m);
       const title = titleMatch ? titleMatch[1].trim() : entry;
       const relPath = relative(CONTENT_DIR, full)
         .replace(/\\/g, '/')

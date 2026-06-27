@@ -9,24 +9,24 @@ Bora Pesa is a TypeScript SDK that gives you a single, consistent interface for 
 Swap providers with a one-line config change. No per-provider boilerplate.
 
 ```ts
-import { createPesa } from '@borapesa/pesa';
-import { SelcomPaymentProvider } from '@borapesa/selcom';
+import { createPesa } from '@borapesa/pesa'
+import { SelcomPaymentProvider } from '@borapesa/selcom'
 
 export const pesa = createPesa({
   provider: new SelcomPaymentProvider({
-    apiKey:    process.env.SELCOM_API_KEY!,
+    apiKey: process.env.SELCOM_API_KEY!,
     apiSecret: process.env.SELCOM_API_SECRET!,
-    vendor:    process.env.SELCOM_VENDOR!,
-    env:       'sandbox',
+    vendor: process.env.SELCOM_VENDOR!,
+    env: 'sandbox',
   }),
-});
+})
 
 const order = await pesa.createOrder({
-  amount:    15000, // TZS 15,000
-  currency:  'TZS',
+  amount: 15000, // TZS 15,000
+  currency: 'TZS',
   reference: 'order_abc123',
-  customer:  { name: 'Juma Ali', phone: '255712345678' },
-});
+  customer: { name: 'Juma Ali', phone: '255712345678' },
+})
 ```
 
 ## Design Principles
@@ -40,25 +40,25 @@ const order = await pesa.createOrder({
 
 ## Packages
 
-| Package | Description |
-|---|---|
-| `@borapesa/pesa` | Core — types, factory, event store, BogusProvider |
-| `@borapesa/selcom` | Selcom provider adapter |
-| `@borapesa/azampay` | AzamPay provider adapter |
-| `@borapesa/clickpesa` | ClickPesa provider adapter |
-| `@borapesa/dpo` | DPO provider adapter |
-| `@borapesa/pesapal` | Pesapal provider adapter |
-| `@borapesa/nextjs` | Next.js App Router adapter |
-| `@borapesa/express` | Express / Fastify adapter |
-| `@borapesa/nestjs` | NestJS PesaModule + PesaService |
-| `@borapesa/elysia` | ElysiaJS Bun-native plugin |
-| `@borapesa/tanstack` | TanStack Start + Query integration |
-| `@borapesa/react` | `usePesaPayment()` React hook |
-| `@borapesa/client` | Browser / RN client — zero secrets |
-| `@borapesa/libsql` | Turso / libSQL event store adapter |
-| `@borapesa/pg` | PostgreSQL event store adapter |
-| `@borapesa/prisma` | Prisma event store adapter |
-| `@borapesa/drizzle` | Drizzle ORM event store adapter |
+| Package               | Description                                       |
+| --------------------- | ------------------------------------------------- |
+| `@borapesa/pesa`      | Core — types, factory, event store, BogusProvider |
+| `@borapesa/selcom`    | Selcom provider adapter                           |
+| `@borapesa/azampay`   | AzamPay provider adapter                          |
+| `@borapesa/clickpesa` | ClickPesa provider adapter                        |
+| `@borapesa/dpo`       | DPO provider adapter                              |
+| `@borapesa/pesapal`   | Pesapal provider adapter                          |
+| `@borapesa/nextjs`    | Next.js App Router adapter                        |
+| `@borapesa/express`   | Express / Fastify adapter                         |
+| `@borapesa/nestjs`    | NestJS PesaModule + PesaService                   |
+| `@borapesa/elysia`    | ElysiaJS Bun-native plugin                        |
+| `@borapesa/tanstack`  | TanStack Start + Query integration                |
+| `@borapesa/react`     | `usePesaPayment()` React hook                     |
+| `@borapesa/client`    | Browser / RN client — zero secrets                |
+| `@borapesa/libsql`    | Turso / libSQL event store adapter                |
+| `@borapesa/pg`        | PostgreSQL event store adapter                    |
+| `@borapesa/prisma`    | Prisma event store adapter                        |
+| `@borapesa/drizzle`   | Drizzle ORM event store adapter                   |
 
 ## Quick Start
 
@@ -70,7 +70,7 @@ See [examples/](./examples/) for full working integrations.
 
 ## Documentation
 
-Full docs at [borapesa.dev](https://borapesa.dev) (coming soon).
+Full docs at [borapesa.dev](https://borapesa.dev).
 
 ## Contributing
 
