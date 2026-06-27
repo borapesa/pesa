@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Coin face (green fill) -->
+  <circle cx="32" cy="32" r="30" fill="#0D7A3E"/>
+  <!-- Milling marks (white edge etchings) -->
+  <circle cx="32" cy="32" r="29" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-dasharray="3 4" opacity="0.4"/>
+  <!-- Gold accent ring -->
+  <circle cx="32" cy="32" r="25" stroke="#F5A623" stroke-width="1.5" fill="none"/>
+  <!-- BP monogram -->
+  <text x="32" y="42" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="700" font-size="24" fill="#FFFFFF">BP</text>
+</svg>

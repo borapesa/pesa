@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/public/borapesa.svg" alt="Bora Pesa" width="96" />
+</p>
+
 # Bora Pesa
 
 A unified, open-source payments SDK for Tanzania.
