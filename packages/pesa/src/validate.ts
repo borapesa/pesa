@@ -1,6 +1,6 @@
 import { PesaValidationError } from './errors';
-import type { CreateOrderPayload } from './types/order';
 import type { DisbursePayload } from './types/disbursement';
+import type { CreateOrderPayload } from './types/order';
 
 /** MSISDN pattern: 255 followed by 9 digits. */
 const MSISDN_RE = /^255\d{9}$/;
@@ -19,7 +19,11 @@ export function validateCreateOrderPayload(payload: CreateOrderPayload): void {
   if (!Number.isInteger(payload.amount)) {
     throw new PesaValidationError('amount must be a whole integer (TZS)');
   }
-  if (!payload.reference || typeof payload.reference !== 'string' || payload.reference.trim().length === 0) {
+  if (
+    !payload.reference ||
+    typeof payload.reference !== 'string' ||
+    payload.reference.trim().length === 0
+  ) {
     throw new PesaValidationError('reference is required and must not be empty');
   }
   if (!payload.customer) {
@@ -49,7 +53,11 @@ export function validateDisbursePayload(payload: DisbursePayload): void {
   if (!Number.isInteger(payload.amount)) {
     throw new PesaValidationError('amount must be a whole integer (TZS)');
   }
-  if (!payload.reference || typeof payload.reference !== 'string' || payload.reference.trim().length === 0) {
+  if (
+    !payload.reference ||
+    typeof payload.reference !== 'string' ||
+    payload.reference.trim().length === 0
+  ) {
     throw new PesaValidationError('reference is required and must not be empty');
   }
   if (!payload.recipient) {

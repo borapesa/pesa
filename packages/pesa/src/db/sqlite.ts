@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
-import type { PesaDatabaseAdapter } from './adapter';
 import type { PaymentEvent } from '../types/event';
+import type { PesaDatabaseAdapter } from './adapter';
 
 /**
  * SQLite event store adapter powered by better-sqlite3.
@@ -66,23 +66,25 @@ export class SQLiteAdapter implements PesaDatabaseAdapter {
 
   async getEvent(id: string): Promise<PaymentEvent | null> {
     await this.ready;
-    const row = this.db.prepare('SELECT * FROM payment_events WHERE id = ?').get(id) as Row | undefined;
+    const row = this.db.prepare('SELECT * FROM payment_events WHERE id = ?').get(id) as
+      | Row
+      | undefined;
     return row ? this.rowToEvent(row) : null;
   }
 
   async getEventsByReference(reference: string): Promise<PaymentEvent[]> {
     await this.ready;
-    const rows = this.db.prepare(
-      'SELECT * FROM payment_events WHERE reference = ? ORDER BY timestamp DESC',
-    ).all(reference) as Row[];
+    const rows = this.db
+      .prepare('SELECT * FROM payment_events WHERE reference = ? ORDER BY timestamp DESC')
+      .all(reference) as Row[];
     return rows.map((r) => this.rowToEvent(r));
   }
 
   async getEventsByOrderId(orderId: string): Promise<PaymentEvent[]> {
     await this.ready;
-    const rows = this.db.prepare(
-      'SELECT * FROM payment_events WHERE order_id = ? ORDER BY timestamp DESC',
-    ).all(orderId) as Row[];
+    const rows = this.db
+      .prepare('SELECT * FROM payment_events WHERE order_id = ? ORDER BY timestamp DESC')
+      .all(orderId) as Row[];
     return rows.map((r) => this.rowToEvent(r));
   }
 

@@ -1,21 +1,21 @@
-import { v4 as uuid } from 'uuid';
+import type {
+  CreateOrderPayload,
+  DisbursePayload,
+  DisburseResult,
+  NameLookupResult,
+  OrderResult,
+  PaymentEvent,
+  PaymentStatus,
+  PreviewResult,
+  ProviderName,
+} from '@borapesa/pesa';
 import {
   BasePaymentProvider,
   PesaError,
   PesaNetworkError,
   PesaProviderError,
 } from '@borapesa/pesa';
-import type {
-  ProviderName,
-  CreateOrderPayload,
-  OrderResult,
-  PaymentStatus,
-  PaymentEvent,
-  DisbursePayload,
-  DisburseResult,
-  PreviewResult,
-  NameLookupResult,
-} from '@borapesa/pesa';
+import { v4 as uuid } from 'uuid';
 
 // ── Config ──────────────────────────────────────────────────────────
 
@@ -142,7 +142,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
 
     this.token = data.token; // already includes "Bearer " prefix
     this.tokenExpiresAt = Date.now() + 55 * 60 * 1000; // refresh 5 min before 1-hour expiry
-    return this.token!;
+    return this.token as string;
   }
 
   private async authHeaders(): Promise<Record<string, string>> {
@@ -164,10 +164,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
 
     if (!res.ok) {
       const body = await res.text();
-      throw new PesaProviderError(
-        `ClickPesa ${path} failed: ${res.status} ${body}`,
-        res.status,
-      );
+      throw new PesaProviderError(`ClickPesa ${path} failed: ${res.status} ${body}`, res.status);
     }
 
     const json = (await res.json()) as T | ClickPesaApiError;
@@ -185,11 +182,16 @@ export class ClickPesaProvider extends BasePaymentProvider {
   private normalizeStatus(status: string): PaymentStatus {
     switch (status) {
       case 'SUCCESS':
-      case 'SETTLED':   return 'SUCCESS';
-      case 'PROCESSING': return 'PROCESSING';
-      case 'PENDING':    return 'PENDING';
-      case 'FAILED':     return 'FAILED';
-      default:           return 'PENDING';
+      case 'SETTLED':
+        return 'SUCCESS';
+      case 'PROCESSING':
+        return 'PROCESSING';
+      case 'PENDING':
+        return 'PENDING';
+      case 'FAILED':
+        return 'FAILED';
+      default:
+        return 'PENDING';
     }
   }
 
@@ -271,7 +273,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
 
       const data = (await res.json()) as PaymentStatusItem[] | ClickPesaApiError;
       if (Array.isArray(data) && data.length > 0) {
-        return this.normalizeStatus(data[0]!.status);
+        return this.normalizeStatus(data[0]?.status ?? 'PENDING');
       }
       return 'PENDING';
     } catch (err) {
@@ -288,7 +290,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
 
     // Verify checksum signature if secret is configured
     if (this.config.checksumSecret) {
-      const checksum = headers['x-clickpesa-checksum'] || headers['checksum'] || '';
+      const checksum = headers['x-clickpesa-checksum'] || headers.checksum || '';
       // ClickPesa uses HMAC-SHA256 for webhook verification
       const verified = await this.verifyChecksum(body, checksum);
       if (!verified) {
@@ -358,10 +360,10 @@ export class ClickPesaProvider extends BasePaymentProvider {
     );
 
     const statusMap: Record<string, DisburseResult['status']> = {
-      SUCCESS:    'SUCCESS',
+      SUCCESS: 'SUCCESS',
       PROCESSING: 'QUEUED',
-      PENDING:    'QUEUED',
-      FAILED:     'FAILED',
+      PENDING: 'QUEUED',
+      FAILED: 'FAILED',
     };
 
     return {
@@ -430,13 +432,10 @@ export class ClickPesaProvider extends BasePaymentProvider {
         accountName?: string;
         accountNumber?: string;
         provider?: string;
-      }>(
-        `/third-parties/disbursement/mobile-money-payout/preview`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ amount: '100', currency: 'TZS', phoneNumber: phoneOrAccount }),
-        },
-      );
+      }>(`/third-parties/disbursement/mobile-money-payout/preview`, {
+        method: 'POST',
+        body: JSON.stringify({ amount: '100', currency: 'TZS', phoneNumber: phoneOrAccount }),
+      });
 
       return {
         found: !!res.accountName,
@@ -473,7 +472,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
       const hex = new Uint8Array(signature);
       let computed = '';
       for (let i = 0; i < hex.length; i++) {
-        computed += hex[i]!.toString(16).padStart(2, '0');
+        computed += hex[i]?.toString(16).padStart(2, '0') ?? '00';
       }
 
       return computed === checksum.toLowerCase();
@@ -482,7 +481,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
       // rather than silently accepting it. Requires Node 19+ or a polyfill.
       throw new PesaProviderError(
         `ClickPesa webhook checksum verification unavailable: ${err instanceof Error ? err.message : 'unknown error'}. ` +
-        `Web Crypto API is required (Node 19+).`,
+          `Web Crypto API is required (Node 19+).`,
         500,
       );
     }

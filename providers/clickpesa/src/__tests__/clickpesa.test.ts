@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ClickPesaProvider } from '../clickpesa';
+
 const customer = { name: 'Juma Ali', phone: '255712345678' };
 
 function mockFetch(response: unknown, status = 200) {
@@ -83,7 +84,10 @@ describe('ClickPesaProvider', () => {
     });
 
     const order = await provider.createOrder({
-      amount: 15000, currency: 'TZS', reference: 'order_001', customer,
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'order_001',
+      customer,
     });
 
     expect(order.orderId).toBe('order_001'); // matches reference
@@ -112,7 +116,10 @@ describe('ClickPesaProvider', () => {
     });
 
     const order = await provider.createOrder({
-      amount: 15000, currency: 'TZS', reference: 'order_002', customer,
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'order_002',
+      customer,
       redirectUrl: 'https://mysite.com/callback',
     });
 
@@ -136,7 +143,13 @@ describe('ClickPesaProvider', () => {
     vi.clearAllMocks();
 
     mockFetch([
-      { id: 'txn_1', status: 'SETTLED', orderReference: 'ref_1', collectedAmount: 5000, collectedCurrency: 'TZS' },
+      {
+        id: 'txn_1',
+        status: 'SETTLED',
+        orderReference: 'ref_1',
+        collectedAmount: 5000,
+        collectedCurrency: 'TZS',
+      },
     ]);
 
     const status = await provider.getPaymentStatus('ref_1');
@@ -234,7 +247,9 @@ describe('ClickPesaProvider', () => {
     });
 
     const result = await provider.disburse({
-      amount: 50000, currency: 'TZS', reference: 'payout_001',
+      amount: 50000,
+      currency: 'TZS',
+      reference: 'payout_001',
       recipient: { phone: '255754321098', name: 'Juma', network: 'MPESA' },
     });
 

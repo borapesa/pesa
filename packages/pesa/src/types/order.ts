@@ -1,4 +1,4 @@
-import type { TZSAmount, Currency } from './core';
+import type { Currency, TZSAmount } from './core';
 
 /**
  * Payment lifecycle statuses.
@@ -8,36 +8,36 @@ import type { TZSAmount, Currency } from './core';
  * PENDING or FAILED would lose information.
  */
 export type PaymentStatus =
-  | 'PENDING'     // initiated, awaiting user action
-  | 'PROCESSING'  // MNO confirmed, awaiting settlement
-  | 'SUCCESS'     // funds received
-  | 'FAILED'      // definitively failed
-  | 'CANCELLED'   // cancelled by user or merchant
-  | 'AMBIGUOUS';  // Selcom-specific: outcome unknown, must poll
+  | 'PENDING' // initiated, awaiting user action
+  | 'PROCESSING' // MNO confirmed, awaiting settlement
+  | 'SUCCESS' // funds received
+  | 'FAILED' // definitively failed
+  | 'CANCELLED' // cancelled by user or merchant
+  | 'AMBIGUOUS'; // Selcom-specific: outcome unknown, must poll
 
 /** Payload for creating a payment order. */
 export interface CreateOrderPayload {
-  amount:      TZSAmount;
-  currency:    Currency;
-  reference:   string;                 // your internal order ID — must be unique
+  amount: TZSAmount;
+  currency: Currency;
+  reference: string; // your internal order ID — must be unique
   description?: string;
   customer: {
-    name:   string;
-    phone:  string;                    // MSISDN format: 255XXXXXXXXX
+    name: string;
+    phone: string; // MSISDN format: 255XXXXXXXXX
     email?: string;
   };
-  redirectUrl?: string;                // required for DPO / Pesapal redirect flows
-  metadata?:   Record<string, unknown>;
+  redirectUrl?: string; // required for DPO / Pesapal redirect flows
+  metadata?: Record<string, unknown>;
 }
 
 /** Result returned after initiating a payment. */
 export interface OrderResult {
-  orderId:            string;          // provider-assigned transaction ID
-  reference:          string;          // your reference, echoed back
-  status:             PaymentStatus;
-  checkoutUrl?:       string;          // redirect-based providers (DPO, Pesapal)
-  ussdPushInitiated?: boolean;         // Selcom / MNO push flows
-  raw?:               unknown;         // escape hatch — never rely on this
+  orderId: string; // provider-assigned transaction ID
+  reference: string; // your reference, echoed back
+  status: PaymentStatus;
+  checkoutUrl?: string; // redirect-based providers (DPO, Pesapal)
+  ussdPushInitiated?: boolean; // Selcom / MNO push flows
+  raw?: unknown; // escape hatch — never rely on this
 }
 
 /** Payload for cancelling a payment order. */
@@ -50,27 +50,27 @@ export interface CancelOrderResult {
   orderId: string;
   cancelled: boolean;
   message?: string;
-  raw?:      unknown;
+  raw?: unknown;
 }
 
 /** Parameters for listing orders. */
 export interface ListOrdersParams {
   fromDate?: Date;
-  toDate?:   Date;
-  limit?:    number;
-  offset?:   number;
+  toDate?: Date;
+  limit?: number;
+  offset?: number;
 }
 
 /** Result returned when listing orders. */
 export interface ListOrdersResult {
   orders: Array<{
-    orderId:   string;
+    orderId: string;
     reference: string;
-    status:    PaymentStatus;
-    amount:    TZSAmount;
-    currency:  Currency;
+    status: PaymentStatus;
+    amount: TZSAmount;
+    currency: Currency;
     createdAt: Date;
-    raw?:      unknown;
+    raw?: unknown;
   }>;
   total: number;
 }

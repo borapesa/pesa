@@ -12,9 +12,7 @@ interface IdempotencyPluginOptions {
  * The key is derived from the operation + the merchant reference,
  * ensuring the same logical payment is never sent to the provider twice.
  */
-export function idempotencyPlugin(
-  _options: IdempotencyPluginOptions = {},
-): PesaPlugin {
+export function idempotencyPlugin(_options: IdempotencyPluginOptions = {}): PesaPlugin {
   const seen = new Set<string>();
 
   return {
@@ -30,7 +28,7 @@ export function idempotencyPlugin(
       if (seen.has(key)) {
         throw new Error(
           `Duplicate request detected for ${ctx.operation}:${ref}. ` +
-          `This is likely a network retry — the original request may have succeeded.`,
+            `This is likely a network retry — the original request may have succeeded.`,
         );
       }
 

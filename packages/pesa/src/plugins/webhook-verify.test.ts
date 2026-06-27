@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { webhookVerifyPlugin } from './webhook-verify';
 
 describe('webhookVerifyPlugin', () => {
@@ -30,8 +30,15 @@ describe('webhookVerifyPlugin', () => {
 
     await expect(
       plugin.onPaymentEvent!({
-        id: 'ev_2', type: 'PAYMENT_SUCCESS', orderId: 'o2', reference: 'r2',
-        amount: 0, currency: 'TZS', status: 'SUCCESS', provider: 'bogus', timestamp: new Date(),
+        id: 'ev_2',
+        type: 'PAYMENT_SUCCESS',
+        orderId: 'o2',
+        reference: 'r2',
+        amount: 0,
+        currency: 'TZS',
+        status: 'SUCCESS',
+        provider: 'bogus',
+        timestamp: new Date(),
       }),
     ).resolves.toBeUndefined();
 
@@ -48,8 +55,15 @@ describe('webhookVerifyPlugin', () => {
 
     await expect(
       plugin.onPaymentEvent!({
-        id: 'ev_3', type: 'PAYMENT_SUCCESS', orderId: 'o3', reference: 'r3',
-        amount: 0, currency: 'TZS', status: 'SUCCESS', provider: 'bogus', timestamp: new Date(),
+        id: 'ev_3',
+        type: 'PAYMENT_SUCCESS',
+        orderId: 'o3',
+        reference: 'r3',
+        amount: 0,
+        currency: 'TZS',
+        status: 'SUCCESS',
+        provider: 'bogus',
+        timestamp: new Date(),
       }),
     ).rejects.toThrow('BORAPESA_WEBHOOK_SECRET');
 
@@ -65,8 +79,15 @@ describe('webhookVerifyPlugin', () => {
 
     await expect(
       plugin.onPaymentEvent!({
-        id: 'ev_4', type: 'PAYMENT_SUCCESS', orderId: 'o4', reference: 'r4',
-        amount: 0, currency: 'TZS', status: 'SUCCESS', provider: 'bogus', timestamp: new Date(),
+        id: 'ev_4',
+        type: 'PAYMENT_SUCCESS',
+        orderId: 'o4',
+        reference: 'r4',
+        amount: 0,
+        currency: 'TZS',
+        status: 'SUCCESS',
+        provider: 'bogus',
+        timestamp: new Date(),
       }),
     ).resolves.toBeUndefined();
 

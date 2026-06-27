@@ -1,30 +1,30 @@
 import { v4 as uuid } from 'uuid';
-import type { PesaConfig } from './types/config';
-import type {
-  CreateOrderPayload,
-  OrderResult,
-  PaymentStatus,
-  CancelOrderResult,
-  ListOrdersParams,
-  ListOrdersResult,
-} from './types/order';
-import type { PaymentEvent, PaymentEventType } from './types/event';
-import type { DisbursePayload, DisburseResult } from './types/disbursement';
-import type { RefundResult } from './types/refund';
-import type { PreviewResult, NameLookupResult } from './types/preview';
 import type { PesaDatabaseAdapter } from './db/adapter';
 import { SQLiteAdapter } from './db/sqlite';
+import {
+  PesaNetworkError,
+  PesaProviderError,
+  PesaUnsupportedError,
+  PesaValidationError,
+  PesaWebhookError,
+} from './errors';
+import { createPesaHandler } from './handler';
 import type { RequestContext, ResponseContext } from './plugins/types';
 import type { BasePaymentProvider } from './providers/base';
-import { createPesaHandler } from './handler';
+import type { PesaConfig } from './types/config';
+import type { DisbursePayload, DisburseResult } from './types/disbursement';
+import type { PaymentEvent, PaymentEventType } from './types/event';
+import type {
+  CancelOrderResult,
+  CreateOrderPayload,
+  ListOrdersParams,
+  ListOrdersResult,
+  OrderResult,
+  PaymentStatus,
+} from './types/order';
+import type { NameLookupResult, PreviewResult } from './types/preview';
+import type { RefundResult } from './types/refund';
 import { validateCreateOrderPayload, validateDisbursePayload } from './validate';
-import {
-  PesaUnsupportedError,
-  PesaWebhookError,
-  PesaNetworkError,
-  PesaValidationError,
-  PesaProviderError,
-} from './errors';
 
 /**
  * PesaInstance — the fully configured payments SDK.
@@ -48,18 +48,12 @@ export interface PesaInstance {
    * Handle an incoming webhook. Called by framework adapters.
    * Verifies, normalizes, persists, and emits the event.
    */
-  handleWebhook(
-    rawBody: string | Buffer,
-    headers: Record<string, string>,
-  ): Promise<void>;
+  handleWebhook(rawBody: string | Buffer, headers: Record<string, string>): Promise<void>;
 
   // ── Event emitter ───────────────────────────────────────────────────
 
   /** React to a verified + persisted payment event. */
-  on(
-    event: PaymentEventType,
-    handler: (event: PaymentEvent) => Promise<void> | void,
-  ): void;
+  on(event: PaymentEventType, handler: (event: PaymentEvent) => Promise<void> | void): void;
 
   // ── Optional operations (delegated to provider) ─────────────────────
 
@@ -267,18 +261,20 @@ export function createPesa(config: PesaConfig): PesaInstance {
     if (!handlers.has(event)) {
       handlers.set(event, new Set());
     }
-    handlers.get(event)!.add(handler);
+    handlers.get(event)?.add(handler);
   }
 
   // ── Optional operations (feature-detect from provider) ──────────────
 
-  const refund     = provider.refund ? provider.refund.bind(provider) : undefined;
+  const refund = provider.refund ? provider.refund.bind(provider) : undefined;
   const cancelOrder = provider.cancelOrder ? provider.cancelOrder.bind(provider) : undefined;
   const validateCredentials = provider.validateCredentials
-    ? provider.validateCredentials.bind(provider) : undefined;
+    ? provider.validateCredentials.bind(provider)
+    : undefined;
   const previewOrder = provider.previewOrder ? provider.previewOrder.bind(provider) : undefined;
   const previewDisburse = provider.previewDisburse
-    ? provider.previewDisburse.bind(provider) : undefined;
+    ? provider.previewDisburse.bind(provider)
+    : undefined;
   const getNameLookup = provider.getNameLookup ? provider.getNameLookup.bind(provider) : undefined;
   const listOrders = provider.listOrders ? provider.listOrders.bind(provider) : undefined;
 
@@ -299,6 +295,7 @@ export function createPesa(config: PesaConfig): PesaInstance {
     listOrders,
     provider,
     // mount set below after assembly
+    // biome-ignore lint/style/noNonNullAssertion: placeholder, set immediately after
     mount: undefined!,
   };
 
@@ -318,16 +315,16 @@ export function createPesa(config: PesaConfig): PesaInstance {
 
 function normalizeError(err: unknown): Error {
   // Pass through known Pesa errors so callers can use instanceof checks
-  if (err instanceof PesaWebhookError ||
-      err instanceof PesaUnsupportedError ||
-      err instanceof PesaNetworkError ||
-      err instanceof PesaValidationError) {
+  if (
+    err instanceof PesaWebhookError ||
+    err instanceof PesaUnsupportedError ||
+    err instanceof PesaNetworkError ||
+    err instanceof PesaValidationError
+  ) {
     return err;
   }
   if (err instanceof TypeError && err.message.includes('fetch')) {
-    return new PesaNetworkError(
-      `Network error: ${err.message}. Is the provider API reachable?`,
-    );
+    return new PesaNetworkError(`Network error: ${err.message}. Is the provider API reachable?`);
   }
   if (err instanceof Error) {
     return new PesaProviderError(err.message, 502);

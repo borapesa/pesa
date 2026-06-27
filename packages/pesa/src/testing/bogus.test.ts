@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { BogusPaymentProvider } from './bogus';
 
 const customer = { name: 'Juma Ali', phone: '255712345678' };
@@ -10,7 +10,10 @@ describe('BogusPaymentProvider', () => {
     it('returns SUCCESS by default with ussdPushInitiated', async () => {
       const provider = new BogusPaymentProvider();
       const result = await provider.createOrder({
-        amount: 15000, currency: 'TZS', reference: 'order_001', customer,
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'order_001',
+        customer,
       });
 
       expect(result.status).toBe('SUCCESS');
@@ -22,7 +25,10 @@ describe('BogusPaymentProvider', () => {
     it('returns FAILED when defaultBehavior is fail', async () => {
       const provider = new BogusPaymentProvider({ defaultBehavior: 'fail' });
       const result = await provider.createOrder({
-        amount: 15000, currency: 'TZS', reference: 'order_002', customer,
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'order_002',
+        customer,
       });
 
       expect(result.status).toBe('FAILED');
@@ -31,7 +37,10 @@ describe('BogusPaymentProvider', () => {
     it('returns AMBIGUOUS with checkoutUrl', async () => {
       const provider = new BogusPaymentProvider({ defaultBehavior: 'ambiguous' });
       const result = await provider.createOrder({
-        amount: 15000, currency: 'TZS', reference: 'order_003', customer,
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'order_003',
+        customer,
       });
 
       expect(result.status).toBe('AMBIGUOUS');
@@ -48,13 +57,22 @@ describe('BogusPaymentProvider', () => {
       });
 
       const fail = await provider.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'order_fail', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'order_fail',
+        customer,
       });
       const pending = await provider.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'order_pending', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'order_pending',
+        customer,
       });
       const ok = await provider.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'order_unscripted', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'order_unscripted',
+        customer,
       });
 
       expect(fail.status).toBe('FAILED');
@@ -69,17 +87,26 @@ describe('BogusPaymentProvider', () => {
 
       // First two calls: success (before threshold)
       const r1 = await provider.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'delay', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'delay',
+        customer,
       });
       const r2 = await provider.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'delay', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'delay',
+        customer,
       });
       expect(r1.status).toBe('SUCCESS');
       expect(r2.status).toBe('SUCCESS');
 
       // Third call: fail (threshold hit)
       const r3 = await provider.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'delay', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'delay',
+        customer,
       });
       expect(r3.status).toBe('FAILED');
     });
@@ -89,7 +116,10 @@ describe('BogusPaymentProvider', () => {
     it('returns the stored order status', async () => {
       const provider = new BogusPaymentProvider();
       const order = await provider.createOrder({
-        amount: 15000, currency: 'TZS', reference: 'order_004', customer,
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'order_004',
+        customer,
       });
 
       const status = await provider.getPaymentStatus(order.orderId);
@@ -153,7 +183,9 @@ describe('BogusPaymentProvider', () => {
     it('respects behavior overrides for disbursement', async () => {
       const provider = new BogusPaymentProvider({ defaultBehavior: 'fail' });
       const result = await provider.disburse({
-        amount: 50000, currency: 'TZS', reference: 'payout_fail',
+        amount: 50000,
+        currency: 'TZS',
+        reference: 'payout_fail',
         recipient: { phone: '255754321098' },
       });
 
@@ -178,7 +210,10 @@ describe('BogusPaymentProvider', () => {
     it('marks the order as CANCELLED', async () => {
       const provider = new BogusPaymentProvider();
       const order = await provider.createOrder({
-        amount: 15000, currency: 'TZS', reference: 'to_cancel', customer,
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'to_cancel',
+        customer,
       });
 
       const result = await provider.cancelOrder!(order.orderId);
@@ -210,7 +245,10 @@ describe('BogusPaymentProvider', () => {
     it('returns valid with 1% fee', async () => {
       const provider = new BogusPaymentProvider();
       const result = await provider.previewOrder!({
-        amount: 10000, currency: 'TZS', reference: 'preview_001', customer,
+        amount: 10000,
+        currency: 'TZS',
+        reference: 'preview_001',
+        customer,
       });
 
       expect(result.valid).toBe(true);
@@ -222,7 +260,9 @@ describe('BogusPaymentProvider', () => {
     it('returns valid with 0.5% fee', async () => {
       const provider = new BogusPaymentProvider();
       const result = await provider.previewDisburse!({
-        amount: 10000, currency: 'TZS', reference: 'pvw_001',
+        amount: 10000,
+        currency: 'TZS',
+        reference: 'pvw_001',
         recipient: { phone: '255754321098' },
       });
 
@@ -246,10 +286,16 @@ describe('BogusPaymentProvider', () => {
     it('returns all created orders', async () => {
       const provider = new BogusPaymentProvider();
       await provider.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'list_1', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'list_1',
+        customer,
       });
       await provider.createOrder({
-        amount: 2000, currency: 'TZS', reference: 'list_2', customer,
+        amount: 2000,
+        currency: 'TZS',
+        reference: 'list_2',
+        customer,
       });
 
       const result = await provider.listOrders!({});
@@ -265,7 +311,10 @@ describe('BogusPaymentProvider', () => {
       const provider = new BogusPaymentProvider({ delay: 100 });
       const start = Date.now();
       await provider.createOrder({
-        amount: 15000, currency: 'TZS', reference: 'timed', customer,
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'timed',
+        customer,
       });
       const elapsed = Date.now() - start;
 

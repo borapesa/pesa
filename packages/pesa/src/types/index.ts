@@ -1,15 +1,15 @@
-export type { TZSAmount, Currency, ProviderName } from './core';
+export type { PesaConfig } from './config';
+export type { Currency, ProviderName, TZSAmount } from './core';
+export type { DisbursePayload, DisburseResult, MobileNetwork } from './disbursement';
+export type { PaymentEvent, PaymentEventType } from './event';
 export type {
-  PaymentStatus,
-  CreateOrderPayload,
-  OrderResult,
   CancelOrderPayload,
   CancelOrderResult,
+  CreateOrderPayload,
   ListOrdersParams,
   ListOrdersResult,
+  OrderResult,
+  PaymentStatus,
 } from './order';
-export type { PaymentEventType, PaymentEvent } from './event';
-export type { MobileNetwork, DisbursePayload, DisburseResult } from './disbursement';
+export type { NameLookupResult, PreviewResult } from './preview';
 export type { RefundResult } from './refund';
-export type { PreviewResult, NameLookupResult } from './preview';
-export type { PesaConfig } from './config';

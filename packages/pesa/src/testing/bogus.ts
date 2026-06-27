@@ -1,19 +1,19 @@
 import { v4 as uuid } from 'uuid';
 import { BasePaymentProvider } from '../providers/base';
 import type {
-  ProviderName,
+  CancelOrderResult,
   CreateOrderPayload,
-  OrderResult,
-  PaymentStatus,
-  PaymentEvent,
   DisbursePayload,
   DisburseResult,
-  RefundResult,
-  CancelOrderResult,
-  PreviewResult,
-  NameLookupResult,
   ListOrdersParams,
   ListOrdersResult,
+  NameLookupResult,
+  OrderResult,
+  PaymentEvent,
+  PaymentStatus,
+  PreviewResult,
+  ProviderName,
+  RefundResult,
 } from '../types/index';
 
 type BogusBehavior = 'success' | 'fail' | 'pending' | 'ambiguous';
@@ -64,7 +64,10 @@ export class BogusPaymentProvider extends BasePaymentProvider {
   private delay: number;
   private script: Map<string, { behavior: BogusBehavior; callCount: number; after: number }>;
   private orders: Map<string, { payload: CreateOrderPayload; status: PaymentStatus }> = new Map();
-  private disbursements: Map<string, { payload: DisbursePayload; status: DisburseResult['status'] }> = new Map();
+  private disbursements: Map<
+    string,
+    { payload: DisbursePayload; status: DisburseResult['status'] }
+  > = new Map();
 
   constructor(options: BogusOptions = {}) {
     super();
@@ -89,9 +92,9 @@ export class BogusPaymentProvider extends BasePaymentProvider {
     const orderId = `bogus_${uuid()}`;
 
     const statusMap: Record<BogusBehavior, PaymentStatus> = {
-      success:   'SUCCESS',
-      fail:      'FAILED',
-      pending:   'PENDING',
+      success: 'SUCCESS',
+      fail: 'FAILED',
+      pending: 'PENDING',
       ambiguous: 'AMBIGUOUS',
     };
 
@@ -126,7 +129,8 @@ export class BogusPaymentProvider extends BasePaymentProvider {
     let currency = 'TZS';
 
     try {
-      const body = typeof _rawBody === 'string' ? JSON.parse(_rawBody) : JSON.parse(_rawBody.toString());
+      const body =
+        typeof _rawBody === 'string' ? JSON.parse(_rawBody) : JSON.parse(_rawBody.toString());
       reference = body.reference ?? reference;
       status = body.status ?? status;
       amount = body.amount ?? amount;
@@ -154,9 +158,9 @@ export class BogusPaymentProvider extends BasePaymentProvider {
     const disbursementId = `bogus_disburse_${uuid()}`;
 
     const statusMap: Record<BogusBehavior, DisburseResult['status']> = {
-      success:   'SUCCESS',
-      fail:      'FAILED',
-      pending:   'QUEUED',
+      success: 'SUCCESS',
+      fail: 'FAILED',
+      pending: 'QUEUED',
       ambiguous: 'QUEUED',
     };
 

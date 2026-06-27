@@ -11,8 +11,8 @@ interface LoggingPluginOptions {
 
 const LEVELS: Record<LogLevel, number> = {
   debug: 0,
-  info:  1,
-  warn:  2,
+  info: 1,
+  warn: 2,
   error: 3,
 };
 
@@ -75,7 +75,7 @@ export function loggingPlugin(options: LoggingPluginOptions = {}): PesaPlugin {
 }
 
 /** Strip sensitive fields before logging. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: PII redaction must accept unknown payload shapes
 function stripSensitive(payload: any): any {
   const safe = { ...payload };
   if ('phone' in safe) safe.phone = '***';

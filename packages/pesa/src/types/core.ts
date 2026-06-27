@@ -19,10 +19,4 @@ export type Currency = 'TZS';
 /**
  * All supported payment providers. Extensible via module augmentation.
  */
-export type ProviderName =
-  | 'selcom'
-  | 'azampay'
-  | 'clickpesa'
-  | 'dpo'
-  | 'pesapal'
-  | 'bogus';
+export type ProviderName = 'selcom' | 'azampay' | 'clickpesa' | 'dpo' | 'pesapal' | 'bogus';

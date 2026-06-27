@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { SQLiteAdapter } from './sqlite';
-import type { PaymentEvent } from '../types/event';
 import { unlinkSync } from 'node:fs';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { PaymentEvent } from '../types/event';
+import { SQLiteAdapter } from './sqlite';
 
 const TEST_DB = './test-sqlite.db';
 
@@ -28,9 +28,21 @@ describe('SQLiteAdapter', () => {
   });
 
   afterEach(() => {
-    try { unlinkSync(TEST_DB); } catch { /* ok */ }
-    try { unlinkSync(TEST_DB + '-wal'); } catch { /* ok */ }
-    try { unlinkSync(TEST_DB + '-shm'); } catch { /* ok */ }
+    try {
+      unlinkSync(TEST_DB);
+    } catch {
+      /* ok */
+    }
+    try {
+      unlinkSync(`${TEST_DB}-wal`);
+    } catch {
+      /* ok */
+    }
+    try {
+      unlinkSync(`${TEST_DB}-shm`);
+    } catch {
+      /* ok */
+    }
   });
 
   it('saves and retrieves an event', async () => {

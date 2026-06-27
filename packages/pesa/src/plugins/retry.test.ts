@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { retryPlugin } from './retry';
 import type { ResponseContext } from './types';
 
@@ -58,10 +58,10 @@ describe('retryPlugin', () => {
     const ctx1 = await plugin.afterResponse!(makeCtx('AMBIGUOUS'));
     expect(ctx1.retry).toBe(true);
 
-    // Reset metadata (simulates a new request from core)
-    const ctx2 = await plugin.afterResponse!(makeCtx('AMBIGUOUS'));
-    // maxAttempts=1 means only 1 retry allowed total across calls
-    // But the key is derived from operation + payload, so same key
+    // Second attempt: should still retry (different key since new metadata)
+    await plugin.afterResponse!(makeCtx('AMBIGUOUS'));
+    // The attempts Map tracks by operation+payload key — a new call
+    // from the factory would reset metadata, so this is a fresh attempt
   });
 
   it('uses exponential backoff by default', async () => {
@@ -91,21 +91,25 @@ describe('retryPlugin', () => {
   it('stops retrying after maxAttempts for the same key', async () => {
     const plugin = retryPlugin({ maxAttempts: 2 });
 
-    const key = JSON.stringify({ reference: 'keyed_ref' });
-
-    const ctx1 = await plugin.afterResponse!(makeCtx('AMBIGUOUS', {
-      payload: { reference: 'keyed_ref' },
-    }));
+    const ctx1 = await plugin.afterResponse!(
+      makeCtx('AMBIGUOUS', {
+        payload: { reference: 'keyed_ref' },
+      }),
+    );
     expect(ctx1.retry).toBe(true);
 
-    const ctx2 = await plugin.afterResponse!(makeCtx('AMBIGUOUS', {
-      payload: { reference: 'keyed_ref' },
-    }));
+    const ctx2 = await plugin.afterResponse!(
+      makeCtx('AMBIGUOUS', {
+        payload: { reference: 'keyed_ref' },
+      }),
+    );
     expect(ctx2.retry).toBe(true);
 
-    const ctx3 = await plugin.afterResponse!(makeCtx('AMBIGUOUS', {
-      payload: { reference: 'keyed_ref' },
-    }));
+    const ctx3 = await plugin.afterResponse!(
+      makeCtx('AMBIGUOUS', {
+        payload: { reference: 'keyed_ref' },
+      }),
+    );
     expect(ctx3.retry).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
-import type { BasePaymentProvider } from '../providers/base';
-import type { PesaPlugin } from '../plugins/types';
 import type { PesaDatabaseAdapter } from '../db/adapter';
+import type { PesaPlugin } from '../plugins/types';
+import type { BasePaymentProvider } from '../providers/base';
 
 /**
  * Configuration passed to createPesa().

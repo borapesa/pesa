@@ -4,3 +4,4 @@ packages:
   - "examples/*"
 allowBuilds:
   better-sqlite3: true
+  lefthook: true

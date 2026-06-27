@@ -1,5 +1,5 @@
-import type { PesaPlugin } from './types';
 import { PesaWebhookError } from '../errors';
+import type { PesaPlugin } from './types';
 
 /**
  * Webhook verification plugin — built into core, not optional.

@@ -16,19 +16,18 @@ interface RetryPluginOptions {
  * Works with the idempotencyPlugin to prevent duplicate charges.
  */
 export function retryPlugin(options: RetryPluginOptions = {}): PesaPlugin {
-  const {
-    maxAttempts = 3,
-    backoff = 'exponential',
-    baseDelayMs = 1000,
-  } = options;
+  const { maxAttempts = 3, backoff = 'exponential', baseDelayMs = 1000 } = options;
 
   const attempts = new Map<string, number>();
 
   function delayFor(attempt: number): number {
     switch (backoff) {
-      case 'exponential': return baseDelayMs * Math.pow(2, attempt);
-      case 'linear':      return baseDelayMs * (attempt + 1);
-      case 'fixed':       return baseDelayMs;
+      case 'exponential':
+        return baseDelayMs * 2 ** attempt;
+      case 'linear':
+        return baseDelayMs * (attempt + 1);
+      case 'fixed':
+        return baseDelayMs;
     }
   }
 
@@ -41,10 +40,8 @@ export function retryPlugin(options: RetryPluginOptions = {}): PesaPlugin {
 
       // Only retry on in-progress statuses or when explicitly flagged
       const status = (ctx.result as { status?: string }).status;
-      const shouldRetry = ctx.retry ||
-        status === 'AMBIGUOUS' ||
-        status === 'PROCESSING' ||
-        status === 'QUEUED';
+      const shouldRetry =
+        ctx.retry || status === 'AMBIGUOUS' || status === 'PROCESSING' || status === 'QUEUED';
 
       if (shouldRetry && current < maxAttempts) {
         const delay = delayFor(current);

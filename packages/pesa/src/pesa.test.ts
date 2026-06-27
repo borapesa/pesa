@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createPesa } from './pesa';
-import { BogusPaymentProvider } from './testing/bogus';
-import { BasePaymentProvider } from './providers/base';
+import { unlinkSync } from 'node:fs';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SQLiteAdapter } from './db/sqlite';
+import { PesaNetworkError, PesaProviderError, PesaWebhookError } from './errors';
+import { createPesa } from './pesa';
 import { retryPlugin } from './plugins/retry';
-import { PesaWebhookError, PesaNetworkError, PesaProviderError } from './errors';
-import type { PaymentEvent } from './types/event';
 import type { PesaPlugin } from './plugins/types';
+import { BasePaymentProvider } from './providers/base';
+import { BogusPaymentProvider } from './testing/bogus';
+import type { PaymentEvent } from './types/event';
 import type {
-  ProviderName,
   CreateOrderPayload,
-  OrderResult,
-  PaymentStatus,
   DisbursePayload,
   DisburseResult,
+  OrderResult,
+  PaymentStatus,
+  ProviderName,
 } from './types/index';
-import { unlinkSync } from 'node:fs';
 
 const customer = { name: 'Juma Ali', phone: '255712345678' };
 const TEST_DB = './test-factory.db';
@@ -28,9 +28,21 @@ describe('createPesa() factory', () => {
   });
 
   afterEach(() => {
-    try { unlinkSync(TEST_DB); } catch { /* ok */ }
-    try { unlinkSync(TEST_DB + '-wal'); } catch { /* ok */ }
-    try { unlinkSync(TEST_DB + '-shm'); } catch { /* ok */ }
+    try {
+      unlinkSync(TEST_DB);
+    } catch {
+      /* ok */
+    }
+    try {
+      unlinkSync(`${TEST_DB}-wal`);
+    } catch {
+      /* ok */
+    }
+    try {
+      unlinkSync(`${TEST_DB}-shm`);
+    } catch {
+      /* ok */
+    }
   });
 
   // ── createOrder ────────────────────────────────────────────────
@@ -42,7 +54,10 @@ describe('createPesa() factory', () => {
     });
 
     const order = await pesa.createOrder({
-      amount: 15000, currency: 'TZS', reference: 'order_abc', customer,
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'order_abc',
+      customer,
     });
 
     expect(order.status).toBe('SUCCESS');
@@ -58,7 +73,10 @@ describe('createPesa() factory', () => {
     });
 
     const order = await pesa.createOrder({
-      amount: 15000, currency: 'TZS', reference: 'order_fail', customer,
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'order_fail',
+      customer,
     });
 
     expect(order.status).toBe('FAILED');
@@ -73,7 +91,10 @@ describe('createPesa() factory', () => {
     });
 
     const order = await pesa.createOrder({
-      amount: 15000, currency: 'TZS', reference: 'order_status', customer,
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'order_status',
+      customer,
     });
     const status = await pesa.getPaymentStatus(order.orderId);
 
@@ -89,7 +110,9 @@ describe('createPesa() factory', () => {
     });
 
     const result = await pesa.disburse({
-      amount: 50000, currency: 'TZS', reference: 'payout_001',
+      amount: 50000,
+      currency: 'TZS',
+      reference: 'payout_001',
       recipient: { phone: '255754321098', network: 'MPESA' },
     });
 
@@ -106,7 +129,9 @@ describe('createPesa() factory', () => {
     });
 
     const events: PaymentEvent[] = [];
-    pesa.on('PAYMENT_SUCCESS', (e: PaymentEvent) => { events.push(e); });
+    pesa.on('PAYMENT_SUCCESS', (e: PaymentEvent) => {
+      events.push(e);
+    });
 
     const body = JSON.stringify({ reference: 'wh_test', status: 'SUCCESS', amount: 5000 });
     await pesa.handleWebhook(body, {});
@@ -128,7 +153,9 @@ describe('createPesa() factory', () => {
     });
 
     const events: PaymentEvent[] = [];
-    pesa.on('PAYMENT_FAILED', (e: PaymentEvent) => { events.push(e); });
+    pesa.on('PAYMENT_FAILED', (e: PaymentEvent) => {
+      events.push(e);
+    });
 
     const body = JSON.stringify({ reference: 'wh_fail', status: 'FAILED' });
     await pesa.handleWebhook(body, {});
@@ -163,8 +190,12 @@ describe('createPesa() factory', () => {
     });
 
     let count = 0;
-    pesa.on('PAYMENT_SUCCESS', () => { count++; });
-    pesa.on('PAYMENT_SUCCESS', () => { count++; });
+    pesa.on('PAYMENT_SUCCESS', () => {
+      count++;
+    });
+    pesa.on('PAYMENT_SUCCESS', () => {
+      count++;
+    });
 
     const body = JSON.stringify({ reference: 'multi', status: 'SUCCESS' });
     await pesa.handleWebhook(body, {});
@@ -192,7 +223,10 @@ describe('createPesa() factory', () => {
     expect(creds.valid).toBe(true);
 
     const preview = await pesa.previewOrder!({
-      amount: 10000, currency: 'TZS', reference: 'pv_1', customer,
+      amount: 10000,
+      currency: 'TZS',
+      reference: 'pv_1',
+      customer,
     });
     expect(preview.valid).toBe(true);
     expect(preview.fee).toBe(100);
@@ -210,16 +244,30 @@ describe('createPesa() factory', () => {
     await pesa.handleWebhook(body, {});
 
     // Clean up the default DB
-    try { unlinkSync('./pesa.db'); } catch { /* ok */ }
-    try { unlinkSync('./pesa.db-wal'); } catch { /* ok */ }
-    try { unlinkSync('./pesa.db-shm'); } catch { /* ok */ }
+    try {
+      unlinkSync('./pesa.db');
+    } catch {
+      /* ok */
+    }
+    try {
+      unlinkSync('./pesa.db-wal');
+    } catch {
+      /* ok */
+    }
+    try {
+      unlinkSync('./pesa.db-shm');
+    } catch {
+      /* ok */
+    }
   }, 10000);
 
   // ── Error normalization ────────────────────────────────────────
 
   describe('error normalization', () => {
     class ThrowingProvider extends BogusPaymentProvider {
-      constructor(private _error: unknown) { super({ delay: 0 }); }
+      constructor(private _error: unknown) {
+        super({ delay: 0 });
+      }
       override async createOrder(_p: CreateOrderPayload): Promise<OrderResult> {
         throw this._error;
       }
@@ -237,9 +285,14 @@ describe('createPesa() factory', () => {
         db,
       });
 
-      await expect(pesa.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'net_err', customer,
-      })).rejects.toThrow(PesaNetworkError);
+      await expect(
+        pesa.createOrder({
+          amount: 1000,
+          currency: 'TZS',
+          reference: 'net_err',
+          customer,
+        }),
+      ).rejects.toThrow(PesaNetworkError);
     });
 
     it('wraps generic Error into PesaProviderError', async () => {
@@ -248,9 +301,14 @@ describe('createPesa() factory', () => {
         db,
       });
 
-      await expect(pesa.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'gen_err', customer,
-      })).rejects.toThrow(PesaProviderError);
+      await expect(
+        pesa.createOrder({
+          amount: 1000,
+          currency: 'TZS',
+          reference: 'gen_err',
+          customer,
+        }),
+      ).rejects.toThrow(PesaProviderError);
     });
 
     it('wraps non-Error throw into PesaProviderError', async () => {
@@ -259,9 +317,14 @@ describe('createPesa() factory', () => {
         db,
       });
 
-      await expect(pesa.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'str_err', customer,
-      })).rejects.toThrow('Unknown provider error');
+      await expect(
+        pesa.createOrder({
+          amount: 1000,
+          currency: 'TZS',
+          reference: 'str_err',
+          customer,
+        }),
+      ).rejects.toThrow('Unknown provider error');
     });
 
     it('passes PesaWebhookError through unchanged', async () => {
@@ -280,10 +343,14 @@ describe('createPesa() factory', () => {
         db,
       });
 
-      await expect(pesa.disburse({
-        amount: 1000, currency: 'TZS', reference: 'derr',
-        recipient: { phone: '255754321098' },
-      })).rejects.toThrow(PesaProviderError);
+      await expect(
+        pesa.disburse({
+          amount: 1000,
+          currency: 'TZS',
+          reference: 'derr',
+          recipient: { phone: '255754321098' },
+        }),
+      ).rejects.toThrow(PesaProviderError);
     });
   });
 
@@ -292,13 +359,25 @@ describe('createPesa() factory', () => {
   describe('retry integration', () => {
     class AmbiguousThenSuccessProvider extends BogusPaymentProvider {
       private calls = 0;
-      constructor() { super({ delay: 0 }); }
+      constructor() {
+        super({ delay: 0 });
+      }
       override async createOrder(payload: CreateOrderPayload): Promise<OrderResult> {
         this.calls++;
         if (this.calls === 1) {
-          return { orderId: 'bogus_amb', reference: payload.reference, status: 'AMBIGUOUS', ussdPushInitiated: true };
+          return {
+            orderId: 'bogus_amb',
+            reference: payload.reference,
+            status: 'AMBIGUOUS',
+            ussdPushInitiated: true,
+          };
         }
-        return { orderId: 'bogus_ok', reference: payload.reference, status: 'SUCCESS', ussdPushInitiated: true };
+        return {
+          orderId: 'bogus_ok',
+          reference: payload.reference,
+          status: 'SUCCESS',
+          ussdPushInitiated: true,
+        };
       }
     }
 
@@ -310,7 +389,10 @@ describe('createPesa() factory', () => {
       });
 
       const result = await pesa.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'retry_amb', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'retry_amb',
+        customer,
       });
 
       expect(result.status).toBe('SUCCESS');
@@ -318,7 +400,9 @@ describe('createPesa() factory', () => {
     });
 
     class AlwaysFailingProvider extends BogusPaymentProvider {
-      constructor() { super({ delay: 0 }); }
+      constructor() {
+        super({ delay: 0 });
+      }
       override async createOrder(_payload: CreateOrderPayload): Promise<OrderResult> {
         throw new Error('permanent failure');
       }
@@ -331,9 +415,14 @@ describe('createPesa() factory', () => {
         db,
       });
 
-      await expect(pesa.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'perm_fail', customer,
-      })).rejects.toThrow(PesaProviderError);
+      await expect(
+        pesa.createOrder({
+          amount: 1000,
+          currency: 'TZS',
+          reference: 'perm_fail',
+          customer,
+        }),
+      ).rejects.toThrow(PesaProviderError);
     });
   });
 
@@ -342,7 +431,9 @@ describe('createPesa() factory', () => {
   describe('disburse retry integration', () => {
     class AmbiguousDisburseProvider extends BogusPaymentProvider {
       private calls = 0;
-      constructor() { super({ delay: 0 }); }
+      constructor() {
+        super({ delay: 0 });
+      }
       override async disburse(payload: DisbursePayload): Promise<DisburseResult> {
         this.calls++;
         if (this.calls === 1) {
@@ -360,7 +451,9 @@ describe('createPesa() factory', () => {
       });
 
       const result = await pesa.disburse({
-        amount: 1000, currency: 'TZS', reference: 'd_retry',
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'd_retry',
         recipient: { phone: '255754321098' },
       });
 
@@ -369,7 +462,9 @@ describe('createPesa() factory', () => {
     });
 
     class AlwaysQueuedDisburseProvider extends BogusPaymentProvider {
-      constructor() { super({ delay: 0 }); }
+      constructor() {
+        super({ delay: 0 });
+      }
       override async disburse(payload: DisbursePayload): Promise<DisburseResult> {
         return { disbursementId: 'b_queue', reference: payload.reference, status: 'QUEUED' };
       }
@@ -383,7 +478,9 @@ describe('createPesa() factory', () => {
       });
 
       const result = await pesa.disburse({
-        amount: 1000, currency: 'TZS', reference: 'd_giveup',
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'd_giveup',
         recipient: { phone: '255754321098' },
       });
 
@@ -399,11 +496,28 @@ describe('createPesa() factory', () => {
     class MinimalProvider extends BasePaymentProvider {
       readonly name: ProviderName = 'bogus' as ProviderName;
       async createOrder(p: CreateOrderPayload): Promise<OrderResult> {
-        return { orderId: 'min_1', reference: p.reference, status: 'SUCCESS', ussdPushInitiated: true };
+        return {
+          orderId: 'min_1',
+          reference: p.reference,
+          status: 'SUCCESS',
+          ussdPushInitiated: true,
+        };
       }
-      async getPaymentStatus(): Promise<PaymentStatus> { return 'SUCCESS'; }
+      async getPaymentStatus(): Promise<PaymentStatus> {
+        return 'SUCCESS';
+      }
       async handleWebhook(): Promise<PaymentEvent> {
-        return { id: 'ev_min', type: 'PAYMENT_SUCCESS', orderId: 'min_1', reference: 'min', amount: 0, currency: 'TZS', status: 'SUCCESS', provider: 'bogus', timestamp: new Date() };
+        return {
+          id: 'ev_min',
+          type: 'PAYMENT_SUCCESS',
+          orderId: 'min_1',
+          reference: 'min',
+          amount: 0,
+          currency: 'TZS',
+          status: 'SUCCESS',
+          provider: 'bogus',
+          timestamp: new Date(),
+        };
       }
       async disburse(): Promise<DisburseResult> {
         return { disbursementId: 'd_min', reference: 'min', status: 'SUCCESS' };
@@ -420,9 +534,14 @@ describe('createPesa() factory', () => {
       // Base class defaults throw synchronously (not async)
       expect(() => pesa.refund!('x')).toThrow('does not support refunds');
       expect(() => pesa.cancelOrder!('x')).toThrow('does not support cancelling orders');
-      expect(() => pesa.previewOrder!({
-        amount: 1000, currency: 'TZS', reference: 'x', customer,
-      })).toThrow('does not support payment preview');
+      expect(() =>
+        pesa.previewOrder!({
+          amount: 1000,
+          currency: 'TZS',
+          reference: 'x',
+          customer,
+        }),
+      ).toThrow('does not support payment preview');
     });
 
     it('still exposes supported operations', async () => {
@@ -432,7 +551,10 @@ describe('createPesa() factory', () => {
       });
 
       const order = await pesa.createOrder({
-        amount: 1000, currency: 'TZS', reference: 'min_ok', customer,
+        amount: 1000,
+        currency: 'TZS',
+        reference: 'min_ok',
+        customer,
       });
       expect(order.status).toBe('SUCCESS');
 
@@ -445,7 +567,9 @@ describe('createPesa() factory', () => {
 
   it('throws PesaWebhookError when provider verification fails', async () => {
     class WebhookFailingProvider extends BogusPaymentProvider {
-      constructor() { super({ delay: 0 }); }
+      constructor() {
+        super({ delay: 0 });
+      }
       override async handleWebhook(): Promise<PaymentEvent> {
         throw new Error('invalid signature from provider');
       }
@@ -456,15 +580,16 @@ describe('createPesa() factory', () => {
       db,
     });
 
-    await expect(pesa.handleWebhook('{}', {}))
-      .rejects.toThrow('Webhook verification failed');
+    await expect(pesa.handleWebhook('{}', {})).rejects.toThrow('Webhook verification failed');
   });
 
   // ── UUID assignment when provider returns event without id ─────
 
   it('assigns a UUID when provider event has no id', async () => {
     class NoIdProvider extends BogusPaymentProvider {
-      constructor() { super({ delay: 0 }); }
+      constructor() {
+        super({ delay: 0 });
+      }
       override async handleWebhook(): Promise<PaymentEvent> {
         return {
           id: '', // empty — core should assign a UUID
@@ -483,7 +608,9 @@ describe('createPesa() factory', () => {
     const pesa = createPesa({ provider: new NoIdProvider(), db });
 
     const events: PaymentEvent[] = [];
-    pesa.on('PAYMENT_SUCCESS', (e: PaymentEvent) => { events.push(e); });
+    pesa.on('PAYMENT_SUCCESS', (e: PaymentEvent) => {
+      events.push(e);
+    });
 
     await pesa.handleWebhook(JSON.stringify({}), {});
 
@@ -530,7 +657,10 @@ describe('createPesa() factory', () => {
 
     const orderingPlugin: PesaPlugin = {
       name: 'order-check',
-      async onPaymentEvent() { order.push('plugin'); return undefined; },
+      async onPaymentEvent() {
+        order.push('plugin');
+        return undefined;
+      },
     };
 
     const pesa = createPesa({
@@ -539,12 +669,11 @@ describe('createPesa() factory', () => {
       db,
     });
 
-    pesa.on('PAYMENT_SUCCESS', () => { order.push('user'); });
+    pesa.on('PAYMENT_SUCCESS', () => {
+      order.push('user');
+    });
 
-    await pesa.handleWebhook(
-      JSON.stringify({ reference: 'order_test', status: 'SUCCESS' }),
-      {},
-    );
+    await pesa.handleWebhook(JSON.stringify({ reference: 'order_test', status: 'SUCCESS' }), {});
 
     expect(order).toEqual(['plugin', 'user']);
   });
@@ -556,7 +685,9 @@ describe('createPesa() factory', () => {
 
     const initPlugin: PesaPlugin = {
       name: 'init-test',
-      init(pesa) { capturedInstance = pesa; },
+      init(pesa) {
+        capturedInstance = pesa;
+      },
     };
 
     const pesa = createPesa({

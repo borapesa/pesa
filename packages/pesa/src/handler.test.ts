@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { createPesaHandler } from './handler';
+import { describe, expect, it } from 'vitest';
 import type { PesaHandlerTarget } from './handler';
+import { createPesaHandler } from './handler';
 
 function mockPesa(overrides: Partial<PesaHandlerTarget> = {}): PesaHandlerTarget {
   return {
@@ -26,7 +26,12 @@ describe('createPesaHandler', () => {
     const req = new Request('http://localhost/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: 15000, currency: 'TZS', reference: 'ref_1', customer: { name: 'Juma', phone: '255712345678' } }),
+      body: JSON.stringify({
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'ref_1',
+        customer: { name: 'Juma', phone: '255712345678' },
+      }),
     });
 
     const res = await handler(req);
@@ -74,11 +79,13 @@ describe('createPesaHandler', () => {
 
   it('handles webhook with custom headers', async () => {
     let receivedHeaders: Record<string, string> = {};
-    const handler = createPesaHandler(mockPesa({
-      handleWebhook: async (_body, headers) => {
-        receivedHeaders = headers;
-      },
-    }));
+    const handler = createPesaHandler(
+      mockPesa({
+        handleWebhook: async (_body, headers) => {
+          receivedHeaders = headers;
+        },
+      }),
+    );
 
     const req = new Request('http://localhost/webhook', {
       method: 'POST',
@@ -95,9 +102,13 @@ describe('createPesaHandler', () => {
   it('returns 401 when provider throws PesaWebhookError', async () => {
     const { PesaWebhookError } = await import('./errors');
 
-    const handler = createPesaHandler(mockPesa({
-      handleWebhook: async () => { throw new PesaWebhookError('bad signature'); },
-    }));
+    const handler = createPesaHandler(
+      mockPesa({
+        handleWebhook: async () => {
+          throw new PesaWebhookError('bad signature');
+        },
+      }),
+    );
 
     const req = new Request('http://localhost/webhook', {
       method: 'POST',
@@ -109,9 +120,13 @@ describe('createPesaHandler', () => {
   });
 
   it('returns 500 for unexpected errors', async () => {
-    const handler = createPesaHandler(mockPesa({
-      handleWebhook: async () => { throw new Error('boom'); },
-    }));
+    const handler = createPesaHandler(
+      mockPesa({
+        handleWebhook: async () => {
+          throw new Error('boom');
+        },
+      }),
+    );
 
     const req = new Request('http://localhost/webhook', {
       method: 'POST',
@@ -123,9 +138,13 @@ describe('createPesaHandler', () => {
   });
 
   it('returns generic 500 for non-Error throws', async () => {
-    const handler = createPesaHandler(mockPesa({
-      handleWebhook: async () => { throw 'raw string error'; },
-    }));
+    const handler = createPesaHandler(
+      mockPesa({
+        handleWebhook: async () => {
+          throw 'raw string error';
+        },
+      }),
+    );
 
     const req = new Request('http://localhost/webhook', {
       method: 'POST',

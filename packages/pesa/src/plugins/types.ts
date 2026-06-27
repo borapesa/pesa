@@ -1,7 +1,7 @@
-import type { PaymentEvent } from '../types/event';
 import type { PesaInstance } from '../pesa';
-import type { CreateOrderPayload, OrderResult } from '../types/order';
 import type { DisbursePayload, DisburseResult } from '../types/disbursement';
+import type { PaymentEvent } from '../types/event';
+import type { CreateOrderPayload, OrderResult } from '../types/order';
 
 /**
  * Context passed to beforeRequest hooks.
@@ -9,9 +9,9 @@ import type { DisbursePayload, DisburseResult } from '../types/disbursement';
  */
 export interface RequestContext {
   operation: 'createOrder' | 'disburse' | 'refund' | 'cancelOrder';
-  payload:   CreateOrderPayload | DisbursePayload | Record<string, unknown>;
-  headers:   Record<string, string>;
-  metadata:  Record<string, unknown>;
+  payload: CreateOrderPayload | DisbursePayload | Record<string, unknown>;
+  headers: Record<string, string>;
+  metadata: Record<string, unknown>;
 }
 
 /**
@@ -19,12 +19,12 @@ export interface RequestContext {
  * Allows plugins to inspect the provider response and decide on retries.
  */
 export interface ResponseContext {
-  operation:  'createOrder' | 'disburse' | 'refund' | 'cancelOrder';
-  payload:    CreateOrderPayload | DisbursePayload | Record<string, unknown>;
-  result:     OrderResult | DisburseResult | Record<string, unknown>;
+  operation: 'createOrder' | 'disburse' | 'refund' | 'cancelOrder';
+  payload: CreateOrderPayload | DisbursePayload | Record<string, unknown>;
+  result: OrderResult | DisburseResult | Record<string, unknown>;
   durationMs: number;
-  retry:      boolean;
-  metadata:   Record<string, unknown>;
+  retry: boolean;
+  metadata: Record<string, unknown>;
 }
 
 /**

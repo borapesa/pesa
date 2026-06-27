@@ -1,19 +1,19 @@
+import { PesaUnsupportedError } from '../errors';
 import type {
-  ProviderName,
+  CancelOrderResult,
   CreateOrderPayload,
-  OrderResult,
-  PaymentStatus,
-  PaymentEvent,
   DisbursePayload,
   DisburseResult,
-  RefundResult,
-  CancelOrderResult,
-  PreviewResult,
-  NameLookupResult,
   ListOrdersParams,
   ListOrdersResult,
+  NameLookupResult,
+  OrderResult,
+  PaymentEvent,
+  PaymentStatus,
+  PreviewResult,
+  ProviderName,
+  RefundResult,
 } from '../types/index';
-import { PesaUnsupportedError } from '../errors';
 
 /**
  * Abstract base class every provider adapter must implement.
@@ -29,14 +29,10 @@ export abstract class BasePaymentProvider {
   // ── Required ────────────────────────────────────────────────────────
 
   /** Initiate a checkout / USSD push / redirect. */
-  abstract createOrder(
-    payload: CreateOrderPayload,
-  ): Promise<OrderResult>;
+  abstract createOrder(payload: CreateOrderPayload): Promise<OrderResult>;
 
   /** Poll or fetch the current payment status for an order. */
-  abstract getPaymentStatus(
-    orderId: string,
-  ): Promise<PaymentStatus>;
+  abstract getPaymentStatus(orderId: string): Promise<PaymentStatus>;
 
   /**
    * Parse + verify an incoming webhook.
@@ -49,9 +45,7 @@ export abstract class BasePaymentProvider {
   ): Promise<PaymentEvent>;
 
   /** B2C / wallet-out disbursement. */
-  abstract disburse(
-    payload: DisbursePayload,
-  ): Promise<DisburseResult>;
+  abstract disburse(payload: DisbursePayload): Promise<DisburseResult>;
 
   // ── Optional — throw PesaUnsupportedError by default ─────────────────
 

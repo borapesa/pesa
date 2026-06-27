@@ -1,6 +1,6 @@
-import type { CreateOrderPayload, OrderResult, PaymentStatus } from './types/order';
-import type { PaymentEventType, PaymentEvent } from './types/event';
 import { PesaWebhookError } from './errors';
+import type { PaymentEvent, PaymentEventType } from './types/event';
+import type { CreateOrderPayload, OrderResult, PaymentStatus } from './types/order';
 import { validateCreateOrderPayload } from './validate';
 
 /**
@@ -39,7 +39,9 @@ export interface PesaHandlerTarget {
  * // Raw Bun
  * Bun.serve({ fetch: pesa.mount });
  */
-export function createPesaHandler(pesa: PesaHandlerTarget): (request: Request) => Promise<Response> {
+export function createPesaHandler(
+  pesa: PesaHandlerTarget,
+): (request: Request) => Promise<Response> {
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
     const path = url.pathname;
