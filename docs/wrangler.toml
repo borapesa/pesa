@@ -1,0 +1,8 @@
+name = "borapesa-docs"
+pages_build_output_dir = "out"
+compatibility_date = "2025-06-27"
+
+[env.production]
+routes = [
+  { pattern = "borapesa.dev", custom_domain = true }
+]
