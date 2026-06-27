@@ -6,15 +6,7 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   trailingSlash: true,
-  // Rewrites for llms.txt / *.md endpoints
-  async rewrites() {
-    return [
-      {
-        source: '/docs/:path*.md',
-        destination: '/llms.mdx/docs/:path*',
-      },
-    ];
-  },
+  output: 'export' as const,
 };
 
 export default withMDX(config);
