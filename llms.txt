@@ -1,0 +1,52 @@
+# Bora Pesa — AI-readable documentation index
+
+## Project
+
+Bora Pesa is a unified, open-source TypeScript payments SDK for Tanzania. Single factory function (`createPesa()`), provider adapters, plugin system, event store, framework adapters. MIT licensed. Inspired by better-auth.
+
+- Repository: https://github.com/borapesa/pesa
+- Package: `@borapesa/pesa` (core) + `@borapesa/*` adapters
+- Website: https://borapesa.dev
+
+## Core documentation
+
+- [README.md](README.md) — project overview, design principles, quick start
+- [AI_USAGE_POLICY.md](AI_USAGE_POLICY.md) — AI assistance disclosure policy for contributors
+- [CLAUDE.md](CLAUDE.md) — project map and architecture (for AI agents)
+- [borapesa-technical-spec-v1.md](../borapesa-technical-spec-v1.md) — full technical specification v1.0
+
+## Packages
+
+### @borapesa/pesa (core)
+- [README.md](packages/pesa/README.md) — install, quick start, exports
+- [src/pesa.ts](packages/pesa/src/pesa.ts) — `createPesa()` factory + `PesaInstance` interface
+- [src/handler.ts](packages/pesa/src/handler.ts) — generic HTTP mount handler
+- [src/providers/base.ts](packages/pesa/src/providers/base.ts) — `BasePaymentProvider` abstract class
+- [src/plugins/retry.ts](packages/pesa/src/plugins/retry.ts) — retry plugin (exponential/linear/fixed backoff)
+- [src/plugins/idempotency.ts](packages/pesa/src/plugins/idempotency.ts) — idempotency plugin
+- [src/plugins/logging.ts](packages/pesa/src/plugins/logging.ts) — logging plugin with PII redaction
+- [src/plugins/webhook-verify.ts](packages/pesa/src/plugins/webhook-verify.ts) — webhook secret enforcement
+- [src/db/sqlite.ts](packages/pesa/src/db/sqlite.ts) — SQLite event store adapter (default)
+- [src/testing/bogus.ts](packages/pesa/src/testing/bogus.ts) — `BogusPaymentProvider` (test double)
+- [src/errors.ts](packages/pesa/src/errors.ts) — error hierarchy
+- [src/validate.ts](packages/pesa/src/validate.ts) — input validation
+- [src/types/](packages/pesa/src/types/) — all type definitions
+
+### @borapesa/clickpesa
+- [README.md](providers/clickpesa/README.md) — install, supported operations, credentials
+- [src/clickpesa.ts](providers/clickpesa/src/clickpesa.ts) — `ClickPesaProvider` implementation
+
+## Guides
+
+- **Getting started:** See `README.md` at the repo root
+- **Building a provider adapter:** Extend `BasePaymentProvider` (4 required methods: `createOrder`, `getPaymentStatus`, `handleWebhook`, `disburse`)
+- **Adding a framework adapter:** Wrap `pesa.mount` (`(Request) => Response`) for your framework
+- **Writing plugins:** Implement `PesaPlugin` with `beforeRequest`, `afterResponse`, `onPaymentEvent`, or `init` hooks
+
+## Configuration
+
+- `pnpm format` — format all files with Biome
+- `pnpm test` — run all tests
+- `pnpm coverage` — run tests with coverage
+- `pnpm typecheck` — TypeScript type check
+- `pnpm build` — compile all packages

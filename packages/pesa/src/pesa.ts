@@ -27,55 +27,135 @@ import type { RefundResult } from './types/refund';
 import { validateCreateOrderPayload, validateDisbursePayload } from './validate';
 
 /**
- * PesaInstance — the fully configured payments SDK.
+ * Fully configured payments SDK instance — returned by {@link createPesa}.
  *
- * Returned by createPesa(). Provides the runtime API for initiating payments,
- * polling status, handling webhooks, and reacting to events.
+ * ## Core operations
+ *
+ * ```ts
+ * // Initiate a payment
+ * const order = await pesa.createOrder({
+ *   amount:    15000,
+ *   currency:  'TZS',
+ *   reference: 'order_abc',
+ *   customer:  { name: 'Juma Ali', phone: '255712345678' },
+ * });
+ *
+ * // Poll status
+ * const status = await pesa.getPaymentStatus(order.orderId);
+ *
+ * // Send money to a customer
+ * await pesa.disburse({
+ *   amount:    50000,
+ *   currency:  'TZS',
+ *   reference: 'payout_xyz',
+ *   recipient: { phone: '255754321098', network: 'MPESA' },
+ * });
+ * ```
+ *
+ * ## Events
+ *
+ * ```ts
+ * // React to verified + persisted payment events
+ * pesa.on('PAYMENT_SUCCESS', async (event) => {
+ *   await db.orders.update({
+ *     id:     event.reference,
+ *     status: 'paid',
+ *   });
+ * });
+ * ```
+ *
+ * ## Optional operations (feature detection)
+ *
+ * ```ts
+ * // Not all providers support these. Check before calling.
+ * if (pesa.refund)     await pesa.refund('order_123', 5000);
+ * if (pesa.previewOrder)  await pesa.previewOrder({ ... });
+ * if (pesa.validateCredentials) await pesa.validateCredentials();
+ * ```
+ *
+ * ## HTTP mount
+ *
+ * ```ts
+ * // Mount directly on any fetch-compatible server
+ * Bun.serve({ fetch: pesa.mount });
+ * // Or use a framework adapter:
+ * // - @borapesa/nextjs → export const { GET, POST } = toNextJsHandler(pesa);
+ * // - @borapesa/express → app.use('/api/pesa', toPesaRouter(pesa));
+ * ```
  */
 export interface PesaInstance {
   // ── Operations ──────────────────────────────────────────────────────
 
-  /** Initiate a checkout / USSD push / redirect. */
+  /**
+   * Initiate a checkout / USSD push / redirect.
+   *
+   * The SDK validates the payload before forwarding to the provider
+   * (amount > 0, valid MSISDN phone, non-empty reference).
+   *
+   * @throws {PesaValidationError} if the payload is invalid.
+   * @throws {PesaNetworkError} if the provider is unreachable.
+   * @throws {PesaProviderError} if the provider returns an error.
+   */
   createOrder(payload: CreateOrderPayload): Promise<OrderResult>;
 
-  /** Poll or fetch current payment status. */
+  /**
+   * Poll or fetch current payment status.
+   *
+   * @throws {PesaNetworkError} if the provider is unreachable.
+   * @throws {PesaProviderError} if the provider returns an error.
+   */
   getPaymentStatus(orderId: string): Promise<PaymentStatus>;
 
-  /** B2C / wallet-out disbursement. */
+  /**
+   * B2C / wallet-out disbursement.
+   *
+   * The SDK validates the payload before forwarding to the provider.
+   *
+   * @throws {PesaValidationError} if the payload is invalid.
+   * @throws {PesaNetworkError} if the provider is unreachable.
+   * @throws {PesaProviderError} if the provider returns an error.
+   */
   disburse(payload: DisbursePayload): Promise<DisburseResult>;
 
   /**
    * Handle an incoming webhook. Called by framework adapters.
-   * Verifies, normalizes, persists, and emits the event.
+   *
+   * Flow: provider verification → UUID assignment → plugin hooks
+   * → event persistence → user-registered handler emission.
    */
   handleWebhook(rawBody: string | Buffer, headers: Record<string, string>): Promise<void>;
 
   // ── Event emitter ───────────────────────────────────────────────────
 
-  /** React to a verified + persisted payment event. */
+  /**
+   * Register a handler for a payment event type.
+   *
+   * Handlers fire **after** the event is verified and persisted.
+   * Multiple handlers can be registered for the same event type.
+   */
   on(event: PaymentEventType, handler: (event: PaymentEvent) => Promise<void> | void): void;
 
   // ── Optional operations (delegated to provider) ─────────────────────
 
-  /** Refund a completed payment. Throws PesaUnsupportedError if the provider doesn't support it. */
+  /** Refund a completed payment. `undefined` if unsupported. */
   refund?(orderId: string, amount?: number): Promise<RefundResult>;
 
-  /** Cancel a pending or in-progress order. */
+  /** Cancel a pending or in-progress order. `undefined` if unsupported. */
   cancelOrder?(orderId: string): Promise<CancelOrderResult>;
 
-  /** Validate that provider credentials are correct (health check). */
+  /** Validate provider credentials (health check). `undefined` if unsupported. */
   validateCredentials?(): Promise<{ valid: boolean; message?: string }>;
 
-  /** Preview / dry-run a payment. */
+  /** Preview / dry-run a payment. `undefined` if unsupported. */
   previewOrder?(payload: CreateOrderPayload): Promise<PreviewResult>;
 
-  /** Preview / dry-run a disbursement. */
+  /** Preview / dry-run a disbursement. `undefined` if unsupported. */
   previewDisburse?(payload: DisbursePayload): Promise<PreviewResult>;
 
-  /** Resolve the account holder name. */
+  /** Resolve account holder name. `undefined` if unsupported. */
   getNameLookup?(phoneOrAccount: string): Promise<NameLookupResult>;
 
-  /** List payment orders. */
+  /** List payment orders. `undefined` if unsupported. */
   listOrders?(params: ListOrdersParams): Promise<ListOrdersResult>;
 
   // ── Internals (exposed for framework adapters) ──────────────────────
@@ -83,26 +163,59 @@ export interface PesaInstance {
   /** The underlying provider adapter. */
   provider: BasePaymentProvider;
 
-  /** Mount handler — generic fetch-like interface for any framework. */
+  /**
+   * Generic fetch-like handler. Works with any framework.
+   *
+   * Routes: `POST /order`, `GET /status/:orderId`, `POST /webhook`.
+   */
   mount: (request: Request) => Promise<Response>;
 }
 
 /**
- * createPesa() — the single entry point for the entire SDK.
+ * The single entry point for the entire Bora Pesa SDK.
  *
- * Mirrors better-auth's betterAuth() factory. Returns a fully configured
- * pesa instance with all provider logic, plugins, and event store wired together.
+ * Returns a fully configured {@link PesaInstance} with provider logic,
+ * plugin pipeline, and event store wired together.
+ *
+ * @param config — only `provider` is required. Everything else has
+ * sensible defaults (SQLite event store, no plugins, webhook secret
+ * from `BORAPESA_WEBHOOK_SECRET` environment variable).
  *
  * @example
+ * **Production setup with Selcom**
  * ```ts
  * import { createPesa } from '@borapesa/pesa';
  * import { SelcomPaymentProvider } from '@borapesa/selcom';
+ * import { retryPlugin, loggingPlugin } from '@borapesa/pesa/plugins';
  *
  * const pesa = createPesa({
- *   provider: new SelcomPaymentProvider({ ... }),
- *   plugins: [retryPlugin(), loggingPlugin()],
+ *   provider: new SelcomPaymentProvider({
+ *     apiKey:    process.env.SELCOM_API_KEY!,
+ *     apiSecret: process.env.SELCOM_API_SECRET!,
+ *     vendor:    process.env.SELCOM_VENDOR!,
+ *     env:       'live',
+ *   }),
+ *   plugins: [
+ *     retryPlugin({ maxAttempts: 3, backoff: 'exponential' }),
+ *     loggingPlugin({ level: 'info' }),
+ *   ],
  * });
  * ```
+ *
+ * **Local development with BogusProvider**
+ * ```ts
+ * import { createPesa } from '@borapesa/pesa';
+ * import { BogusPaymentProvider } from '@borapesa/pesa/testing';
+ *
+ * const pesa = createPesa({
+ *   provider: new BogusPaymentProvider({
+ *     defaultBehavior: 'success',
+ *     delay: 200,
+ *   }),
+ * });
+ * ```
+ *
+ * @throws {Error} if the provider is invalid or plugin init fails.
  */
 export function createPesa(config: PesaConfig): PesaInstance {
   const provider = config.provider;
