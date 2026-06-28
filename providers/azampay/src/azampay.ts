@@ -197,12 +197,7 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
     path: string,
     body?: Record<string, unknown>,
   ): Promise<T> {
-    const headers = body
-      ? await this.checkoutHeaders()
-      : {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${await this.authenticate()}`,
-        };
+    const headers = await this.checkoutHeaders();
 
     const res = await fetch(`${this.config.checkoutBaseUrl}${path}`, {
       method,
@@ -225,25 +220,24 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
   // ── Required Methods ─────────────────────────────────────────────
 
   async createOrder(payload: CreateOrderPayload): Promise<OrderResult> {
+    const provider = this.mapNetwork(payload.customer.phone);
+
     const body: Record<string, unknown> = {
       accountNumber: payload.customer.phone,
       amount: String(payload.amount),
       currency: payload.currency,
       externalId: payload.reference,
-      provider: this.mapNetwork(payload.customer.phone),
+      provider,
     };
 
-    const provider = this.mapNetwork(payload.customer.phone);
     const res = await this.request<CheckoutResult>('POST', '/azampay/mno/checkout', body);
-
-    // Track provider for status queries
-    this.orderProviders.set(res.transactionId, provider);
 
     return {
       orderId: res.transactionId,
       reference: payload.reference,
       status: res.success ? 'PENDING' : 'FAILED',
-      raw: res,
+      ussdPushInitiated: res.success,
+      raw: { ...res, _providerName: provider },
     };
   }
 
@@ -257,15 +251,23 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
     return 'Azampesa'; // fallback to Azam's own wallet
   }
 
-  // Track which provider was used per order for status queries.
-  private orderProviders = new Map<string, string>();
-
-  async getPaymentStatus(orderId: string): Promise<PaymentStatus> {
+  /**
+   * Query payment status.
+   *
+   * @param orderId - The AzamPay transaction ID returned by {@link createOrder}.
+   * @param providerName - The mobile money provider used for the order
+   *   (e.g. `'Mpesa'`, `'Tigo'`, `'Airtel'`).  Defaults to `'Azampesa'`.
+   *   **Tip:** `createOrder` returns this in `raw._providerName`.
+   */
+  async getPaymentStatus(orderId: string, providerName = 'Azampesa'): Promise<PaymentStatus> {
     try {
-      const bankName = this.orderProviders.get(orderId) ?? 'Azampesa';
+      const qs = new URLSearchParams({
+        pgReferenceId: orderId,
+        bankName: providerName,
+      });
       const res = await this.request<TransactionStatusResponse>(
         'GET',
-        `/api/v1/azampay/transactionstatus?pgReferenceId=${encodeURIComponent(orderId)}&bankName=${bankName}`,
+        `/api/v1/azampay/transactionstatus?${qs.toString()}`,
       );
 
       if (!res.success) return 'FAILED';
@@ -301,7 +303,7 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
         countryCode: 'TZ',
         fullName: payload.recipient.name ?? '',
         bankName: payload.recipient.accountNumber
-          ? (payload.recipient.bic ?? 'NMB')
+          ? payload.recipient.bic
           : this.mapNetwork(payload.recipient.phone ?? ''),
         accountNumber: payload.recipient.accountNumber ?? payload.recipient.phone ?? '',
         currency: 'TZS',
@@ -325,6 +327,15 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
     };
   }
 
+  /**
+   * Parse an incoming AzamPay webhook.
+   *
+   * **Webhook signing:** AzamPay does not cryptographically sign webhook
+   * payloads. Verification relies on the SDK-level
+   * `BORAPESA_WEBHOOK_SECRET` plugin (see {@link webhookVerifyPlugin}).
+   * The `headers` parameter is accepted for interface conformance but is
+   * ignored — there is no signature to verify.
+   */
   async handleWebhook(
     rawBody: string | Buffer,
     _headers: Record<string, string>,
@@ -374,8 +385,6 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
       return { found: false, accountNumber: phoneOrAccount };
     }
   }
-
-  // ── Optional Methods ─────────────────────────────────────────────
 
   async validateCredentials(): Promise<{ valid: boolean; message?: string }> {
     try {
