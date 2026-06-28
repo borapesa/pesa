@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: 'Bora Pesa',
   description: 'The unified, open-source payments SDK for Tanzania — one API, all providers.',
   openGraph: {
+    siteName: 'Bora Pesa',
     title: 'Bora Pesa',
     description: 'The unified, open-source payments SDK for Tanzania — one API, all providers.',
     images: [{ url: '/og', width: 1200, height: 630 }],

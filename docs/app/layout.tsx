@@ -6,6 +6,7 @@ import 'fumadocs-ui/style.css';
 import './global.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://borapesa.dev'),
   icons: {
     icon: '/borapesa.svg',
     shortcut: '/borapesa.svg',
