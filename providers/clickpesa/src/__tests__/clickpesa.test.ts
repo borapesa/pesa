@@ -736,4 +736,163 @@ describe('ClickPesaProvider', () => {
     expect(result.orders).toHaveLength(1);
     expect(result.total).toBe(1); // falls back to items.length
   });
+
+  // ── BillPay ──────────────────────────────────────────────────────
+
+  it('creates an order control number', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      billPayNumber: '55042914871931',
+      billAmount: 90900,
+      billDescription: 'Water Bill - July 2026',
+      billPaymentMode: 'EXACT',
+    });
+
+    const cn = await provider.createOrderControlNumber({
+      amount: 90900,
+      description: 'Water Bill - July 2026',
+      paymentMode: 'EXACT',
+    });
+
+    expect(cn.billPayNumber).toBe('55042914871931');
+    expect(cn.billAmount).toBe(90900);
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('create-order-control-number');
+  });
+
+  it('creates a customer control number', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      billPayNumber: '55042914871932',
+      billCustomerName: 'Jane Doe',
+      billAmount: 50000,
+    });
+
+    const cn = await provider.createCustomerControlNumber({
+      customerName: 'Jane Doe',
+      phone: '255712345678',
+      amount: 50000,
+    });
+
+    expect(cn.billCustomerName).toBe('Jane Doe');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.customerName).toBe('Jane Doe');
+    expect(body.customerPhone).toBe('255712345678');
+  });
+
+  it('rejects customer control number without phone or email', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+
+    await expect(
+      provider.createCustomerControlNumber({ customerName: 'No Contact' }),
+    ).rejects.toThrow();
+  });
+
+  it('gets BillPay details', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      billPayNumber: '55042914871931',
+      billStatus: 'ACTIVE',
+      billAmount: 90900,
+    });
+
+    const details = await provider.getBillPayDetails('55042914871931');
+    expect(details.billStatus).toBe('ACTIVE');
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('55042914871931');
+  });
+
+  it('updates a BillPay reference', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      billPayNumber: '55042914871931',
+      billAmount: 120000,
+      billStatus: 'ACTIVE',
+    });
+
+    const updated = await provider.updateBillPayReference('55042914871931', {
+      amount: 120000,
+      status: 'ACTIVE',
+    });
+
+    expect(updated.billAmount).toBe(120000);
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.billAmount).toBe(120000);
+    expect(body.billStatus).toBe('ACTIVE');
+  });
+
+  it('convenience wrapper updateBillPayStatus sets status', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      billPayNumber: '55042914871931',
+      billStatus: 'INACTIVE',
+    });
+
+    const result = await provider.updateBillPayStatus('55042914871931', 'INACTIVE');
+    expect(result.billStatus).toBe('INACTIVE');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.billStatus).toBe('INACTIVE');
+  });
 });

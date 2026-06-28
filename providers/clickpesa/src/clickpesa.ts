@@ -119,6 +119,29 @@ interface PreviewResponse {
   message?: string;
 }
 
+// ── BillPay types ────────────────────────────────────────────────────
+
+/** A single BillPay control number. */
+export interface BillPayControlNumber {
+  billPayNumber: string;
+  billReference?: string;
+  billAmount?: number;
+  billDescription?: string;
+  billPaymentMode?: string;
+  billCustomerName?: string;
+  billStatus?: string;
+  billCustomerPhone?: string;
+  billCustomerEmail?: string;
+}
+
+/** Result from a bulk BillPay creation. */
+export interface BillPayBulkResult {
+  billPayNumbers: BillPayControlNumber[];
+  created: number;
+  failed: number;
+  errors?: Array<{ billReference?: string; error: string }>;
+}
+
 // ── Provider ────────────────────────────────────────────────────────
 
 export class ClickPesaProvider extends BasePaymentProvider {
@@ -693,6 +716,128 @@ export class ClickPesaProvider extends BasePaymentProvider {
       })),
       total: data.totalCount ?? items.length,
     };
+  }
+
+  // ── BillPay ─────────────────────────────────────────────────────────
+
+  /**
+   * Generate a one-time order control number.
+   *
+   * Customers pay this number via mobile money, SIM banking, or CRDB Wakala.
+   * All fields are optional — the API auto-generates a reference if omitted.
+   */
+  async createOrderControlNumber(params?: {
+    billReference?: string;
+    amount?: number;
+    description?: string;
+    paymentMode?: 'ALLOW_PARTIAL_AND_OVER_PAYMENT' | 'EXACT';
+  }): Promise<BillPayControlNumber> {
+    const payload: Record<string, unknown> = {};
+    if (params?.billReference) payload.billReference = params.billReference;
+    if (params?.amount !== undefined) payload.billAmount = params.amount;
+    if (params?.description) payload.billDescription = params.description;
+    if (params?.paymentMode) payload.billPaymentMode = params.paymentMode;
+    return this.request<BillPayControlNumber>(
+      '/third-parties/billpay/create-order-control-number',
+      { method: 'POST', body: JSON.stringify(payload) },
+    );
+  }
+
+  /**
+   * Generate a persistent control number tied to a specific customer.
+   * At least one of `phone` or `email` must be supplied.
+   */
+  async createCustomerControlNumber(params: {
+    customerName: string;
+    phone?: string;
+    email?: string;
+    billReference?: string;
+    amount?: number;
+    description?: string;
+    paymentMode?: 'ALLOW_PARTIAL_AND_OVER_PAYMENT' | 'EXACT';
+  }): Promise<BillPayControlNumber> {
+    if (!params.phone && !params.email) {
+      throw new PesaProviderError('At least one of phone or email must be provided', 400);
+    }
+    const payload: Record<string, unknown> = { customerName: params.customerName };
+    if (params.phone) payload.customerPhone = params.phone;
+    if (params.email) payload.customerEmail = params.email;
+    if (params.billReference) payload.billReference = params.billReference;
+    if (params.amount !== undefined) payload.billAmount = params.amount;
+    if (params.description) payload.billDescription = params.description;
+    if (params.paymentMode) payload.billPaymentMode = params.paymentMode;
+    return this.request<BillPayControlNumber>(
+      '/third-parties/billpay/create-customer-control-number',
+      { method: 'POST', body: JSON.stringify(payload) },
+    );
+  }
+
+  /** Bulk-create up to 50 order control numbers in a single request. */
+  async bulkCreateOrderNumbers(
+    controlNumbers: Array<Record<string, unknown>>,
+  ): Promise<BillPayBulkResult> {
+    if (!controlNumbers.length || controlNumbers.length > 50) {
+      throw new PesaProviderError('bulkCreateOrderNumbers requires 1–50 items', 400);
+    }
+    return this.request<BillPayBulkResult>(
+      '/third-parties/billpay/bulk-create-order-control-numbers',
+      { method: 'POST', body: JSON.stringify({ controlNumbers }) },
+    );
+  }
+
+  /** Bulk-create up to 50 customer control numbers in a single request. */
+  async bulkCreateCustomerNumbers(
+    controlNumbers: Array<Record<string, unknown>>,
+  ): Promise<BillPayBulkResult> {
+    if (!controlNumbers.length || controlNumbers.length > 50) {
+      throw new PesaProviderError('bulkCreateCustomerNumbers requires 1–50 items', 400);
+    }
+    return this.request<BillPayBulkResult>(
+      '/third-parties/billpay/bulk-create-customer-control-numbers',
+      { method: 'POST', body: JSON.stringify({ controlNumbers }) },
+    );
+  }
+
+  /** Query details of a specific control number. */
+  async getBillPayDetails(billPayNumber: string): Promise<BillPayControlNumber> {
+    return this.request<BillPayControlNumber>(
+      `/third-parties/billpay/${encodeURIComponent(billPayNumber)}`,
+    );
+  }
+
+  /**
+   * Partially update a BillPay reference. At least one field besides
+   * `billPayNumber` must be provided.
+   */
+  async updateBillPayReference(
+    billPayNumber: string,
+    params: {
+      amount?: number;
+      description?: string;
+      status?: 'ACTIVE' | 'INACTIVE';
+      paymentMode?: 'ALLOW_PARTIAL_AND_OVER_PAYMENT' | 'EXACT';
+    },
+  ): Promise<BillPayControlNumber> {
+    const data: Record<string, unknown> = {};
+    if (params.amount !== undefined) data.billAmount = params.amount;
+    if (params.description) data.billDescription = params.description;
+    if (params.status) data.billStatus = params.status;
+    if (params.paymentMode) data.billPaymentMode = params.paymentMode;
+    if (Object.keys(data).length === 0) {
+      throw new PesaProviderError('At least one field must be provided to update', 400);
+    }
+    return this.request<BillPayControlNumber>(
+      `/third-parties/billpay/${encodeURIComponent(billPayNumber)}`,
+      { method: 'PATCH', body: JSON.stringify(data) },
+    );
+  }
+
+  /** Activate or deactivate a control number (convenience wrapper). */
+  async updateBillPayStatus(
+    billPayNumber: string,
+    status: 'ACTIVE' | 'INACTIVE',
+  ): Promise<BillPayControlNumber> {
+    return this.updateBillPayReference(billPayNumber, { status });
   }
 
   // refund and cancelOrder are not supported by ClickPesa's current API.
