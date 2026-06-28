@@ -33,7 +33,7 @@ console.log(order.status); // 'SUCCESS'
 | Path | Contents |
 |---|---|
 | `@borapesa/pesa` | `createPesa`, `BasePaymentProvider`, `PesaError` hierarchy, all types |
-| `@borapesa/pesa/plugins` | `retryPlugin`, `idempotencyPlugin`, `loggingPlugin`, `webhookVerifyPlugin` |
+| `@borapesa/pesa/plugins` | `retryPlugin`, `idempotencyPlugin`, `loggingPlugin` |
 | `@borapesa/pesa/testing` | `BogusPaymentProvider` |
 
 ## Documentation

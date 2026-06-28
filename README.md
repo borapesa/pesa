@@ -18,10 +18,10 @@ import { SelcomPaymentProvider } from '@borapesa/selcom'
 
 export const pesa = createPesa({
   provider: new SelcomPaymentProvider({
-    apiKey: process.env.SELCOM_API_KEY!,
+    apiKey:    process.env.SELCOM_API_KEY!,
     apiSecret: process.env.SELCOM_API_SECRET!,
-    vendor: process.env.SELCOM_VENDOR!,
-    env: 'sandbox',
+    vendor:    process.env.SELCOM_VENDOR!,
+    pin:       process.env.SELCOM_PIN!,
   }),
 })
 
