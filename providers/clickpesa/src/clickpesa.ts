@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import type {
   CreateOrderPayload,
   DisbursePayload,
@@ -17,17 +18,43 @@ import {
 } from '@borapesa/pesa';
 import { v4 as uuid } from 'uuid';
 
+// ── Constants ───────────────────────────────────────────────────────
+
+const SANDBOX_URL = 'https://api-sandbox.clickpesa.com';
+const PRODUCTION_URL = 'https://api.clickpesa.com';
+
 // ── Config ──────────────────────────────────────────────────────────
 
 export interface ClickPesaConfig {
-  /** Base URL (default: https://api.clickpesa.com). */
-  baseUrl: string;
   /** Client ID from ClickPesa dashboard. */
   clientId: string;
   /** API key from ClickPesa dashboard. */
   apiKey: string;
-  /** Optional checksum secret for webhook verification. */
-  checksumSecret?: string;
+  /**
+   * Optional checksum key for HMAC-SHA256 signing.
+   *
+   * When set, every POST/PUT/PATCH request body is automatically signed
+   * with a `checksum` field.  Also used for verifying incoming webhook
+   * signatures.  Generate this in the ClickPesa dashboard.
+   */
+  checksumKey?: string;
+  /**
+   * Target the sandbox environment.
+   *
+   * When `true`, defaults to `https://api-sandbox.clickpesa.com`.
+   * When `false` (default), uses `https://api.clickpesa.com`.
+   *
+   * Set `baseUrl` directly to override both — useful for local proxies
+   * or staging environments.
+   */
+  sandbox?: boolean;
+  /**
+   * Explicit base URL override.
+   *
+   * Takes precedence over `sandbox`.  You rarely need this — prefer
+   * `sandbox: true` for testing and `sandbox: false` for production.
+   */
+  baseUrl?: string;
 }
 
 // ── Response types (ClickPesa-specific shapes) ──────────────────────
@@ -84,17 +111,19 @@ interface PreviewResponse {
 export class ClickPesaProvider extends BasePaymentProvider {
   readonly name: ProviderName = 'clickpesa';
 
-  private config: ClickPesaConfig;
+  private config: Required<Pick<ClickPesaConfig, 'clientId' | 'apiKey'>> &
+    Pick<ClickPesaConfig, 'checksumKey'> & { baseUrl: string };
   private token: string | null = null;
   private tokenExpiresAt = 0;
 
   constructor(config: ClickPesaConfig) {
     super();
+    const baseUrl = config.baseUrl ?? (config.sandbox ? SANDBOX_URL : PRODUCTION_URL);
     this.config = {
-      baseUrl: config.baseUrl.replace(/\/$/, ''),
+      baseUrl: baseUrl.replace(/\/$/, ''),
       clientId: config.clientId,
       apiKey: config.apiKey,
-      checksumSecret: config.checksumSecret,
+      checksumKey: config.checksumKey,
     };
   }
 
@@ -156,15 +185,32 @@ export class ClickPesaProvider extends BasePaymentProvider {
   // ── Helpers ──────────────────────────────────────────────────────
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
+    const method = (init.method ?? 'GET').toUpperCase();
     const headers = await this.authHeaders();
+
+    // Build a copy so the caller's body is never mutated (matches Python SDK pattern).
+    let body = init.body as string | undefined;
+    if (init.body && this.config.checksumKey && ['POST', 'PUT', 'PATCH'].includes(method)) {
+      const payload = JSON.parse(init.body as string) as Record<string, unknown>;
+      if (!('checksum' in payload)) {
+        payload.checksum = this.createChecksum(payload);
+        body = JSON.stringify(payload);
+      }
+    }
+
     const res = await fetch(`${this.config.baseUrl}${path}`, {
       ...init,
+      method,
+      body,
       headers: { ...headers, ...(init.headers as Record<string, string> | undefined) },
     });
 
     if (!res.ok) {
-      const body = await res.text();
-      throw new PesaProviderError(`ClickPesa ${path} failed: ${res.status} ${body}`, res.status);
+      const bodyText = await res.text();
+      throw new PesaProviderError(
+        `ClickPesa ${path} failed: ${res.status} ${bodyText}`,
+        res.status,
+      );
     }
 
     const json = (await res.json()) as T | ClickPesaApiError;
@@ -288,10 +334,9 @@ export class ClickPesaProvider extends BasePaymentProvider {
   ): Promise<PaymentEvent> {
     const body = typeof rawBody === 'string' ? rawBody : rawBody.toString();
 
-    // Verify checksum signature if secret is configured
-    if (this.config.checksumSecret) {
+    // Verify checksum signature if key is configured
+    if (this.config.checksumKey) {
       const checksum = headers['x-clickpesa-checksum'] || headers.checksum || '';
-      // ClickPesa uses HMAC-SHA256 for webhook verification
       const verified = await this.verifyChecksum(body, checksum);
       if (!verified) {
         throw new PesaProviderError('ClickPesa webhook checksum verification failed', 401);
@@ -456,26 +501,63 @@ export class ClickPesaProvider extends BasePaymentProvider {
 
   // ── Private helpers ──────────────────────────────────────────────
 
+  /**
+   * Create a ClickPesa-compatible HMAC-SHA256 checksum for a request body.
+   *
+   * Algorithm (per ClickPesa docs):
+   * 1. Canonicalize — recursively sort all object keys alphabetically.
+   * 2. Serialize to compact JSON (no whitespace).
+   * 3. Return hex digest of HMAC-SHA256(key, json_string).
+   *
+   * @internal Exposed for testing via the provider instance.
+   */
+  createChecksum(payload: Record<string, unknown>): string {
+    if (!this.config.checksumKey) return '';
+
+    const canonicalize = (obj: unknown): unknown => {
+      if (obj === null || typeof obj !== 'object') return obj;
+      if (Array.isArray(obj)) return obj.map(canonicalize);
+      const sorted: Record<string, unknown> = {};
+      for (const key of Object.keys(obj as Record<string, unknown>).sort()) {
+        sorted[key] = canonicalize((obj as Record<string, unknown>)[key]);
+      }
+      return sorted;
+    };
+
+    const canonical = canonicalize(payload);
+    const json = JSON.stringify(canonical);
+
+    const hmac = createHmac('sha256', this.config.checksumKey);
+    return hmac.update(json).digest('hex');
+  }
+
   private async verifyChecksum(body: string, checksum: string): Promise<boolean> {
-    if (!this.config.checksumSecret) return true;
+    if (!this.config.checksumKey) return true;
 
     try {
       const encoder = new TextEncoder();
       const key = await crypto.subtle.importKey(
         'raw',
-        encoder.encode(this.config.checksumSecret),
+        encoder.encode(this.config.checksumKey),
         { name: 'HMAC', hash: 'SHA-256' },
         false,
         ['sign'],
       );
       const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
-      const hex = new Uint8Array(signature);
-      let computed = '';
-      for (let i = 0; i < hex.length; i++) {
-        computed += hex[i]?.toString(16).padStart(2, '0') ?? '00';
-      }
+      const hex = Array.from(new Uint8Array(signature))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
 
-      return computed === checksum.toLowerCase();
+      // Constant-time comparison — prevents timing-based side-channel attacks.
+      // XOR-based: every byte is compared regardless of mismatch position.
+      const expected = hex;
+      const received = checksum.toLowerCase();
+      if (expected.length !== received.length) return false;
+      let diff = 0;
+      for (let i = 0; i < expected.length; i++) {
+        diff |= expected.charCodeAt(i) ^ received.charCodeAt(i);
+      }
+      return diff === 0;
     } catch (err) {
       // Fail closed — if Web Crypto is unavailable, reject the webhook
       // rather than silently accepting it. Requires Node 19+ or a polyfill.

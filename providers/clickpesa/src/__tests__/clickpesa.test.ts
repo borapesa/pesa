@@ -256,4 +256,161 @@ describe('ClickPesaProvider', () => {
     expect(result.status).toBe('SUCCESS');
     expect(result.disbursementId).toBe('disb_1');
   });
+
+  // ── Sandbox flag ─────────────────────────────────────────────────
+
+  it('sandbox: true defaults to sandbox base URL', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      sandbox: true,
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('api-sandbox.clickpesa.com');
+  });
+
+  it('sandbox: false defaults to production base URL', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      sandbox: false,
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('api.clickpesa.com');
+  });
+
+  it('no sandbox flag defaults to production', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('api.clickpesa.com');
+  });
+
+  it('baseUrl overrides sandbox flag', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      sandbox: true,
+      baseUrl: 'https://custom-proxy.example.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('custom-proxy.example.com');
+  });
+
+  // ── Checksum creation ────────────────────────────────────────────
+
+  it('createChecksum returns empty string when no checksumKey', () => {
+    const provider = new ClickPesaProvider({
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    expect(provider.createChecksum({ amount: '5000' })).toBe('');
+  });
+
+  it('createChecksum canonicalizes and signs payload', () => {
+    const provider = new ClickPesaProvider({
+      clientId: 'test-client',
+      apiKey: 'test-key',
+      checksumKey: 'sk_test_abc123',
+    });
+
+    // Same payload, different key order — must produce the same checksum
+    const a = provider.createChecksum({ amount: '5000', currency: 'TZS', phone: '255712345678' });
+    const b = provider.createChecksum({ phone: '255712345678', currency: 'TZS', amount: '5000' });
+    expect(a).toBe(b);
+    expect(a.length).toBe(64); // SHA-256 hex is 64 chars
+  });
+
+  it('createChecksum produces different values for different payloads', () => {
+    const provider = new ClickPesaProvider({
+      clientId: 'test-client',
+      apiKey: 'test-key',
+      checksumKey: 'sk_test_abc123',
+    });
+
+    const a = provider.createChecksum({ amount: '5000' });
+    const b = provider.createChecksum({ amount: '10000' });
+    expect(a).not.toBe(b);
+  });
+
+  it('injects checksum into POST request body', async () => {
+    // Auth
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+      checksumKey: 'sk_test_abc123',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      id: 'txn_cs',
+      status: 'SUCCESS',
+      channel: 'USSD',
+      orderReference: 'order_cs',
+      collectedAmount: '15000',
+      collectedCurrency: 'TZS',
+    });
+
+    await provider.createOrder({
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'order_cs',
+      customer,
+    });
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.checksum).toBeDefined();
+    expect(body.checksum).toHaveLength(64); // SHA-256 hex
+  });
+
+  it('does not inject checksum on GET requests', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+      checksumKey: 'sk_test_abc123',
+    });
+    await provider.validateCredentials!();
+
+    // validateCredentials uses POST for auth, then we check
+    // getPaymentStatus is a GET — no body, so no checksum injection.
+    vi.clearAllMocks();
+    mockFetch([
+      {
+        id: 't1',
+        status: 'SUCCESS',
+        orderReference: 'r1',
+        collectedAmount: 5000,
+        collectedCurrency: 'TZS',
+      },
+    ]);
+
+    await provider.getPaymentStatus('r1');
+    const init = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1] as
+      | RequestInit
+      | undefined;
+    // GET request should not have a body with checksum
+    expect(init?.body).toBeUndefined();
+  });
 });
