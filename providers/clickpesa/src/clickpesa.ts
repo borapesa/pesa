@@ -688,6 +688,31 @@ export class ClickPesaProvider extends BasePaymentProvider {
     return data;
   }
 
+  /**
+   * Fetch a transaction statement for a given currency.
+   *
+   * @param currency — `"TZS"` (default) or `"USD"`.
+   * @param startDate — Optional filter: start date.
+   * @param endDate — Optional filter: end date.
+   */
+  async getAccountStatement(
+    currency = 'TZS',
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
+    accountDetails: Record<string, unknown>;
+    transactions: Array<Record<string, unknown>>;
+  }> {
+    const params: Record<string, string> = { currency };
+    if (startDate) params.startDate = startDate.toISOString().slice(0, 10);
+    if (endDate) params.endDate = endDate.toISOString().slice(0, 10);
+    const qs = new URLSearchParams(params).toString();
+    return this.request<{
+      accountDetails: Record<string, unknown>;
+      transactions: Array<Record<string, unknown>>;
+    }>(`/third-parties/account/statement?${qs}`);
+  }
+
   async getNameLookup(phoneOrAccount: string): Promise<NameLookupResult> {
     try {
       const res = await this.request<{

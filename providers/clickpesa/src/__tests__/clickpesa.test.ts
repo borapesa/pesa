@@ -965,4 +965,40 @@ describe('ClickPesaProvider', () => {
     expect(url).toContain('source=USD');
     expect(url).toContain('target=TZS');
   });
+
+  // ── Account statement ────────────────────────────────────────────
+
+  it('fetches account statement with date filters', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      accountDetails: { name: 'Bora Pesa Ltd', currency: 'TZS' },
+      transactions: [
+        { id: 'tx1', amount: 5000, type: 'CREDIT', date: '2026-06-01' },
+        { id: 'tx2', amount: 15000, type: 'DEBIT', date: '2026-06-15' },
+      ],
+    });
+
+    const statement = await provider.getAccountStatement!(
+      'TZS',
+      new Date('2026-06-01'),
+      new Date('2026-06-30'),
+    );
+
+    expect(statement.transactions).toHaveLength(2);
+    expect(statement.accountDetails.name).toBe('Bora Pesa Ltd');
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('currency=TZS');
+    expect(url).toContain('startDate=2026-06-01');
+    expect(url).toContain('endDate=2026-06-30');
+  });
 });
