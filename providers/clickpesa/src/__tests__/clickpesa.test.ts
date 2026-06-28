@@ -339,6 +339,103 @@ describe('ClickPesaProvider', () => {
     expect(result.disbursementId).toBe('disb_1');
   });
 
+  it('routes to bank payout when accountNumber is present', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      id: 'bank_disb_1',
+      status: 'SUCCESS',
+      orderReference: 'bank_payout_001',
+    });
+
+    const result = await provider.disburse({
+      amount: 500000,
+      currency: 'TZS',
+      reference: 'bank_payout_001',
+      recipient: {
+        name: 'Jane Doe',
+        accountNumber: '1234567890',
+        bic: 'EQBLTZTZ',
+        transferType: 'RTGS',
+      },
+    });
+
+    expect(result.status).toBe('SUCCESS');
+    expect(result.disbursementId).toBe('bank_disb_1');
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('create-bank-payout');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.accountNumber).toBe('1234567890');
+    expect(body.bic).toBe('EQBLTZTZ');
+    expect(body.transferType).toBe('RTGS');
+  });
+
+  it('defaults bank transferType to ACH', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      id: 'bank_disb_2',
+      status: 'PROCESSING',
+      orderReference: 'bank_payout_002',
+    });
+
+    await provider.disburse({
+      amount: 100000,
+      currency: 'TZS',
+      reference: 'bank_payout_002',
+      recipient: { name: 'Jane', accountNumber: '0987654321', bic: 'NMBTZTZ' },
+    });
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.transferType).toBe('ACH');
+  });
+
+  it('fetches list of supported banks', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch([
+      {
+        name: 'EQUITY BANK TANZANIA LIMITED',
+        bic: 'EQBLTZTZ',
+        value: 'equity_bank_tanzania_limited',
+      },
+      { name: 'NMB BANK', bic: 'NMBTZTZ', value: 'nmb_bank' },
+    ]);
+
+    const banks = await provider.getBanks!();
+    expect(banks).toHaveLength(2);
+    expect(banks[0]?.bic).toBe('EQBLTZTZ');
+  });
+
   // ── Sandbox flag ─────────────────────────────────────────────────
 
   it('sandbox: true defaults to sandbox base URL', async () => {

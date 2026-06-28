@@ -19,11 +19,19 @@ import type { Currency, TZSAmount } from './core';
  */
 export type MobileNetwork = 'MPESA' | 'TIGOPESA' | 'AIRTELMONEY' | 'HALOPESA' | 'AZAMPESA';
 
+/** Transfer type for bank payouts. */
+export type BankTransferType = 'ACH' | 'RTGS';
+
 /**
  * Payload for sending a disbursement (B2C / wallet-out).
  *
  * Pass this to {@link PesaInstance.disburse} to send money to a
- * customer's mobile money wallet.
+ * customer's mobile money wallet or bank account.
+ *
+ * **Mobile money** — provide `recipient.phone`.
+ * **Bank payout** — provide `recipient.accountNumber` + `recipient.bic`.
+ *
+ * @since 0.1.0 (mobile money), 0.2.0 (bank payout fields)
  */
 export interface DisbursePayload {
   /** Amount in whole TZS. Must be > 0. */
@@ -33,11 +41,17 @@ export interface DisbursePayload {
   /** Recipient details. */
   recipient: {
     /** Mobile money phone number in MSISDN format: `255XXXXXXXXX`. */
-    phone: string;
+    phone?: string;
     /** Recipient's full name (optional but recommended). */
     name?: string;
     /** Target mobile money network. */
     network?: MobileNetwork;
+    /** Bank account number (for bank payouts). */
+    accountNumber?: string;
+    /** Bank identifier code — fetch via `getBanks()` on supported providers. */
+    bic?: string;
+    /** Transfer type for bank payouts: `"ACH"` (default) or `"RTGS"`. */
+    transferType?: BankTransferType;
   };
   /** Your internal reference. Must be unique. */
   reference: string;

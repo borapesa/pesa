@@ -434,6 +434,10 @@ export class ClickPesaProvider extends BasePaymentProvider {
   }
 
   async disburse(payload: DisbursePayload): Promise<DisburseResult> {
+    // Route by recipient: bank account → bank payout, phone → mobile money
+    if (payload.recipient.accountNumber) {
+      return this.createBankPayout(payload);
+    }
     const res = await this.request<MobilePayoutResponse>(
       '/third-parties/disbursement/mobile-money-payout',
       {
@@ -445,6 +449,38 @@ export class ClickPesaProvider extends BasePaymentProvider {
           phoneNumber: payload.recipient.phone,
           recipientName: payload.recipient.name,
           remarks: payload.remarks,
+        }),
+      },
+    );
+
+    const statusMap: Record<string, DisburseResult['status']> = {
+      SUCCESS: 'SUCCESS',
+      PROCESSING: 'QUEUED',
+      PENDING: 'QUEUED',
+      FAILED: 'FAILED',
+    };
+
+    return {
+      disbursementId: res.id,
+      reference: payload.reference,
+      status: statusMap[res.status] ?? 'QUEUED',
+    };
+  }
+
+  private async createBankPayout(payload: DisbursePayload): Promise<DisburseResult> {
+    const res = await this.request<MobilePayoutResponse>(
+      '/third-parties/payouts/create-bank-payout',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: payload.amount,
+          accountNumber: payload.recipient.accountNumber,
+          accountName: payload.recipient.name,
+          bic: payload.recipient.bic,
+          orderReference: payload.reference,
+          transferType: payload.recipient.transferType ?? 'ACH',
+          currency: payload.currency,
+          accountCurrency: 'TZS',
         }),
       },
     );
@@ -537,6 +573,9 @@ export class ClickPesaProvider extends BasePaymentProvider {
   }
 
   async previewDisburse(payload: DisbursePayload): Promise<PreviewResult> {
+    if (payload.recipient.accountNumber) {
+      return this.previewBankPayout(payload);
+    }
     const res = await this.request<PreviewResponse>(
       '/third-parties/disbursement/mobile-money-payout/preview',
       {
@@ -555,6 +594,35 @@ export class ClickPesaProvider extends BasePaymentProvider {
       message: res.message,
       raw: res,
     };
+  }
+
+  private async previewBankPayout(payload: DisbursePayload): Promise<PreviewResult> {
+    const res = await this.request<PreviewResponse>('/third-parties/payouts/preview-bank-payout', {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: payload.amount,
+        accountNumber: payload.recipient.accountNumber,
+        bic: payload.recipient.bic,
+        orderReference: payload.reference,
+        transferType: payload.recipient.transferType ?? 'ACH',
+        currency: payload.currency,
+        accountCurrency: 'TZS',
+      }),
+    });
+
+    return {
+      valid: res.valid !== false,
+      fee: res.fee,
+      message: res.message,
+      raw: res,
+    };
+  }
+
+  async getBanks(): Promise<Array<{ name: string; bic: string; value?: string }>> {
+    const data = await this.request<Array<{ name: string; bic: string; value?: string }>>(
+      '/third-parties/list/banks',
+    );
+    return data;
   }
 
   async getNameLookup(phoneOrAccount: string): Promise<NameLookupResult> {

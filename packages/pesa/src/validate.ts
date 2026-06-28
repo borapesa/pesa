@@ -63,6 +63,19 @@ export function validateDisbursePayload(payload: DisbursePayload): void {
   if (!payload.recipient) {
     throw new PesaValidationError('recipient is required');
   }
+
+  // Bank payout: accountNumber + bic required
+  if (payload.recipient.accountNumber) {
+    if (!payload.recipient.accountNumber || payload.recipient.accountNumber.trim().length === 0) {
+      throw new PesaValidationError('recipient.accountNumber must not be empty');
+    }
+    if (!payload.recipient.bic || payload.recipient.bic.trim().length === 0) {
+      throw new PesaValidationError('recipient.bic is required for bank payouts');
+    }
+    return;
+  }
+
+  // Mobile money: phone required
   if (!payload.recipient.phone || !MSISDN_RE.test(payload.recipient.phone)) {
     throw new PesaValidationError(
       `recipient.phone must be in MSISDN format (255XXXXXXXXX), got: ${payload.recipient.phone}`,
