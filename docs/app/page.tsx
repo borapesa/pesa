@@ -63,6 +63,7 @@ export default function Page() {
           background: var(--color-fd-secondary); border-radius: 0.5rem;
           padding: 0.625rem 1rem; font-size: 0.875rem; font-family: monospace;
           margin-bottom: 1rem;
+          max-width: calc(100vw - 2rem); overflow-x: auto;
         }
         .install-block code { font-size: inherit; }
       `}</style>
@@ -78,7 +79,16 @@ export default function Page() {
           gap: '1rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '0.5rem',
+          }}
+        >
           <img src="/borapesa.svg" alt="Bora Pesa" width={64} height={64} />
           <h1
             style={{
@@ -104,11 +114,19 @@ export default function Page() {
         </p>
 
         <div className="install-block">
-          <code>pnpm add @borapesa/pesa</code>
+          <code style={{ overflowWrap: 'anywhere' }}>pnpm add @borapesa/pesa</code>
           <CopyButton text="pnpm add @borapesa/pesa" />
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '3rem',
+          }}
+        >
           <Link href="/docs" className="btn-primary">
             Read the docs
           </Link>
@@ -128,6 +146,8 @@ export default function Page() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: '1.5rem',
             maxWidth: '56rem',
+            width: '100%',
+            boxSizing: 'border-box',
             textAlign: 'left',
             marginBottom: '4rem',
           }}
