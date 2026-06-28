@@ -3,22 +3,29 @@ title: "Type Alias: Currency"
 ---
 
 ```ts
-type Currency = "TZS";
+type Currency = "TZS" | "USD";
 ```
 
-Defined in: [packages/pesa/src/types/core.ts:44](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/types/core.ts#L44)
+Defined in: [packages/pesa/src/types/core.ts:46](https://github.com/borapesa/pesa/blob/baa979229e12b20ccff1c404ff60a42226191e08/packages/pesa/src/types/core.ts#L46)
 
 Supported currencies.
 
-Currently TZS-only. Multi-currency support will be added post-v1.0
-based on community demand. Extensible via module augmentation.
+Extensible via module augmentation.
+
+## Since
+
+0.1.0 — `'TZS'`
+
+## Since
+
+0.2.0 — `'USD'` (card payments via ClickPesa)
 
 ## Example
 
 ```ts
-// Future expansion (post-v1):
+// Future expansion:
 // module augmentation in your app to add KES
 declare module '@borapesa/pesa' {
-  export type Currency = 'TZS' | 'KES';
+  export type Currency = 'TZS' | 'USD' | 'KES';
 }
 ```

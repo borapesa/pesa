@@ -10,3 +10,4 @@ Bora Pesa API reference — auto-generated from JSDoc.
 | --- | --- |
 | [@borapesa/pesa](pesa) | Core — types, factory, event store, plugins |
 | [@borapesa/clickpesa](clickpesa) | ClickPesa provider adapter |
+| [@borapesa/selcom](selcom) | Selcom provider adapter |

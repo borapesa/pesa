@@ -2,7 +2,7 @@
 title: "Class: PesaError"
 ---
 
-Defined in: [packages/pesa/src/errors.ts:9](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/errors.ts#L9)
+Defined in: [packages/pesa/src/errors.ts:9](https://github.com/borapesa/pesa/blob/baa979229e12b20ccff1c404ff60a42226191e08/packages/pesa/src/errors.ts#L9)
 
 Base error class for all Bora Pesa errors.
 
@@ -26,7 +26,7 @@ Base error class for all Bora Pesa errors.
 new PesaError(message, code): PesaError;
 ```
 
-Defined in: [packages/pesa/src/errors.ts:10](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/errors.ts#L10)
+Defined in: [packages/pesa/src/errors.ts:10](https://github.com/borapesa/pesa/blob/baa979229e12b20ccff1c404ff60a42226191e08/packages/pesa/src/errors.ts#L10)
 
 #### Parameters
 
@@ -49,4 +49,4 @@ Error.constructor
 
 | Property | Modifier | Type | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="code"></a> `code` | `readonly` | `string` | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/f7ac5b710a6494b0dc7ab450f968667f9f555cf6/packages/pesa/src/errors.ts#L12) |
+| <a id="code"></a> `code` | `readonly` | `string` | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/baa979229e12b20ccff1c404ff60a42226191e08/packages/pesa/src/errors.ts#L12) |

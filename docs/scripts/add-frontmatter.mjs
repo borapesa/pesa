@@ -15,6 +15,11 @@ const PACKAGES = [
     name: '@borapesa/clickpesa',
     desc: 'ClickPesa provider adapter',
   },
+  {
+    dir: 'providers/selcom/src',
+    name: '@borapesa/selcom',
+    desc: 'Selcom provider adapter',
+  },
 ];
 
 // ── Step 1: Flatten directory structure ─────────────────────────

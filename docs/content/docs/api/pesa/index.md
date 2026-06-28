@@ -19,6 +19,8 @@ title: "@borapesa/pesa"
 
 | Interface | Description |
 | ------ | ------ |
+| [BalanceEntry](interfaces/BalanceEntry) | A single currency balance entry. |
+| [BalanceResult](interfaces/BalanceResult) | Result of a balance inquiry — returns available balances across all active currencies in the provider's wallet. |
 | [CancelOrderPayload](interfaces/CancelOrderPayload) | Payload for cancelling a pending or in-progress order. |
 | [CancelOrderResult](interfaces/CancelOrderResult) | Result returned after cancelling a payment order. |
 | [CreateOrderPayload](interfaces/CreateOrderPayload) | Payload for creating a payment order. |
