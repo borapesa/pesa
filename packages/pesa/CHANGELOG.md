@@ -1,5 +1,39 @@
 # @borapesa/pesa
 
+## 0.2.0
+
+### Minor Changes
+
+**New types**
+
+- `BalanceResult` / `BalanceEntry` — per-currency wallet balances
+- `BankTransferType` — `'ACH' | 'RTGS'`
+- `Currency` extended to `'TZS' | 'USD'`
+
+**New optional method**
+
+- `getBalance()` added to `BasePaymentProvider` — throws `PesaUnsupportedError` by default, feature-detectable via `'getBalance' in pesa`
+
+**Disbursement**
+
+- `DisbursePayload.recipient` now accepts optional bank fields: `accountNumber`, `bic`, `transferType`
+- Bank payout validation: `accountNumber` + `bic` required when `phone` is absent
+
+**Bug fixes**
+
+- **P0 (critical):** Retry plugin's `maxAttempts` was silently ignored by the core's hardcoded `MAX_RETRIES = 3`. The retry plugin is now the sole authority on retry decisions.
+- Retry plugin documentation no longer claims to retry on network errors (only status-based retries for AMBIGUOUS/PROCESSING/QUEUED)
+
+**Removed**
+
+- `webhookVerifyPlugin` — was a no-op that only checked an env var. Guard folded into `createPesa()` directly.
+
+**Internal**
+
+- `withRetry()` helper extracted — eliminates duplicate retry loop between `createOrder` and `disburse`
+- `idempotencyPlugin()` signature simplified (unused `options` param removed)
+- Circuit breaker test added for infinite-retry safety cap (100 iterations)
+
 ## 0.1.1
 
 ### Patch Changes

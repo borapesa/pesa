@@ -1,5 +1,57 @@
 # @borapesa/clickpesa
 
+## 0.2.0
+
+### Minor Changes
+
+The ClickPesa provider now covers the complete API surface.
+
+**Payments**
+
+- USSD push (TZS mobile money)
+- Card payments (USD, VISA/Mastercard)
+- Hosted checkout links
+- Order listing with date filtering and pagination
+
+**Disbursements**
+
+- Mobile money payout
+- Bank payout (ACH/RTGS) with `getBanks()` for BIC lookup
+- Hosted payout links (recipient enters own payment details)
+
+**Account & Utilities**
+
+- `getAccountStatement()` — transaction history with date filters
+- `getExchangeRates()` — currency conversion rates
+
+**BillPay**
+
+- `createOrderControlNumber()` / `createCustomerControlNumber()`
+- `bulkCreateOrderNumbers()` / `bulkCreateCustomerNumbers()` (up to 50 per request)
+- `getBillPayDetails()` / `updateBillPayReference()` / `updateBillPayStatus()`
+
+**Security**
+
+- Sandbox mode (`sandbox: true` — auto-targets `api-sandbox.clickpesa.com`)
+- Request checksum signing: HMAC-SHA256 auto-injected on all POST/PUT/PATCH requests
+- Constant-time webhook signature verification
+
+**Bug fixes**
+
+- `getPaymentStatus` now uses `this.request()` — auto-refreshes bearer tokens on 401 instead of failing
+- Webhook event type dispatch replaced with a deterministic lookup table (was order-sensitive if/else chain)
+- Duplicate `statusMap` literal in two disbursement methods extracted to `static PAYOUT_STATUS_MAP`
+
+**Internal**
+
+- Checksum methods unified on `crypto.createHmac` (dropped dual Web Crypto + Node crypto split)
+- `WEBHOOK_EVENT_MAP` moved to module-level constant (was recreated on every webhook call)
+
+### Patch Changes
+
+- Updated dependencies
+  - @borapesa/pesa@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes
