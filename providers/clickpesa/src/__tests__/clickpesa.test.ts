@@ -895,4 +895,74 @@ describe('ClickPesaProvider', () => {
     );
     expect(body.billStatus).toBe('INACTIVE');
   });
+
+  // ── Hosted payout links ──────────────────────────────────────────
+
+  it('generates a hosted payout link', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      payoutLink: 'https://pay.clickpesa.com/payout/abc123',
+      clientId: 'client_1',
+    });
+
+    const link = await provider.generatePayoutLink!(50000, 'payout_link_001');
+    expect(link).toBe('https://pay.clickpesa.com/payout/abc123');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.amount).toBe('50000');
+    expect(body.orderReference).toBe('payout_link_001');
+  });
+
+  // ── Exchange rates ───────────────────────────────────────────────
+
+  it('fetches all exchange rates', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch([
+      { source: 'USD', target: 'TZS', rate: 2510, date: '2026-06-28' },
+      { source: 'EUR', target: 'TZS', rate: 2750, date: '2026-06-28' },
+    ]);
+
+    const rates = await provider.getExchangeRates!();
+    expect(rates).toHaveLength(2);
+    expect(rates[0]?.source).toBe('USD');
+    expect(rates[0]?.rate).toBe(2510);
+  });
+
+  it('filters exchange rates by source and target', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch([{ source: 'USD', target: 'TZS', rate: 2510, date: '2026-06-28' }]);
+
+    await provider.getExchangeRates!('USD', 'TZS');
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('source=USD');
+    expect(url).toContain('target=TZS');
+  });
 });

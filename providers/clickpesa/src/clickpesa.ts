@@ -641,6 +641,46 @@ export class ClickPesaProvider extends BasePaymentProvider {
     };
   }
 
+  /**
+   * Generate a hosted payout link.
+   *
+   * The recipient uses the link to enter their own bank or mobile-money
+   * details — you don't need to collect them yourself.  Returns a URL
+   * you redirect the recipient to.
+   */
+  async generatePayoutLink(amount: number, orderId: string): Promise<string> {
+    const res = await this.request<{ payoutLink: string; clientId: string }>(
+      '/third-parties/payout-link/generate-payout-url',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: String(amount),
+          orderReference: orderId,
+        }),
+      },
+    );
+    return res.payoutLink;
+  }
+
+  /**
+   * Fetch the latest exchange rates.
+   *
+   * @param source — ISO 4217 source currency (e.g. `"USD"`). All sources when omitted.
+   * @param target — ISO 4217 target currency (e.g. `"TZS"`). All targets when omitted.
+   */
+  async getExchangeRates(
+    source?: string,
+    target?: string,
+  ): Promise<Array<{ source: string; target: string; rate: number; date: string }>> {
+    const params: Record<string, string> = {};
+    if (source) params.source = source;
+    if (target) params.target = target;
+    const qs = new URLSearchParams(params).toString();
+    return this.request<Array<{ source: string; target: string; rate: number; date: string }>>(
+      `/third-parties/exchange-rates/all${qs ? `?${qs}` : ''}`,
+    );
+  }
+
   async getBanks(): Promise<Array<{ name: string; bic: string; value?: string }>> {
     const data = await this.request<Array<{ name: string; bic: string; value?: string }>>(
       '/third-parties/list/banks',
