@@ -74,12 +74,11 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
    * Build Selcom HMAC-SHA256 digest for a request.
    *
    * Selcom requires every request to carry an HMAC signature of the
-   * payload fields.  The signing string is:
-   *   timestamp=<ts>&field1=val1&field2=val2...
-   * with fields in the exact order of `signedFields`.
+   * payload fields.  The timestamp used in the signing string must
+   * match the `Timestamp` header exactly — generate it once and
+   * thread it through.
    */
-  private sign(signedFields: string[], params: Record<string, unknown>): string {
-    const ts = this.timestamp();
+  private sign(signedFields: string[], params: Record<string, unknown>, ts: string): string {
     const parts = [`timestamp=${ts}`];
     for (const field of signedFields) {
       const val = params[field];
@@ -110,12 +109,13 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
     signedFields: string[],
     params: Record<string, unknown>,
   ): Record<string, string> {
+    const ts = this.timestamp();
     return {
       'Content-Type': 'application/json',
       Authorization: `SELCOM ${Buffer.from(this.config.apiKey).toString('base64')}`,
       'Digest-Method': 'HS256',
-      Digest: this.sign(signedFields, params),
-      Timestamp: this.timestamp(),
+      Digest: this.sign(signedFields, params, ts),
+      Timestamp: ts,
       'Signed-Fields': signedFields.join(','),
     };
   }
@@ -196,6 +196,9 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
     if (res.resultcode === '000') return;
     if (res.resultcode === '999') {
       throw new PesaProviderError(`Selcom: AMBIGUOUS — ${res.message}`, 502, res);
+    }
+    if (res.resultcode === '111' || res.resultcode === '927') {
+      throw new PesaProviderError(`Selcom: INPROGRESS — ${res.message}`, 502, res);
     }
     throw new PesaProviderError(`Selcom error [${res.resultcode}]: ${res.message}`, 502, res);
   }
@@ -448,7 +451,8 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
     const signedFieldsStr = headers['signed-fields'] || headers['Signed-Fields'] || '';
     if (receivedDigest && signedFieldsStr) {
       const signedFields = signedFieldsStr.split(',').map((f) => f.trim());
-      const computed = this.sign(signedFields, payload as Record<string, unknown>);
+      const webhookTs = headers['timestamp'] || headers['Timestamp'] || '';
+      const computed = this.sign(signedFields, payload as Record<string, unknown>, webhookTs);
       // Constant-time comparison
       const a = Buffer.from(computed);
       const b = Buffer.from(receivedDigest);

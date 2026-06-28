@@ -475,4 +475,114 @@ describe('SelcomPaymentProvider', () => {
     const creds = await provider.validateCredentials!();
     expect(creds.valid).toBe(true);
   });
+
+  // ── Edge cases ───────────────────────────────────────────────────
+
+  it('throws on Selcom error response', async () => {
+    mockFetch({
+      transid: 'err_001',
+      reference: 'ref_err',
+      resultcode: '403',
+      result: 'FAIL',
+      message: 'Insufficient float balance',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    await expect(
+      provider.disburse({
+        amount: 50000,
+        currency: 'TZS',
+        reference: 'payout_fail',
+        recipient: { phone: '255754321098' },
+      }),
+    ).rejects.toThrow('Insufficient float balance');
+  });
+
+  it('handles INPROGRESS status', async () => {
+    mockFetch({
+      transid: 'txn_ip',
+      reference: 'ref_ip',
+      resultcode: '111',
+      result: 'INPROGRESS',
+      message: 'Transaction in progress',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    await expect(
+      provider.disburse({
+        amount: 50000,
+        currency: 'TZS',
+        reference: 'payout_ip',
+        recipient: { phone: '255754321098' },
+      }),
+    ).rejects.toThrow('Selcom: INPROGRESS');
+  });
+
+  it('handles AMBIGUOUS status', async () => {
+    mockFetch({
+      transid: 'txn_amb',
+      reference: 'ref_amb',
+      resultcode: '999',
+      result: 'AMBIGUOUS',
+      message: 'Transaction outcome unknown',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    await expect(provider.getPaymentStatus('order_amb')).rejects.toThrow('Selcom: AMBIGUOUS');
+  });
+
+  it('returns PAYMENT_PENDING for non-terminal webhook status', async () => {
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const body = JSON.stringify({
+      transid: 'T123',
+      order_id: 'order_pend',
+      result: 'INPROGRESS',
+      resultcode: '111',
+      payment_status: 'INPROGRESS',
+    });
+
+    const event = await provider.handleWebhook(body, {});
+    expect(event.type).toBe('PAYMENT_PENDING');
+  });
+
+  it('throws on network failure', async () => {
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('ECONNREFUSED'));
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    await expect(provider.getPaymentStatus('order_net')).rejects.toThrow(/Selcom|PesaNetworkError/);
+  });
 });
