@@ -278,23 +278,34 @@ export function createPesa(config: PesaConfig): PesaInstance {
 
   // ── Operations ──────────────────────────────────────────────────────
 
-  const MAX_RETRIES = 3;
+  // Circuit breaker — safety cap so a misconfigured plugin never loops
+  // forever.  The retry plugin's `maxAttempts` is the real limit; this
+  // only exists as a backstop.
+  const MAX_SAFETY_ITERATIONS = 100;
 
-  async function createOrder(payload: CreateOrderPayload): Promise<OrderResult> {
-    // Validate before any plugin or provider interaction
-    validateCreateOrderPayload(payload);
+  /**
+   * Run an operation through the plugin pipeline with retry.
+   *
+   * The retry plugin (if configured) owns the retry decision — the core
+   * loop simply respects `rCtx.retry`.  This means `retryPlugin({ maxAttempts: 5 })`
+   * actually gives 5 retries; the core does not override it.
+   */
+  async function withRetry<T>(
+    operation: RequestContext['operation'],
+    payload: CreateOrderPayload | DisbursePayload,
+    execute: (ctx: RequestContext) => Promise<T>,
+  ): Promise<T> {
+    const ctx = await runBeforeHooks(operation, payload);
 
-    // Run beforeRequest hooks once — retries skip this to avoid
-    // idempotency plugin conflicts and redundant logging.
-    const ctx = await runBeforeHooks('createOrder', payload);
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    for (let i = 0; i < MAX_SAFETY_ITERATIONS; i++) {
       try {
-        // Pass ctx.payload so plugin modifications reach the provider
-        const result = await provider.createOrder(ctx.payload as CreateOrderPayload);
-        const rCtx = await runAfterHooks(ctx, result);
+        const result = await execute(ctx);
+        const rCtx = await runAfterHooks(
+          ctx,
+          result as OrderResult | DisburseResult | Record<string, unknown>,
+        );
 
-        if (!rCtx.retry || attempt >= MAX_RETRIES) return result;
+        if (!rCtx.retry) return result;
 
         const delay = (rCtx.metadata.retryDelayMs as number) ?? 1000;
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -303,8 +314,14 @@ export function createPesa(config: PesaConfig): PesaInstance {
       }
     }
 
-    // Should be unreachable — fallback for type safety
-    throw new PesaProviderError('createOrder: max retries exceeded', 502);
+    throw new PesaProviderError(`${operation}: retry circuit breaker triggered`, 502);
+  }
+
+  async function createOrder(payload: CreateOrderPayload): Promise<OrderResult> {
+    validateCreateOrderPayload(payload);
+    return withRetry('createOrder', payload, (ctx) =>
+      provider.createOrder(ctx.payload as CreateOrderPayload),
+    );
   }
 
   async function getPaymentStatus(orderId: string): Promise<PaymentStatus> {
@@ -317,23 +334,9 @@ export function createPesa(config: PesaConfig): PesaInstance {
 
   async function disburse(payload: DisbursePayload): Promise<DisburseResult> {
     validateDisbursePayload(payload);
-    const ctx = await runBeforeHooks('disburse', payload);
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        const result = await provider.disburse(ctx.payload as DisbursePayload);
-        const rCtx = await runAfterHooks(ctx, result);
-
-        if (!rCtx.retry || attempt >= MAX_RETRIES) return result;
-
-        const delay = (rCtx.metadata.retryDelayMs as number) ?? 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      } catch (err) {
-        throw normalizeError(err);
-      }
-    }
-
-    throw new PesaProviderError('disburse: max retries exceeded', 502);
+    return withRetry('disburse', payload, (ctx) =>
+      provider.disburse(ctx.payload as DisbursePayload),
+    );
   }
 
   async function handleWebhook(
