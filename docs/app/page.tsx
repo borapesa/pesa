@@ -95,6 +95,7 @@ export default function Page() {
 
         .provider-card {
           display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
           padding: 1.5rem 2rem; border-radius: 0.5rem;
           border: 1px solid var(--color-fd-border); text-decoration: none;
           color: var(--color-fd-foreground);
@@ -104,7 +105,7 @@ export default function Page() {
         .provider-card img { display: block; }
 
         @media (max-width: 640px) {
-          .providers-grid { gap: 1rem; }
+          .providers-grid { gap: 1rem; justify-content: flex-start; }
           .provider-card { padding: 1rem 1.25rem; }
         }
       `}</style>
@@ -231,10 +232,12 @@ export default function Page() {
           className="providers-grid"
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
             justifyContent: 'center',
             gap: '2rem',
             marginBottom: '4rem',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: '0.5rem',
           }}
         >
           {providers.map(({ name, logo, href, bg, size, px }) => (
