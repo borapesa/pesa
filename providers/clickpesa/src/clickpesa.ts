@@ -103,6 +103,16 @@ interface MobilePayoutResponse {
   orderReference: string;
 }
 
+interface CardPaymentResponse {
+  cardPaymentLink: string;
+  clientId: string;
+}
+
+interface CardPreviewResponse {
+  success: boolean;
+  activeMethods?: Array<{ name: string; status: string }>;
+}
+
 interface PreviewResponse {
   valid: boolean;
   fee?: number;
@@ -247,8 +257,13 @@ export class ClickPesaProvider extends BasePaymentProvider {
   // ── Required Methods ─────────────────────────────────────────────
 
   async createOrder(payload: CreateOrderPayload): Promise<OrderResult> {
-    // ClickPesa supports USSD push (mobile money) and hosted checkout link.
-    // We use USSD push by default. If redirectUrl is provided, generate a checkout link.
+    // Route by currency:
+    //   TZS + redirectUrl → hosted checkout link
+    //   TZS (no redirect) → USSD push (mobile money)
+    //   USD               → card payment (VISA / Mastercard)
+    if ((payload.currency as string) === 'USD') {
+      return this.createCardPayment(payload);
+    }
     if (payload.redirectUrl) {
       return this.createCheckout(payload);
     }
@@ -304,6 +319,33 @@ export class ClickPesaProvider extends BasePaymentProvider {
       reference: payload.reference,
       status: 'PENDING',
       checkoutUrl: res.checkoutLink,
+    };
+  }
+
+  private async createCardPayment(payload: CreateOrderPayload): Promise<OrderResult> {
+    const customer: Record<string, string> = {};
+    if (payload.customer.name) customer.fullName = payload.customer.name;
+    if (payload.customer.email) customer.email = payload.customer.email;
+    if (payload.customer.phone) customer.phoneNumber = payload.customer.phone;
+
+    const res = await this.request<CardPaymentResponse>(
+      '/third-parties/payments/initiate-card-payment',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: String(payload.amount),
+          currency: 'USD',
+          orderReference: payload.reference,
+          customer,
+        }),
+      },
+    );
+
+    return {
+      orderId: payload.reference,
+      reference: payload.reference,
+      status: 'PENDING',
+      checkoutUrl: res.cardPaymentLink,
     };
   }
 
@@ -448,6 +490,9 @@ export class ClickPesaProvider extends BasePaymentProvider {
   }
 
   async previewOrder(payload: CreateOrderPayload): Promise<PreviewResult> {
+    if ((payload.currency as string) === 'USD') {
+      return this.previewCard(payload);
+    }
     const res = await this.request<PreviewResponse>(
       '/third-parties/payments/preview-ussd-push-request',
       {
@@ -464,6 +509,29 @@ export class ClickPesaProvider extends BasePaymentProvider {
       valid: res.valid !== false,
       fee: res.fee,
       message: res.message,
+      raw: res,
+    };
+  }
+
+  private async previewCard(payload: CreateOrderPayload): Promise<PreviewResult> {
+    const res = await this.request<CardPreviewResponse>(
+      '/third-parties/payments/preview-card-payment',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: String(payload.amount),
+          currency: 'USD',
+          orderReference: payload.reference,
+        }),
+      },
+    );
+
+    return {
+      valid: res.success !== false && (res.activeMethods?.length ?? 0) > 0,
+      message:
+        res.activeMethods && res.activeMethods.length > 0
+          ? `Available: ${res.activeMethods.map((m) => m.name).join(', ')}`
+          : 'No card methods available',
       raw: res,
     };
   }

@@ -130,6 +130,88 @@ describe('ClickPesaProvider', () => {
     expect(url).toContain('generate-checkout-link');
   });
 
+  it('routes USD currency to card payment', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      cardPaymentLink: 'https://pay.clickpesa.com/card/xyz',
+      clientId: 'client_1',
+    });
+
+    const order = await provider.createOrder({
+      amount: 50,
+      currency: 'USD' as 'TZS',
+      reference: 'card_001',
+      customer: { name: 'Juma Ali', phone: '255712345678', email: 'juma@example.com' },
+    });
+
+    expect(order.checkoutUrl).toBe('https://pay.clickpesa.com/card/xyz');
+    expect(order.status).toBe('PENDING');
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('initiate-card-payment');
+  });
+
+  it('previews card payment methods for USD', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      activeMethods: [
+        { name: 'VISA', status: 'AVAILABLE' },
+        { name: 'MASTER CARD', status: 'AVAILABLE' },
+      ],
+    });
+
+    const preview = await provider.previewOrder!({
+      amount: 50,
+      currency: 'USD' as 'TZS',
+      reference: 'card_pre_001',
+      customer: { name: 'Juma', phone: '255712345678' },
+    });
+
+    expect(preview.valid).toBe(true);
+    expect(preview.message).toContain('VISA');
+    expect(preview.message).toContain('MASTER CARD');
+  });
+
+  it('reports invalid when no card methods available', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({ success: true, activeMethods: [] });
+
+    const preview = await provider.previewOrder!({
+      amount: 50,
+      currency: 'USD' as 'TZS',
+      reference: 'card_pre_002',
+      customer: { name: 'Juma', phone: '255712345678' },
+    });
+
+    expect(preview.valid).toBe(false);
+  });
+
   // ── getPaymentStatus ────────────────────────────────────────────
 
   it('normalizes SETTLED to SUCCESS', async () => {
