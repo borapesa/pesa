@@ -142,6 +142,15 @@ export interface BillPayBulkResult {
   errors?: Array<{ billReference?: string; error: string }>;
 }
 
+// ── Webhook event dispatch ───────────────────────────────────────────
+
+const WEBHOOK_EVENT_MAP: Record<string, (s: string) => PaymentEvent['type']> = {
+  'PAYMENT RECEIVED': (s) => (s === 'SUCCESS' ? 'PAYMENT_SUCCESS' : 'PAYMENT_PENDING'),
+  'PAYOUT INITIATED': (s) => (s === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED'),
+  'PAYOUT REFUNDED': (s) => (s === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED'),
+  'PAYMENT FAILED': () => 'PAYMENT_FAILED',
+};
+
 // ── Provider ────────────────────────────────────────────────────────
 
 export class ClickPesaProvider extends BasePaymentProvider {
@@ -433,16 +442,8 @@ export class ClickPesaProvider extends BasePaymentProvider {
     const amount = Number(data?.collectedAmount ?? data?.amount ?? 0);
     const currency = (data?.collectedCurrency as string) ?? (data?.currency as string) ?? 'TZS';
 
-    // Deterministic event lookup — no order-sensitive conditionals that
-    // silently change behaviour when reordered.
-    const EVENT_MAP: Record<string, (s: string) => PaymentEvent['type']> = {
-      'PAYMENT RECEIVED': (s) => (s === 'SUCCESS' ? 'PAYMENT_SUCCESS' : 'PAYMENT_PENDING'),
-      'PAYOUT INITIATED': (s) => (s === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED'),
-      'PAYOUT REFUNDED': (s) => (s === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED'),
-      'PAYMENT FAILED': () => 'PAYMENT_FAILED',
-    };
     const type: PaymentEvent['type'] = event
-      ? (EVENT_MAP[event]?.(status as string) ??
+      ? (WEBHOOK_EVENT_MAP[event]?.(status as string) ??
         (status === 'FAILED' ? 'PAYMENT_FAILED' : 'PAYMENT_PENDING'))
       : status === 'FAILED'
         ? 'PAYMENT_FAILED'

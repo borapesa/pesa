@@ -429,6 +429,36 @@ describe('createPesa() factory', () => {
         }),
       ).rejects.toThrow(PesaProviderError);
     });
+
+    it('circuit breaker fires when retry plugin never gives up', async () => {
+      const pesa = createPesa({
+        provider: new BogusPaymentProvider({
+          delay: 0,
+          defaultBehavior: 'success',
+        }),
+        // Plugin that always sets retry=true regardless of status
+        plugins: [
+          {
+            name: 'infinite-retry',
+            async afterResponse(ctx) {
+              ctx.retry = true;
+              ctx.metadata.retryDelayMs = 0;
+              return ctx;
+            },
+          },
+        ],
+        db,
+      });
+
+      await expect(
+        pesa.createOrder({
+          amount: 1000,
+          currency: 'TZS',
+          reference: 'circuit_breaker',
+          customer,
+        }),
+      ).rejects.toThrow('retry circuit breaker triggered');
+    });
   });
 
   // ── Retry loop: disburse ────────────────────────────────────────

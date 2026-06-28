@@ -12,8 +12,12 @@ interface RetryPluginOptions {
 /**
  * Retry plugin with configurable backoff.
  *
- * Retries on AMBIGUOUS / PROCESSING statuses and network errors.
+ * Retries on AMBIGUOUS / PROCESSING / QUEUED statuses.
  * Works with the idempotencyPlugin to prevent duplicate charges.
+ *
+ * **Note:** Retry only applies to successful HTTP responses with
+ * transient statuses.  Network errors (unreachable host, 5xx) are
+ * thrown immediately — the plugin does not intercept exceptions.
  */
 export function retryPlugin(options: RetryPluginOptions = {}): PesaPlugin {
   const { maxAttempts = 3, backoff = 'exponential', baseDelayMs = 1000 } = options;

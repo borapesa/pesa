@@ -1,18 +1,16 @@
 import type { PesaPlugin, RequestContext } from './types';
 
-interface IdempotencyPluginOptions {
-  /** Storage for idempotency keys (default: 'memory'). */
-  store?: 'memory';
-}
-
 /**
  * Idempotency plugin — prevents duplicate charges on network retries.
  *
  * Attaches a unique idempotency key to each outgoing request.
  * The key is derived from the operation + the merchant reference,
  * ensuring the same logical payment is never sent to the provider twice.
+ *
+ * **Limitation (v0.1):** In-memory only — keys are lost on process restart.
+ * A persistent store (Redis, SQLite, pg) is planned for v1.0.
  */
-export function idempotencyPlugin(_options: IdempotencyPluginOptions = {}): PesaPlugin {
+export function idempotencyPlugin(): PesaPlugin {
   const seen = new Set<string>();
 
   return {
