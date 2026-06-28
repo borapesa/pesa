@@ -232,6 +232,14 @@ export function createPesa(config: PesaConfig): PesaInstance {
   const plugins = config.plugins ?? [];
   const db: PesaDatabaseAdapter = config.db ?? new SQLiteAdapter();
 
+  // Enforce webhook secret in production — the deleted webhookVerifyPlugin lived here.
+  const webhookSecret = config.webhooks?.secret ?? process.env.BORAPESA_WEBHOOK_SECRET;
+  if (!webhookSecret && process.env.NODE_ENV === 'production') {
+    throw new PesaWebhookError(
+      'BORAPESA_WEBHOOK_SECRET is not set. Webhook verification is required in production.',
+    );
+  }
+
   // Event emitter
   const handlers = new Map<PaymentEventType, Set<(event: PaymentEvent) => Promise<void> | void>>();
 

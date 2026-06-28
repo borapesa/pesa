@@ -147,6 +147,14 @@ export interface BillPayBulkResult {
 export class ClickPesaProvider extends BasePaymentProvider {
   readonly name: ProviderName = 'clickpesa';
 
+  // Shared payout status mapping (used by both mobile money + bank payouts)
+  private static readonly PAYOUT_STATUS_MAP: Record<string, DisburseResult['status']> = {
+    SUCCESS: 'SUCCESS',
+    PROCESSING: 'QUEUED',
+    PENDING: 'QUEUED',
+    FAILED: 'FAILED',
+  };
+
   private config: Required<Pick<ClickPesaConfig, 'clientId' | 'apiKey'>> &
     Pick<ClickPesaConfig, 'checksumKey'> & { baseUrl: string };
   private token: string | null = null;
@@ -374,23 +382,18 @@ export class ClickPesaProvider extends BasePaymentProvider {
 
   async getPaymentStatus(orderId: string): Promise<PaymentStatus> {
     try {
-      const res = await fetch(
-        `${this.config.baseUrl}/third-parties/payments/${encodeURIComponent(orderId)}`,
-        { method: 'GET', headers: await this.authHeaders() },
+      const data = await this.request<PaymentStatusItem[]>(
+        `/third-parties/payments/${encodeURIComponent(orderId)}`,
       );
-
-      if (res.status === 404) return 'PENDING';
-      if (!res.ok) {
-        const body = await res.text();
-        throw new PesaProviderError(`ClickPesa query failed: ${res.status} ${body}`, res.status);
-      }
-
-      const data = (await res.json()) as PaymentStatusItem[] | ClickPesaApiError;
       if (Array.isArray(data) && data.length > 0) {
         return this.normalizeStatus(data[0]?.status ?? 'PENDING');
       }
       return 'PENDING';
     } catch (err) {
+      // 404 means the order hasn't been processed yet — return PENDING
+      if (err instanceof PesaProviderError && err.statusCode === 404) {
+        return 'PENDING';
+      }
       if (err instanceof PesaError) throw err;
       throw new PesaNetworkError(`ClickPesa status query failed: ${err}`);
     }
@@ -430,17 +433,20 @@ export class ClickPesaProvider extends BasePaymentProvider {
     const amount = Number(data?.collectedAmount ?? data?.amount ?? 0);
     const currency = (data?.collectedCurrency as string) ?? (data?.currency as string) ?? 'TZS';
 
-    // Map ClickPesa event names to PaymentEventType.
-    // Payout events checked before PAYMENT_FAILED to avoid the `status === 'FAILED'`
-    // branch catching payout failures as PAYMENT_FAILED.
-    let type: PaymentEvent['type'] = 'PAYMENT_PENDING';
-    if (event === 'PAYMENT RECEIVED' && status === 'SUCCESS') {
-      type = 'PAYMENT_SUCCESS';
-    } else if (event === 'PAYOUT INITIATED' || event === 'PAYOUT REFUNDED') {
-      type = status === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED';
-    } else if (event === 'PAYMENT FAILED' || status === 'FAILED') {
-      type = 'PAYMENT_FAILED';
-    }
+    // Deterministic event lookup — no order-sensitive conditionals that
+    // silently change behaviour when reordered.
+    const EVENT_MAP: Record<string, (s: string) => PaymentEvent['type']> = {
+      'PAYMENT RECEIVED': (s) => (s === 'SUCCESS' ? 'PAYMENT_SUCCESS' : 'PAYMENT_PENDING'),
+      'PAYOUT INITIATED': (s) => (s === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED'),
+      'PAYOUT REFUNDED': (s) => (s === 'SUCCESS' ? 'DISBURSEMENT_SUCCESS' : 'DISBURSEMENT_FAILED'),
+      'PAYMENT FAILED': () => 'PAYMENT_FAILED',
+    };
+    const type: PaymentEvent['type'] = event
+      ? (EVENT_MAP[event]?.(status as string) ??
+        (status === 'FAILED' ? 'PAYMENT_FAILED' : 'PAYMENT_PENDING'))
+      : status === 'FAILED'
+        ? 'PAYMENT_FAILED'
+        : 'PAYMENT_PENDING';
 
     return {
       id: uuid(),
@@ -476,17 +482,10 @@ export class ClickPesaProvider extends BasePaymentProvider {
       },
     );
 
-    const statusMap: Record<string, DisburseResult['status']> = {
-      SUCCESS: 'SUCCESS',
-      PROCESSING: 'QUEUED',
-      PENDING: 'QUEUED',
-      FAILED: 'FAILED',
-    };
-
     return {
       disbursementId: res.id,
       reference: payload.reference,
-      status: statusMap[res.status] ?? 'QUEUED',
+      status: ClickPesaProvider.PAYOUT_STATUS_MAP[res.status] ?? 'QUEUED',
     };
   }
 
@@ -508,17 +507,10 @@ export class ClickPesaProvider extends BasePaymentProvider {
       },
     );
 
-    const statusMap: Record<string, DisburseResult['status']> = {
-      SUCCESS: 'SUCCESS',
-      PROCESSING: 'QUEUED',
-      PENDING: 'QUEUED',
-      FAILED: 'FAILED',
-    };
-
     return {
       disbursementId: res.id,
       reference: payload.reference,
-      status: statusMap[res.status] ?? 'QUEUED',
+      status: ClickPesaProvider.PAYOUT_STATUS_MAP[res.status] ?? 'QUEUED',
     };
   }
 

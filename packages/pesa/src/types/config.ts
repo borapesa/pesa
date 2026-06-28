@@ -52,7 +52,6 @@ export interface PesaConfig {
    * - `retryPlugin` — exponential/linear/fixed backoff
    * - `idempotencyPlugin` — prevents duplicate charges
    * - `loggingPlugin` — structured logging with PII redaction
-   * - `webhookVerifyPlugin` — enforces webhook secret in production
    */
   plugins?: PesaPlugin[];
 
