@@ -41,22 +41,18 @@ const providers = [
     logo: '/azampay.png',
     href: '/docs/api/azampay',
     bg: '#ffffff',
-    size: 48,
   },
   {
     name: 'ClickPesa',
     logo: '/clickpesa.png',
     href: '/docs/api/clickpesa',
     bg: '#ffffff',
-    size: 64,
-    px: '1.5rem 1.75rem',
   },
   {
     name: 'Selcom',
     logo: '/selcom.webp',
     href: '/docs/api/selcom',
     bg: 'hsla(347.07, 100%, 45.49%, 1)',
-    size: 48,
   },
 ];
 
@@ -96,17 +92,17 @@ export default function Page() {
         .provider-card {
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
-          padding: 1.5rem 2rem; border-radius: 0.5rem;
+          width: 104px; height: 72px;
+          border-radius: 0.5rem;
           border: 1px solid var(--color-fd-border); text-decoration: none;
           color: var(--color-fd-foreground);
           transition: border-color 0.15s, transform 0.15s;
         }
         .provider-card:hover { border-color: var(--color-fd-primary); transform: translateY(-1px); }
-        .provider-card img { display: block; }
+        .provider-card img { display: block; max-width: 56px; max-height: 48px; object-fit: contain; }
 
         @media (max-width: 640px) {
           .providers-grid { gap: 1rem; justify-content: flex-start; }
-          .provider-card { padding: 1rem 1.25rem; }
         }
       `}</style>
       <main
@@ -240,14 +236,9 @@ export default function Page() {
             padding: '0.75rem 0',
           }}
         >
-          {providers.map(({ name, logo, href, bg, size, px }) => (
-            <Link
-              key={name}
-              href={href}
-              className="provider-card"
-              style={{ background: bg, padding: px }}
-            >
-              <img src={logo} alt={`${name} provider`} width={size} height={size} />
+          {providers.map(({ name, logo, href, bg }) => (
+            <Link key={name} href={href} className="provider-card" style={{ background: bg }}>
+              <img src={logo} alt={`${name} provider`} />
             </Link>
           ))}
         </div>
