@@ -11,6 +11,11 @@ const PACKAGES = [
     desc: 'Core — types, factory, event store, plugins',
   },
   {
+    dir: 'providers/azampay/src',
+    name: '@borapesa/azampay',
+    desc: 'AzamPay provider adapter',
+  },
+  {
     dir: 'providers/clickpesa/src',
     name: '@borapesa/clickpesa',
     desc: 'ClickPesa provider adapter',

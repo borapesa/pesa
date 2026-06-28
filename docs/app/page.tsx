@@ -35,6 +35,31 @@ const features = [
   },
 ];
 
+const providers = [
+  {
+    name: 'AzamPay',
+    logo: '/azampay.png',
+    href: '/docs/api/azampay',
+    bg: '#ffffff',
+    size: 48,
+  },
+  {
+    name: 'ClickPesa',
+    logo: '/clickpesa.png',
+    href: '/docs/api/clickpesa',
+    bg: '#ffffff',
+    size: 64,
+    px: '1.5rem 1.75rem',
+  },
+  {
+    name: 'Selcom',
+    logo: '/selcom.webp',
+    href: '/docs/api/selcom',
+    bg: 'hsla(347.07, 100%, 45.49%, 1)',
+    size: 48,
+  },
+];
+
 export default function Page() {
   return (
     <HomeLayout>
@@ -67,6 +92,21 @@ export default function Page() {
           max-width: calc(100vw - 2rem); overflow-x: auto;
         }
         .install-block code { font-size: inherit; }
+
+        .provider-card {
+          display: flex; align-items: center; justify-content: center;
+          padding: 1.5rem 2rem; border-radius: 0.5rem;
+          border: 1px solid var(--color-fd-border); text-decoration: none;
+          color: var(--color-fd-foreground);
+          transition: border-color 0.15s, transform 0.15s;
+        }
+        .provider-card:hover { border-color: var(--color-fd-primary); transform: translateY(-1px); }
+        .provider-card img { display: block; }
+
+        @media (max-width: 640px) {
+          .providers-grid { gap: 1rem; }
+          .provider-card { padding: 1rem 1.25rem; }
+        }
       `}</style>
       <main
         style={{
@@ -175,6 +215,37 @@ export default function Page() {
                 {desc}
               </p>
             </div>
+          ))}
+        </div>
+
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            marginBottom: '1.5rem',
+          }}
+        >
+          Supported Providers
+        </h2>
+        <div
+          className="providers-grid"
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '2rem',
+            marginBottom: '4rem',
+          }}
+        >
+          {providers.map(({ name, logo, href, bg, size, px }) => (
+            <Link
+              key={name}
+              href={href}
+              className="provider-card"
+              style={{ background: bg, padding: px }}
+            >
+              <img src={logo} alt={`${name} provider`} width={size} height={size} />
+            </Link>
           ))}
         </div>
       </main>

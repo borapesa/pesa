@@ -9,5 +9,6 @@ Bora Pesa API reference — auto-generated from JSDoc.
 | Package | Description |
 | --- | --- |
 | [@borapesa/pesa](pesa) | Core — types, factory, event store, plugins |
+| [@borapesa/azampay](azampay) | AzamPay provider adapter |
 | [@borapesa/clickpesa](clickpesa) | ClickPesa provider adapter |
 | [@borapesa/selcom](selcom) | Selcom provider adapter |

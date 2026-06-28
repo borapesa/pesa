@@ -6,7 +6,7 @@ title: "Function: createPesaHandler()"
 function createPesaHandler(pesa): (request) => Promise<Response>;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:42](https://github.com/borapesa/pesa/blob/baa979229e12b20ccff1c404ff60a42226191e08/packages/pesa/src/handler.ts#L42)
+Defined in: [packages/pesa/src/handler.ts:42](https://github.com/borapesa/pesa/blob/a805b581d73bcc0f93f26e929b723955868c1bad/packages/pesa/src/handler.ts#L42)
 
 Creates a generic fetch-like handler that can be mounted on any framework.
 

@@ -52,7 +52,7 @@ describe('SelcomPaymentProvider', () => {
       amount: 8000,
       currency: 'TZS',
       reference: 'order_001',
-      customer,
+      customer: { ...customer, email: 'juma@example.com' },
       redirectUrl: 'https://mysite.com/callback',
     });
 
@@ -97,7 +97,7 @@ describe('SelcomPaymentProvider', () => {
       amount: 8000,
       currency: 'TZS',
       reference: 'order_001',
-      customer,
+      customer: { ...customer, email: 'juma@example.com' },
       redirectUrl: 'https://mysite.com/callback',
     });
 
@@ -323,6 +323,7 @@ describe('SelcomPaymentProvider', () => {
       result: 'SUCCESS',
       resultcode: '000',
       payment_status: 'COMPLETED',
+      amount: '8000',
     });
 
     const event = await provider.handleWebhook(body, {});
@@ -596,6 +597,7 @@ describe('SelcomPaymentProvider', () => {
       result: 'INPROGRESS',
       resultcode: '111',
       payment_status: 'INPROGRESS',
+      amount: '5000',
     });
 
     const event = await provider.handleWebhook(body, {});

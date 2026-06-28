@@ -3,6 +3,7 @@
   "tsconfig": "./typedoc.tsconfig.json",
   "entryPoints": [
     "../packages/pesa/src/index.ts",
+    "../providers/azampay/src/index.ts",
     "../providers/clickpesa/src/index.ts",
     "../providers/selcom/src/index.ts"
   ],

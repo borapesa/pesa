@@ -17,6 +17,7 @@ import {
   PesaError,
   PesaNetworkError,
   PesaProviderError,
+  PesaValidationError,
 } from '@borapesa/pesa';
 import { v4 as uuid } from 'uuid';
 
@@ -212,7 +213,11 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       case 'FAILED':
         return 'FAILED';
       default:
-        return 'PENDING';
+        // AMBIGUOUS is Selcom's own "outcome unknown" status — it forces
+        // the caller to poll, which is the correct behavior for an
+        // unrecognized code.  PENDING would incorrectly imply "waiting for
+        // user action."
+        return 'AMBIGUOUS';
     }
   }
 
@@ -226,10 +231,15 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   }
 
   private async createCheckoutOrder(payload: CreateOrderPayload): Promise<OrderResult> {
+    // buyer_email is Mandatory per Selcom checkout spec.
+    if (!payload.customer.email) {
+      throw new PesaValidationError('customer.email is required for Selcom checkout orders');
+    }
+
     const body: Record<string, unknown> = {
       vendor: this.config.vendor,
       order_id: payload.reference,
-      buyer_email: payload.customer.email ?? '',
+      buyer_email: payload.customer.email,
       buyer_name: payload.customer.name,
       buyer_phone: payload.customer.phone,
       amount: String(payload.amount),
@@ -333,17 +343,30 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
 
     const transid = uuid();
 
+    // All three are Mandatory per Selcom Qwiksend spec.
+    if (!payload.recipient.bic) {
+      throw new PesaValidationError('recipient.bic is required for bank disbursement');
+    }
+    if (!payload.recipient.accountNumber) {
+      throw new PesaValidationError('recipient.accountNumber is required for bank disbursement');
+    }
+    if (!payload.recipient.name) {
+      throw new PesaValidationError('recipient.name is required for bank disbursement');
+    }
+
     const body: Record<string, unknown> = {
       transid,
-      recipientFiCode: payload.recipient.bic ?? '',
-      recipientAccount: payload.recipient.accountNumber ?? '',
-      recipientName: payload.recipient.name ?? '',
+      recipientFiCode: payload.recipient.bic,
+      recipientAccount: payload.recipient.accountNumber,
+      recipientName: payload.recipient.name,
       senderAccount: this.config.senderAccount,
       senderName: this.config.senderName,
       amount: String(payload.amount),
       vendor: this.config.vendor,
       pin: this.config.pin,
       msisdn: this.config.senderPhone,
+      // Spec lists GIFT as an example purpose.  DISBURSEMENT is unverified —
+      // verify against Selcom's accepted purpose enum values.
       purpose: 'DISBURSEMENT',
       remarks: payload.remarks ?? '',
     };
@@ -380,7 +403,10 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       case 'PROCESSING':
         return 'QUEUED';
       default:
-        return 'FAILED';
+        // QUEUED is non-terminal — if Selcom returns an unrecognized status,
+        // the caller keeps polling rather than treating it as an irreversible
+        // failure.  FAILED would be the wrong default because it's terminal.
+        return 'QUEUED';
     }
   }
 
@@ -412,6 +438,12 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       }
     }
 
+    // Reject webhooks missing required fields — producing sentinel values
+    // like 0 or 'unknown' is worse than surfacing the malformed callback.
+    if (payload.amount === undefined || payload.amount === null) {
+      throw new PesaProviderError('Selcom webhook: missing required field "amount"', 400);
+    }
+
     const status = this.normalizeStatus(
       (payload.result as string) ?? 'PENDING',
       (payload.payment_status as string) ?? undefined,
@@ -420,9 +452,13 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
     return {
       id: uuid(),
       type: this.webhookEventType(status),
-      orderId: (payload.order_id as string) ?? (payload.reference as string) ?? 'unknown',
+      orderId:
+        (payload.order_id as string) ??
+        (payload.transid as string) ??
+        (payload.reference as string) ??
+        'unknown',
       reference: (payload.reference as string) ?? (payload.order_id as string) ?? 'unknown',
-      amount: Number(payload.amount ?? 0),
+      amount: Number(payload.amount),
       currency: (payload.currency as 'TZS') ?? 'TZS',
       status,
       provider: 'selcom',
@@ -476,11 +512,15 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
     return {
       orders: items.map((item) => ({
         orderId: (item.order_id as string) ?? '',
+        // Selcom's list-orders data items don't include a per-item reference
+        // field — only order_id.  We echo order_id as reference.
         reference: (item.order_id as string) ?? '',
         status: this.normalizeStatus('PENDING', item.payment_status as string | undefined),
         amount: Number(item.amount ?? 0),
         currency: 'TZS' as const,
-        createdAt: item.creation_date ? new Date(item.creation_date as string) : new Date(),
+        // creation_date is always present per Selcom spec.  If absent, use
+        // epoch 0 as a sentinel — current time would be silently wrong.
+        createdAt: item.creation_date ? new Date(item.creation_date as string) : new Date(0),
         raw: item,
       })),
       total: items.length,
@@ -501,7 +541,7 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       balances: [
         {
           currency: 'TZS',
-          amount: Number(firstItem?.balance ?? 0),
+          amount: firstItem?.balance !== undefined ? Number(firstItem.balance) : 0,
         },
       ],
       raw: res,
