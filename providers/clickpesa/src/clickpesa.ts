@@ -4,6 +4,8 @@ import type {
   CreateOrderPayload,
   DisbursePayload,
   DisburseResult,
+  ListOrdersParams,
+  ListOrdersResult,
   NameLookupResult,
   OrderResult,
   PaymentEvent,
@@ -510,9 +512,54 @@ export class ClickPesaProvider extends BasePaymentProvider {
     }
   }
 
-  // ── Not yet supported ────────────────────────────────────────────
+  async listOrders(params: ListOrdersParams): Promise<ListOrdersResult> {
+    const query: Record<string, string> = {};
 
-  // refund, cancelOrder, and listOrders are not supported by ClickPesa's current API.
+    // Map our date types to ClickPesa's YYYY-MM-DD string params
+    if (params.fromDate) {
+      query.startDate = params.fromDate.toISOString().slice(0, 10);
+    }
+    if (params.toDate) {
+      query.endDate = params.toDate.toISOString().slice(0, 10);
+    }
+    if (params.limit !== undefined) {
+      query.limit = String(params.limit);
+    }
+    if (params.offset !== undefined) {
+      query.skip = String(params.offset);
+    }
+
+    const qs = new URLSearchParams(query).toString();
+    const path = `/third-parties/payments/all${qs ? `?${qs}` : ''}`;
+
+    const data = await this.request<{
+      data?: Array<{
+        id: string;
+        status: string;
+        orderReference: string;
+        collectedAmount: number;
+        collectedCurrency: string;
+        createdAt?: string;
+      }>;
+      totalCount?: number;
+    }>(path);
+
+    const items = data.data ?? [];
+    return {
+      orders: items.map((item) => ({
+        orderId: item.orderReference,
+        reference: item.orderReference,
+        status: this.normalizeStatus(item.status),
+        amount: item.collectedAmount,
+        currency: (item.collectedCurrency as 'TZS') ?? 'TZS',
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        raw: item,
+      })),
+      total: data.totalCount ?? items.length,
+    };
+  }
+
+  // refund and cancelOrder are not supported by ClickPesa's current API.
   // They fall back to the BasePaymentProvider default (throws PesaUnsupportedError).
 
   // ── Private helpers ──────────────────────────────────────────────

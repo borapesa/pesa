@@ -456,4 +456,105 @@ describe('ClickPesaProvider', () => {
     expect(result.balances).toHaveLength(0);
     expect(result.raw).toBeDefined();
   });
+
+  // ── listOrders ───────────────────────────────────────────────────
+
+  it('lists orders with date range and pagination', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      data: [
+        {
+          id: 'txn_1',
+          status: 'SUCCESS',
+          orderReference: 'ref_1',
+          collectedAmount: 5000,
+          collectedCurrency: 'TZS',
+          createdAt: '2026-01-15T10:30:00Z',
+        },
+        {
+          id: 'txn_2',
+          status: 'PROCESSING',
+          orderReference: 'ref_2',
+          collectedAmount: 15000,
+          collectedCurrency: 'TZS',
+          createdAt: '2026-01-16T14:00:00Z',
+        },
+      ],
+      totalCount: 42,
+    });
+
+    const result = await provider.listOrders!({
+      fromDate: new Date('2026-01-01'),
+      toDate: new Date('2026-01-31'),
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(result.orders).toHaveLength(2);
+    expect(result.total).toBe(42);
+    expect(result.orders[0]?.status).toBe('SUCCESS');
+    expect(result.orders[1]?.status).toBe('PROCESSING');
+    expect(result.orders[0]?.amount).toBe(5000);
+
+    // Verify query params were sent
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('startDate=2026-01-01');
+    expect(url).toContain('endDate=2026-01-31');
+    expect(url).toContain('limit=20');
+    expect(url).toContain('skip=0');
+  });
+
+  it('returns empty list when no orders match', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({ success: true, data: [], totalCount: 0 });
+
+    const result = await provider.listOrders!({});
+    expect(result.orders).toHaveLength(0);
+    expect(result.total).toBe(0);
+  });
+
+  it('handles missing totalCount gracefully', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      data: [
+        {
+          id: 'txn_3',
+          status: 'FAILED',
+          orderReference: 'ref_3',
+          collectedAmount: 3000,
+          collectedCurrency: 'TZS',
+        },
+      ],
+    });
+
+    const result = await provider.listOrders!({});
+    expect(result.orders).toHaveLength(1);
+    expect(result.total).toBe(1); // falls back to items.length
+  });
 });
