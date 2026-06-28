@@ -1,3 +1,4 @@
+import { PesaValidationError } from '../errors';
 import type { PesaPlugin, RequestContext } from './types';
 
 /**
@@ -24,7 +25,7 @@ export function idempotencyPlugin(): PesaPlugin {
       const key = `${ctx.operation}:${ref}`;
 
       if (seen.has(key)) {
-        throw new Error(
+        throw new PesaValidationError(
           `Duplicate request detected for ${ctx.operation}:${ref}. ` +
             `This is likely a network retry — the original request may have succeeded.`,
         );

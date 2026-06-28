@@ -452,6 +452,7 @@ export function createPesa(config: PesaConfig): PesaInstance {
 function normalizeError(err: unknown): Error {
   // Pass through known Pesa errors so callers can use instanceof checks
   if (
+    err instanceof PesaProviderError ||
     err instanceof PesaWebhookError ||
     err instanceof PesaUnsupportedError ||
     err instanceof PesaNetworkError ||
