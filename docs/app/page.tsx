@@ -237,7 +237,7 @@ export default function Page() {
             marginBottom: '4rem',
             overflowX: 'auto',
             WebkitOverflowScrolling: 'touch',
-            paddingBottom: '0.5rem',
+            padding: '0.75rem 0',
           }}
         >
           {providers.map(({ name, logo, href, bg, size, px }) => (
