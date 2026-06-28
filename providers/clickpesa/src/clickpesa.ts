@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto';
 import type {
+  BalanceResult,
   CreateOrderPayload,
   DisbursePayload,
   DisburseResult,
@@ -427,6 +428,21 @@ export class ClickPesaProvider extends BasePaymentProvider {
     } catch (err) {
       return { valid: false, message: err instanceof Error ? err.message : 'Auth failed' };
     }
+  }
+
+  async getBalance(): Promise<BalanceResult> {
+    const data = await this.request<{
+      balances?: Array<{ currency: string; balance: number }>;
+    }>('/third-parties/account/balance');
+
+    const rawBalances = data.balances ?? [];
+    return {
+      balances: rawBalances.map((b) => ({
+        currency: b.currency,
+        amount: b.balance,
+      })),
+      raw: data,
+    };
   }
 
   async previewOrder(payload: CreateOrderPayload): Promise<PreviewResult> {

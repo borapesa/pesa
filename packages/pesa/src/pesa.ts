@@ -11,6 +11,7 @@ import {
 import { createPesaHandler } from './handler';
 import type { RequestContext, ResponseContext } from './plugins/types';
 import type { BasePaymentProvider } from './providers/base';
+import type { BalanceResult } from './types/account';
 import type { PesaConfig } from './types/config';
 import type { DisbursePayload, DisburseResult } from './types/disbursement';
 import type { PaymentEvent, PaymentEventType } from './types/event';
@@ -70,8 +71,9 @@ import { validateCreateOrderPayload, validateDisbursePayload } from './validate'
  *
  * ```ts
  * // Not all providers support these. Check before calling.
- * if (pesa.refund)     await pesa.refund('order_123', 5000);
- * if (pesa.previewOrder)  await pesa.previewOrder({ ... });
+ * if (pesa.getBalance)   await pesa.getBalance();
+ * if (pesa.refund)       await pesa.refund('order_123', 5000);
+ * if (pesa.previewOrder) await pesa.previewOrder({ ... });
  * if (pesa.validateCredentials) await pesa.validateCredentials();
  * ```
  *
@@ -147,6 +149,9 @@ export interface PesaInstance {
 
   /** Validate provider credentials (health check). `undefined` if unsupported. */
   validateCredentials?(): Promise<{ valid: boolean; message?: string }>;
+
+  /** Retrieve wallet balances across currencies. `undefined` if unsupported. */
+  getBalance?(): Promise<BalanceResult>;
 
   /** Preview / dry-run a payment. `undefined` if unsupported. */
   previewOrder?(payload: CreateOrderPayload): Promise<PreviewResult>;
@@ -389,6 +394,7 @@ export function createPesa(config: PesaConfig): PesaInstance {
   const validateCredentials = provider.validateCredentials
     ? provider.validateCredentials.bind(provider)
     : undefined;
+  const getBalance = provider.getBalance ? provider.getBalance.bind(provider) : undefined;
   const previewOrder = provider.previewOrder ? provider.previewOrder.bind(provider) : undefined;
   const previewDisburse = provider.previewDisburse
     ? provider.previewDisburse.bind(provider)
@@ -407,6 +413,7 @@ export function createPesa(config: PesaConfig): PesaInstance {
     refund,
     cancelOrder,
     validateCredentials,
+    getBalance,
     previewOrder,
     previewDisburse,
     getNameLookup,

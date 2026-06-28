@@ -214,6 +214,7 @@ describe('createPesa() factory', () => {
     expect(pesa.refund).toBeDefined();
     expect(pesa.cancelOrder).toBeDefined();
     expect(pesa.validateCredentials).toBeDefined();
+    expect(pesa.getBalance).toBeDefined();
     expect(pesa.previewOrder).toBeDefined();
 
     const refund = await pesa.refund!('order_1', 5000);
@@ -221,6 +222,10 @@ describe('createPesa() factory', () => {
 
     const creds = await pesa.validateCredentials!();
     expect(creds.valid).toBe(true);
+
+    const balance = await pesa.getBalance!();
+    expect(balance.balances).toHaveLength(2);
+    expect(balance.balances[0]?.currency).toBe('TZS');
 
     const preview = await pesa.previewOrder!({
       amount: 10000,

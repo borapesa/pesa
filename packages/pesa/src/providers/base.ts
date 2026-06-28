@@ -1,5 +1,6 @@
 import { PesaUnsupportedError } from '../errors';
 import type {
+  BalanceResult,
   CancelOrderResult,
   CreateOrderPayload,
   DisbursePayload,
@@ -36,8 +37,9 @@ import type {
  * Applications can feature-detect capability:
  *
  * ```ts
- * if (pesa.refund) {
- *   await pesa.refund('order_123', 5000);
+ * if (pesa.getBalance) {
+ *   const { balances } = await pesa.getBalance();
+ *   console.log(`TZS balance: ${balances.find(b => b.currency === 'TZS')?.amount}`);
  * }
  * ```
  *
@@ -141,6 +143,22 @@ export abstract class BasePaymentProvider {
    */
   validateCredentials?(): Promise<{ valid: boolean; message?: string }> {
     throw new PesaUnsupportedError(`${this.name} does not support credential validation`);
+  }
+
+  /**
+   * Retrieve available balances across all active currencies.
+   *
+   * Useful for dashboards, pre-disbursement checks, and wallet health
+   * monitoring.  Returns per-currency balance entries with raw provider
+   * data for advanced use.
+   *
+   * @returns `{ balances: [...] }` with per-currency entries.
+   * @throws `PesaUnsupportedError` — if the provider does not expose balance data.
+   *
+   * @since 0.2.0
+   */
+  getBalance?(): Promise<BalanceResult> {
+    throw new PesaUnsupportedError(`${this.name} does not support balance retrieval`);
   }
 
   /**

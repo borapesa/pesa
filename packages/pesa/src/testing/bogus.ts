@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { BasePaymentProvider } from '../providers/base';
 import type {
+  BalanceResult,
   CancelOrderResult,
   CreateOrderPayload,
   DisbursePayload,
@@ -197,6 +198,16 @@ export class BogusPaymentProvider extends BasePaymentProvider {
   async validateCredentials(): Promise<{ valid: boolean; message?: string }> {
     await this.sleep();
     return { valid: true, message: 'BogusProvider is always valid' };
+  }
+
+  async getBalance(): Promise<BalanceResult> {
+    await this.sleep();
+    return {
+      balances: [
+        { currency: 'TZS', amount: 10_000_000 },
+        { currency: 'USD', amount: 5_000 },
+      ],
+    };
   }
 
   async previewOrder(payload: CreateOrderPayload): Promise<PreviewResult> {

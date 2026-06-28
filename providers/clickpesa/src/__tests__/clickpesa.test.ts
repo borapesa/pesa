@@ -413,4 +413,47 @@ describe('ClickPesaProvider', () => {
     // GET request should not have a body with checksum
     expect(init?.body).toBeUndefined();
   });
+
+  // ── getBalance ───────────────────────────────────────────────────
+
+  it('returns per-currency balances', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({
+      success: true,
+      balances: [
+        { currency: 'TZS', balance: 1500000 },
+        { currency: 'USD', balance: 250.5 },
+      ],
+    });
+
+    const result = await provider.getBalance!();
+    expect(result.balances).toHaveLength(2);
+    expect(result.balances[0]).toEqual({ currency: 'TZS', amount: 1500000 });
+    expect(result.balances[1]).toEqual({ currency: 'USD', amount: 250.5 });
+  });
+
+  it('returns empty balances when account has no funds', async () => {
+    mockFetch({ success: true, token: 'Bearer tok' });
+    const provider = new ClickPesaProvider({
+      baseUrl: 'https://api.clickpesa.com',
+      clientId: 'test-client',
+      apiKey: 'test-key',
+    });
+    await provider.validateCredentials!();
+    vi.clearAllMocks();
+
+    mockFetch({ success: true, balances: [] });
+
+    const result = await provider.getBalance!();
+    expect(result.balances).toHaveLength(0);
+    expect(result.raw).toBeDefined();
+  });
 });

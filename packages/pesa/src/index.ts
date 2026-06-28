@@ -15,6 +15,8 @@ export { createPesa } from './pesa';
 export type { PesaPlugin, RequestContext, ResponseContext } from './plugins/types';
 export { BasePaymentProvider } from './providers/base';
 export type {
+  BalanceEntry,
+  BalanceResult,
   CancelOrderPayload,
   CancelOrderResult,
   CreateOrderPayload,
