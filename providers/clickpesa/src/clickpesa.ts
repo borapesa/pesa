@@ -292,7 +292,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
     //   TZS + redirectUrl → hosted checkout link
     //   TZS (no redirect) → USSD push (mobile money)
     //   USD               → card payment (VISA / Mastercard)
-    if ((payload.currency as string) === 'USD') {
+    if (payload.currency === 'USD') {
       return this.createCardPayment(payload);
     }
     if (payload.redirectUrl) {
@@ -541,7 +541,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
   }
 
   async previewOrder(payload: CreateOrderPayload): Promise<PreviewResult> {
-    if ((payload.currency as string) === 'USD') {
+    if (payload.currency === 'USD') {
       return this.previewCard(payload);
     }
     const res = await this.request<PreviewResponse>(

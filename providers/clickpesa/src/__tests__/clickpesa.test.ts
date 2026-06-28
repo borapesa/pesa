@@ -148,7 +148,7 @@ describe('ClickPesaProvider', () => {
 
     const order = await provider.createOrder({
       amount: 50,
-      currency: 'USD' as 'TZS',
+      currency: 'USD',
       reference: 'card_001',
       customer: { name: 'Juma Ali', phone: '255712345678', email: 'juma@example.com' },
     });
@@ -180,7 +180,7 @@ describe('ClickPesaProvider', () => {
 
     const preview = await provider.previewOrder!({
       amount: 50,
-      currency: 'USD' as 'TZS',
+      currency: 'USD',
       reference: 'card_pre_001',
       customer: { name: 'Juma', phone: '255712345678' },
     });
@@ -204,7 +204,7 @@ describe('ClickPesaProvider', () => {
 
     const preview = await provider.previewOrder!({
       amount: 50,
-      currency: 'USD' as 'TZS',
+      currency: 'USD',
       reference: 'card_pre_002',
       customer: { name: 'Juma', phone: '255712345678' },
     });
