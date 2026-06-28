@@ -408,15 +408,29 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
   /**
    * Map phone prefix to AzamPay MNO name for **disbursement** endpoints.
    *
-   * The `MnoDisbursementRequest` `bankName` enum per the spec is:
+   * The `MnoDisbursementRequest` `bankName` enum per the (unofficial) spec is:
    * `["tigo", "airtel", "azampesa"]` — all lowercase.
    *
-   * **Note:** The spec enum does not include `halopesa` or `Mpesa` for
-   * disbursement. Callers disbursing to HaloPesa (25562…) or Vodacom/M-Pesa
-   * (25574…, 25575…) phones may receive `400 Invalid BankName`. If the
-   * real API accepts these values outside the documented enum, update this
-   * mapping. Otherwise, map unsupported networks to `'azampesa'` as a
-   * fallback.
+   * **⚠ KNOWN AMBIGUITY — requires sandbox verification:**
+   *
+   * The unofficial OpenAPI spec excludes `halopesa` and `Mpesa` from the
+   * disbursement `bankName` enum, but includes both in the checkout-side
+   * `Provider` enum. It is unclear whether this reflects the real API:
+   *
+   * - If the real API **rejects** halopesa/mpesa: this fallback is correct,
+   *   but `raw._providerName` will differ from the actual checkout MNO.
+   * - If the real API **accepts** halopesa/mpesa: this fallback is wrong
+   *   and should be removed — it silently converts valid requests.
+   *
+   * Additionally, `disburse` `source.bankName` is restricted to the same
+   * `["tigo","airtel","azampesa"]` enum by the spec, but these are MNO
+   * names, not bank names. It is unclear what value a merchant using
+   * CRDB or NMB should set for `senderBank`. The code defaults to
+   * `'azampesa'` but the correct value depends on the real API.
+   *
+   * **Resolve by testing against the AzamPay sandbox or asking their
+   * integration team.** Until then, the fallback maps unknown prefixes
+   * to `'azampesa'` (the provider's own wallet, always in the enum).
    */
   private mapDisburseProvider(phone: string): string {
     if (phone.startsWith('25578') || phone.startsWith('25568')) return 'airtel';
@@ -431,11 +445,14 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
    *
    * @param orderId - The AzamPay transaction ID returned by {@link createOrder}.
    * @param providerName - The mobile money provider used for the order
-   *   (e.g. `'Mpesa'`, `'tigo'`, `'airtel'`).  Defaults to `'azampesa'`.
-   *   **Tip:** `createOrder` returns this in `raw._providerName` (disbursement
-   *   format — lowercase, may fall back to `'azampesa'` for some MNOs).
+   *   (e.g. `'airtel'`, `'tigo'`, `'azampesa'`). Defaults to `'azampesa'`
+   *   when called through the SDK — the default exists because the SDK only
+   *   passes `orderId`. **When calling this method directly, always pass the
+   *   explicit provider name** from {@link createOrder}'s `raw._providerName`
+   *   to avoid silently querying with the wrong bank name.
    *   The checkout-side provider is at `raw._checkoutProvider` (PascalCase,
-   *   matches what was sent to the checkout API).
+   *   matches what was sent to the checkout API — may differ from
+   *   `_providerName` for HaloPesa/M-Pesa due to spec enum constraints).
    */
   async getPaymentStatus(orderId: string, providerName = 'azampesa'): Promise<PaymentStatus> {
     try {
@@ -556,17 +573,31 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
       throw new PesaWebhookError('AzamPay webhook: signature verification failed');
     }
 
+    // Validate required fields — per spec, these MUST be present.
+    // Producing sentinel values like 'unknown' or 0 is worse than
+    // rejecting the callback: an unprocessable callback should surface
+    // loudly so the operator can investigate.
+    if (!payload.transid) {
+      throw new PesaWebhookError('AzamPay webhook: missing required field "transid"');
+    }
+    if (!payload.transactionstatus) {
+      throw new PesaWebhookError('AzamPay webhook: missing required field "transactionstatus"');
+    }
+    if (payload.amount === undefined || payload.amount === null) {
+      throw new PesaWebhookError('AzamPay webhook: missing required field "amount"');
+    }
+
     // Map `transactionstatus` (string: "success"/"failure") to PaymentStatus
-    const isSuccess = payload.transactionstatus?.toLowerCase() === 'success';
+    const isSuccess = payload.transactionstatus.toLowerCase() === 'success';
     const status: PaymentStatus = isSuccess ? 'SUCCESS' : 'FAILED';
     const eventType = isSuccess ? 'PAYMENT_SUCCESS' : 'PAYMENT_FAILED';
 
-    const amount = Number(payload.amount ?? 0);
+    const amount = Number(payload.amount);
 
     return {
       id: uuid(),
       type: eventType,
-      orderId: payload.transid ?? payload.reference ?? 'unknown',
+      orderId: payload.transid,
       reference: payload.utilityref ?? payload.reference ?? 'unknown',
       amount,
       currency: 'TZS',
@@ -607,7 +638,7 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
         found: Boolean(ok) && !!res.name,
         accountName: res.name ?? undefined,
         accountNumber: res.accountNumber || phoneOrAccount,
-        provider: res.bankName ?? 'AzamPay',
+        provider: res.bankName ?? 'azampesa',
         raw: res,
       };
     } catch {

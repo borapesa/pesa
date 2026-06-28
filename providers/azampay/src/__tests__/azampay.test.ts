@@ -461,6 +461,27 @@ describe('AzamPayPaymentProvider', () => {
     expect(event.type).toBe('PAYMENT_SUCCESS');
   });
 
+  it('rejects webhook missing required field transid', async () => {
+    const provider = new AzamPayPaymentProvider(defaultConfig());
+    await expect(
+      provider.handleWebhook(callbackPayload({ transid: undefined }), {}),
+    ).rejects.toThrow('missing required field "transid"');
+  });
+
+  it('rejects webhook missing required field transactionstatus', async () => {
+    const provider = new AzamPayPaymentProvider(defaultConfig());
+    await expect(
+      provider.handleWebhook(callbackPayload({ transactionstatus: undefined }), {}),
+    ).rejects.toThrow('missing required field "transactionstatus"');
+  });
+
+  it('rejects webhook missing required field amount', async () => {
+    const provider = new AzamPayPaymentProvider(defaultConfig());
+    await expect(provider.handleWebhook(callbackPayload({ amount: null }), {})).rejects.toThrow(
+      'missing required field "amount"',
+    );
+  });
+
   // ── Provider-specific ────────────────────────────────────────────
 
   it('generates post checkout URL', async () => {
