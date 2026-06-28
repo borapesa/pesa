@@ -122,69 +122,38 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
 
   // ── Helpers ──────────────────────────────────────────────────────
 
-  private async post<T>(
+  /**
+   * Execute a signed request against the Selcom API.
+   *
+   * `signedFields` is derived automatically from `Object.keys(params)`
+   * in alphabetical order — no manual lists to keep in sync.
+   */
+  private async request<T>(
+    method: 'POST' | 'GET' | 'DELETE',
     path: string,
-    signedFields: string[],
-    body: Record<string, unknown>,
+    params: Record<string, unknown>,
   ): Promise<T> {
-    const headers = this.authHeaders(signedFields, body);
-    const res = await fetch(`${this.config.baseUrl}${path}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new PesaProviderError(`Selcom ${path} failed: ${res.status} ${text}`, res.status);
-    }
-
-    const json = (await res.json()) as SelcomResponse;
-    this.throwOnError(json);
-    return json as T;
-  }
-
-  private async get<T>(
-    path: string,
-    signedFields: string[],
-    params: Record<string, string>,
-  ): Promise<T> {
-    const qs = new URLSearchParams(params).toString();
-    const fullPath = qs ? `${path}?${qs}` : path;
+    const signedFields = Object.keys(params).sort();
     const headers = this.authHeaders(signedFields, params);
 
-    const res = await fetch(`${this.config.baseUrl}${fullPath}`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new PesaProviderError(`Selcom ${path} failed: ${res.status} ${text}`, res.status);
-    }
-
-    const json = (await res.json()) as SelcomResponse;
-    this.throwOnError(json);
-    return json as T;
-  }
-
-  private async del<T>(
-    path: string,
-    signedFields: string[],
-    params: Record<string, string>,
-  ): Promise<T> {
-    const qs = new URLSearchParams(params).toString();
+    const isGetOrDelete = method === 'GET' || method === 'DELETE';
+    const qs = isGetOrDelete
+      ? new URLSearchParams(params as Record<string, string>).toString()
+      : '';
     const fullPath = qs ? `${path}?${qs}` : path;
-    const headers = this.authHeaders(signedFields, params);
 
     const res = await fetch(`${this.config.baseUrl}${fullPath}`, {
-      method: 'DELETE',
+      method,
       headers,
+      body: isGetOrDelete ? undefined : JSON.stringify(params),
     });
 
     if (!res.ok) {
       const text = await res.text();
-      throw new PesaProviderError(`Selcom ${path} failed: ${res.status} ${text}`, res.status);
+      throw new PesaProviderError(
+        `Selcom ${method} ${path} failed: ${res.status} ${text}`,
+        res.status,
+      );
     }
 
     const json = (await res.json()) as SelcomResponse;
@@ -192,14 +161,11 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
     return json as T;
   }
 
+  /** Throw on genuinely fatal Selcom responses. INPROGRESS and AMBIGUOUS pass through. */
   private throwOnError(res: SelcomResponse): void {
     if (res.resultcode === '000') return;
-    if (res.resultcode === '999') {
-      throw new PesaProviderError(`Selcom: AMBIGUOUS — ${res.message}`, 502, res);
-    }
-    if (res.resultcode === '111' || res.resultcode === '927') {
-      throw new PesaProviderError(`Selcom: INPROGRESS — ${res.message}`, 502, res);
-    }
+    if (res.resultcode === '111' || res.resultcode === '927') return; // INPROGRESS
+    if (res.resultcode === '999') return; // AMBIGUOUS — poll status
     throw new PesaProviderError(`Selcom error [${res.resultcode}]: ${res.message}`, 502, res);
   }
 
@@ -254,23 +220,9 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       no_of_items: 1,
     };
 
-    const signedFields = [
-      'vendor',
-      'order_id',
-      'buyer_email',
-      'buyer_name',
-      'buyer_phone',
-      'amount',
-      'currency',
-      'webhook',
-      'buyer_remarks',
-      'merchant_remarks',
-      'no_of_items',
-    ];
-
-    const res = await this.post<SelcomResponse>(
+    const res = await this.request<SelcomResponse>(
+      'POST',
       '/v1/checkout/create-order-minimal',
-      signedFields,
       body,
     );
 
@@ -287,7 +239,6 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   }
 
   private async createUssdPush(payload: CreateOrderPayload): Promise<OrderResult> {
-    // Generate unique transid — Selcom requires it on every call
     const transid = uuid();
     const body: Record<string, unknown> = {
       transid,
@@ -297,9 +248,7 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       msisdn: payload.customer.phone,
     };
 
-    const signedFields = ['transid', 'utilityref', 'amount', 'vendor', 'msisdn'];
-
-    const res = await this.post<SelcomResponse>('/v1/wallet/pushussd', signedFields, body);
+    const res = await this.request<SelcomResponse>('POST', '/v1/wallet/pushussd', body);
 
     return {
       orderId: transid,
@@ -312,7 +261,7 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
 
   async getPaymentStatus(orderId: string): Promise<PaymentStatus> {
     try {
-      const res = await this.get<SelcomResponse>('/v1/checkout/order-status', ['order_id'], {
+      const res = await this.request<SelcomResponse>('GET', '/v1/checkout/order-status', {
         order_id: orderId,
       });
 
@@ -344,18 +293,7 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       pin: this.config.pin,
       msisdn: payload.recipient.phone ?? '',
     };
-
-    const signedFields = [
-      'transid',
-      'utilitycode',
-      'utilityref',
-      'amount',
-      'vendor',
-      'pin',
-      'msisdn',
-    ];
-
-    const res = await this.post<SelcomResponse>('/v1/walletcashin/process', signedFields, body);
+    const res = await this.request<SelcomResponse>('POST', '/v1/walletcashin/process', body);
 
     return {
       disbursementId: res.transid ?? transid,
@@ -374,29 +312,14 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       recipientAccount: payload.recipient.accountNumber ?? '',
       recipientName: payload.recipient.name ?? '',
       senderAccount: this.config.vendor,
-      senderName: payload.recipient.name ?? '',
+      senderName: this.config.vendor,
       amount: String(payload.amount),
       vendor: this.config.vendor,
       pin: this.config.pin,
       msisdn: payload.recipient.phone ?? '',
       remarks: payload.remarks ?? '',
     };
-
-    const signedFields = [
-      'transid',
-      'recipientFiCode',
-      'recipientAccount',
-      'recipientName',
-      'senderAccount',
-      'senderName',
-      'amount',
-      'vendor',
-      'pin',
-      'msisdn',
-      'remarks',
-    ];
-
-    const res = await this.post<SelcomResponse>('/v1/qwiksend/process', signedFields, body);
+    const res = await this.request<SelcomResponse>('POST', '/v1/qwiksend/process', body);
 
     return {
       disbursementId: res.transid ?? transid,
@@ -499,7 +422,7 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   async cancelOrder(
     orderId: string,
   ): Promise<{ orderId: string; cancelled: boolean; message?: string }> {
-    const res = await this.del<SelcomResponse>('/v1/checkout/cancel-order', ['order_id'], {
+    const res = await this.request<SelcomResponse>('DELETE', '/v1/checkout/cancel-order', {
       order_id: orderId,
     });
 
@@ -519,13 +442,7 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       query.todate = params.toDate.toISOString().slice(0, 10);
     }
 
-    const signedFields = Object.keys(query);
-
-    const res = await this.get<SelcomResponse>(
-      '/v1/checkout/list-orders',
-      signedFields.length > 0 ? signedFields : ['fromdate'],
-      query,
-    );
+    const res = await this.request<SelcomResponse>('GET', '/v1/checkout/list-orders', query);
 
     const items = res.data as Array<Record<string, unknown>>;
     return {
@@ -545,11 +462,11 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   async getBalance(): Promise<BalanceResult> {
     const transid = uuid();
 
-    const res = await this.post<SelcomResponse>(
-      '/v1/vendor/balance',
-      ['vendor', 'pin', 'transid'],
-      { vendor: this.config.vendor, pin: this.config.pin, transid },
-    );
+    const res = await this.request<SelcomResponse>('POST', '/v1/vendor/balance', {
+      vendor: this.config.vendor,
+      pin: this.config.pin,
+      transid,
+    });
 
     const firstItem = res.data[0] as Record<string, unknown> | undefined;
     return {
@@ -566,15 +483,11 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   async getNameLookup(phoneOrAccount: string): Promise<NameLookupResult> {
     try {
       const transid = uuid();
-      const res = await this.get<SelcomResponse>(
-        '/v1/walletcashin/namelookup',
-        ['utilitycode', 'utilityref', 'transid'],
-        {
-          utilitycode: 'CASHIN', // auto-route
-          utilityref: phoneOrAccount,
-          transid,
-        },
-      );
+      const res = await this.request<SelcomResponse>('GET', '/v1/walletcashin/namelookup', {
+        utilitycode: 'CASHIN', // auto-route
+        utilityref: phoneOrAccount,
+        transid,
+      });
 
       const firstItem = res.data[0] as Record<string, unknown> | undefined;
       return {

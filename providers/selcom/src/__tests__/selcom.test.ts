@@ -505,7 +505,7 @@ describe('SelcomPaymentProvider', () => {
     ).rejects.toThrow('Insufficient float balance');
   });
 
-  it('handles INPROGRESS status', async () => {
+  it('passes through INPROGRESS as QUEUED for disburse', async () => {
     mockFetch({
       transid: 'txn_ip',
       reference: 'ref_ip',
@@ -522,17 +522,17 @@ describe('SelcomPaymentProvider', () => {
       pin: '1234',
     });
 
-    await expect(
-      provider.disburse({
-        amount: 50000,
-        currency: 'TZS',
-        reference: 'payout_ip',
-        recipient: { phone: '255754321098' },
-      }),
-    ).rejects.toThrow('Selcom: INPROGRESS');
+    const result = await provider.disburse({
+      amount: 50000,
+      currency: 'TZS',
+      reference: 'payout_ip',
+      recipient: { phone: '255754321098' },
+    });
+    expect(result.status).toBe('QUEUED');
+    expect(result.disbursementId).toBe('txn_ip');
   });
 
-  it('handles AMBIGUOUS status', async () => {
+  it('passes through AMBIGUOUS as AMBIGUOUS for getPaymentStatus', async () => {
     mockFetch({
       transid: 'txn_amb',
       reference: 'ref_amb',
@@ -549,7 +549,8 @@ describe('SelcomPaymentProvider', () => {
       pin: '1234',
     });
 
-    await expect(provider.getPaymentStatus('order_amb')).rejects.toThrow('Selcom: AMBIGUOUS');
+    const status = await provider.getPaymentStatus('order_amb');
+    expect(status).toBe('AMBIGUOUS');
   });
 
   it('returns PAYMENT_PENDING for non-terminal webhook status', async () => {
