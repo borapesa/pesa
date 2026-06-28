@@ -227,6 +227,9 @@ describe('SelcomPaymentProvider', () => {
       apiSecret: 'test-api-secret',
       vendor: 'VENDOR001',
       pin: '1234',
+      senderAccount: 'VENDOR001',
+      senderName: 'Bora Pesa Ltd',
+      senderPhone: '255700000001',
     });
 
     const result = await provider.disburse({
@@ -245,6 +248,32 @@ describe('SelcomPaymentProvider', () => {
 
     const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
     expect(url).toContain('qwiksend/process');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.senderName).toBe('Bora Pesa Ltd');
+    expect(body.senderAccount).toBe('VENDOR001');
+    expect(body.msisdn).toBe('255700000001');
+    expect(body.purpose).toBe('DISBURSEMENT');
+  });
+
+  it('throws if bank disbursement lacks sender config', async () => {
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    await expect(
+      provider.disburse({
+        amount: 500000,
+        currency: 'TZS',
+        reference: 'bank_fail',
+        recipient: { name: 'Jane', accountNumber: '1234567890', bic: 'NMBTZTZ' },
+      }),
+    ).rejects.toThrow('senderAccount');
   });
 
   it('defaults to CASHIN for unknown wallet networks', async () => {

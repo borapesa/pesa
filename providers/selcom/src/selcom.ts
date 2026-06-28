@@ -37,6 +37,20 @@ export interface SelcomConfig {
   vendor: string;
   /** Float account PIN — required for disbursement and balance queries. */
   pin: string;
+  /**
+   * Source account number for Qwiksend bank transfers.
+   * Defaults to vendor if not set.
+   */
+  senderAccount?: string;
+  /**
+   * Account holder display name for bank transfers.
+   * Defaults to vendor if not set.
+   */
+  senderName?: string;
+  /**
+   * Sender mobile number for bank transfers.
+   */
+  senderPhone?: string;
 }
 
 // ── Response types ──────────────────────────────────────────────────
@@ -55,7 +69,10 @@ interface SelcomResponse {
 export class SelcomPaymentProvider extends BasePaymentProvider {
   readonly name: ProviderName = 'selcom';
 
-  private config: Required<Omit<SelcomConfig, 'baseUrl'>> & { baseUrl: string };
+  private config: Required<
+    Omit<SelcomConfig, 'baseUrl' | 'senderAccount' | 'senderName' | 'senderPhone'>
+  > &
+    Pick<SelcomConfig, 'senderAccount' | 'senderName' | 'senderPhone'> & { baseUrl: string };
 
   constructor(config: SelcomConfig) {
     super();
@@ -65,6 +82,9 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       apiSecret: config.apiSecret,
       vendor: config.vendor,
       pin: config.pin,
+      senderAccount: config.senderAccount,
+      senderName: config.senderName,
+      senderPhone: config.senderPhone,
     };
   }
 
@@ -304,6 +324,13 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   }
 
   private async disburseToBank(payload: DisbursePayload): Promise<DisburseResult> {
+    if (!this.config.senderAccount || !this.config.senderName || !this.config.senderPhone) {
+      throw new PesaProviderError(
+        'selcom bank disbursement requires senderAccount, senderName, and senderPhone in provider config',
+        400,
+      );
+    }
+
     const transid = uuid();
 
     const body: Record<string, unknown> = {
@@ -311,12 +338,13 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       recipientFiCode: payload.recipient.bic ?? '',
       recipientAccount: payload.recipient.accountNumber ?? '',
       recipientName: payload.recipient.name ?? '',
-      senderAccount: this.config.vendor,
-      senderName: this.config.vendor,
+      senderAccount: this.config.senderAccount,
+      senderName: this.config.senderName,
       amount: String(payload.amount),
       vendor: this.config.vendor,
       pin: this.config.pin,
-      msisdn: payload.recipient.phone ?? '',
+      msisdn: this.config.senderPhone,
+      purpose: 'DISBURSEMENT',
       remarks: payload.remarks ?? '',
     };
     const res = await this.request<SelcomResponse>('POST', '/v1/qwiksend/process', body);
