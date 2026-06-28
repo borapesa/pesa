@@ -405,7 +405,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
     // Verify checksum signature if key is configured
     if (this.config.checksumKey) {
       const checksum = headers['x-clickpesa-checksum'] || headers.checksum || '';
-      const verified = await this.verifyChecksum(body, checksum);
+      const verified = this.verifyChecksum(body, checksum);
       if (!verified) {
         throw new PesaProviderError('ClickPesa webhook checksum verification failed', 401);
       }
@@ -915,41 +915,20 @@ export class ClickPesaProvider extends BasePaymentProvider {
     return hmac.update(json).digest('hex');
   }
 
-  private async verifyChecksum(body: string, checksum: string): Promise<boolean> {
+  private verifyChecksum(body: string, checksum: string): boolean {
     if (!this.config.checksumKey) return true;
 
-    try {
-      const encoder = new TextEncoder();
-      const key = await crypto.subtle.importKey(
-        'raw',
-        encoder.encode(this.config.checksumKey),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign'],
-      );
-      const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
-      const hex = Array.from(new Uint8Array(signature))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+    const hmac = createHmac('sha256', this.config.checksumKey);
+    const expected = hmac.update(body).digest('hex');
 
-      // Constant-time comparison — prevents timing-based side-channel attacks.
-      // XOR-based: every byte is compared regardless of mismatch position.
-      const expected = hex;
-      const received = checksum.toLowerCase();
-      if (expected.length !== received.length) return false;
-      let diff = 0;
-      for (let i = 0; i < expected.length; i++) {
-        diff |= expected.charCodeAt(i) ^ received.charCodeAt(i);
-      }
-      return diff === 0;
-    } catch (err) {
-      // Fail closed — if Web Crypto is unavailable, reject the webhook
-      // rather than silently accepting it. Requires Node 19+ or a polyfill.
-      throw new PesaProviderError(
-        `ClickPesa webhook checksum verification unavailable: ${err instanceof Error ? err.message : 'unknown error'}. ` +
-          `Web Crypto API is required (Node 19+).`,
-        500,
-      );
+    // Constant-time comparison — prevents timing-based side-channel attacks.
+    // XOR-based: every byte is compared regardless of mismatch position.
+    const received = checksum.toLowerCase();
+    if (expected.length !== received.length) return false;
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) {
+      diff |= expected.charCodeAt(i) ^ received.charCodeAt(i);
     }
+    return diff === 0;
   }
 }
