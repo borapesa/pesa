@@ -58,7 +58,17 @@ const providers = [
 
 export default function Page() {
   return (
-    <HomeLayout>
+    <HomeLayout
+      githubUrl="https://github.com/borapesa/pesa"
+      nav={{
+        title: (
+          <>
+            <img src="/borapesa.svg" alt="Bora Pesa" width={32} height={32} />
+            <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Bora Pesa</span>
+          </>
+        ),
+      }}
+    >
       <style>{`
         .btn-primary {
           display: inline-flex; align-items: center; padding: 0.75rem 1.5rem;
@@ -113,33 +123,10 @@ export default function Page() {
           justifyContent: 'center',
           minHeight: '80vh',
           textAlign: 'center',
-          padding: '0 1rem',
+          padding: '3rem 1rem 0',
           gap: '1rem',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1rem',
-            marginBottom: '0.5rem',
-          }}
-        >
-          <img src="/borapesa.svg" alt="Bora Pesa" width={64} height={64} />
-          <h1
-            style={{
-              fontSize: '3.5rem',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              margin: 0,
-            }}
-          >
-            Bora Pesa
-          </h1>
-        </div>
-
         <p
           style={{
             fontSize: '1.25rem',
