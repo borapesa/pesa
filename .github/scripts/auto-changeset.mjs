@@ -116,6 +116,15 @@ function parseCommit(line) {
 // ── Main ───────────────────────────────────────────────────────────────
 
 function main() {
+  // Don't regenerate if the incoming commit is a changeset release merge —
+  // changesets/action just consumed all changeset files and published.
+  // If we regenerate here, the action sees new files and opens another PR.
+  const headMsg = git(['log', '-1', '--pretty=format:%s']);
+  if (headMsg.includes('chore: release')) {
+    console.log('Skipping: release commit detected — changesets were just consumed.');
+    return;
+  }
+
   const ref = lastTag();
   console.log(`Scanning commits since ${ref}`);
 
