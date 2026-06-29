@@ -1,5 +1,6 @@
 'use client';
 
+import { Check, Clipboard } from 'lucide-react';
 import { useState } from 'react';
 
 export function CopyButton({ text }: { text: string }) {
@@ -15,22 +16,10 @@ export function CopyButton({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0.25rem 0.5rem',
-        borderRadius: '0.25rem',
-        border: '1px solid var(--color-fd-border)',
-        background: 'transparent',
-        color: 'var(--color-fd-muted-foreground)',
-        cursor: 'pointer',
-        fontSize: '0.75rem',
-        transition: 'background 0.15s, color 0.15s',
-      }}
+      className="inline-flex items-center justify-center p-1 rounded border border-fd-border bg-transparent text-fd-muted-foreground cursor-pointer transition-all duration-150 hover:bg-fd-accent [&_svg]:size-3.5"
       aria-label="Copy to clipboard"
     >
-      {copied ? '✓ Copied' : 'Copy'}
+      {copied ? <Check /> : <Clipboard />}
     </button>
   );
 }
