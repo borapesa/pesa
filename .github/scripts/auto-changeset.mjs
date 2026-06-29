@@ -10,7 +10,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // ── Package mapping ────────────────────────────────────────────────────
@@ -51,12 +51,11 @@ function git(args, opts = {}) {
 
 function lastTag() {
   try {
-    // Changesets creates per-package tags: @borapesa/pesa@0.2.1
-    // Use the core package tag to find the last release.
-    return git(['describe', '--tags', '--abbrev=0', '--match', '@borapesa/pesa@*']);
+    // Changesets creates per-package tags: @borapesa/pesa@0.2.1, etc.
+    return git(['describe', '--tags', '--abbrev=0', '--match', '@borapesa/*@*']);
   } catch {
-    // Fall back to v* style tags (legacy, from before changesets)
     try {
+      // Legacy tags from before changesets
       return git(['describe', '--tags', '--abbrev=0', '--match', 'v*']);
     } catch {
       // No tags yet — use first commit
@@ -117,18 +116,6 @@ function parseCommit(line) {
 // ── Main ───────────────────────────────────────────────────────────────
 
 function main() {
-  // Idempotency: don't regenerate if auto-changesets already exist (they
-  // were created on a previous push and haven't been consumed by a version
-  // bump yet).
-  const dir = join(process.cwd(), '.changeset');
-  const existing = existsSync(dir)
-    ? readdirSync(dir).filter((f) => f.startsWith('auto-'))
-    : [];
-  if (existing.length > 0) {
-    console.log(`Skipping: ${existing.length} auto-changeset(s) already exist — waiting for version bump.`);
-    return;
-  }
-
   const ref = lastTag();
   console.log(`Scanning commits since ${ref}`);
 
