@@ -7,11 +7,10 @@ export default function Layout({ children }: { children: ReactNode }) {
     <DocsLayout
       tree={source.pageTree}
       nav={{
-        enabled: false,
         title: (
           <>
-            <img src="/borapesa.svg" alt="Bora Pesa" width={28} height={28} />
-            <span style={{ fontWeight: 600 }}>Bora Pesa</span>
+            <img src="/borapesa.svg" alt="Bora Pesa" width={32} height={32} />
+            <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Bora Pesa</span>
           </>
         ),
       }}
