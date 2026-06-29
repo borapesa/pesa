@@ -10,3 +10,6 @@ dist/
 coverage/
 out/
 .source/
+docs/public/llms/
+docs/public/llms.txt
+docs/public/llms-full.txt

@@ -4,7 +4,8 @@
   "private": true,
   "description": "Bora Pesa documentation site — powered by Fumadocs",
   "scripts": {
-    "dev": "next dev",
+    "dev": "pnpm predev && next dev",
+    "predev": "node scripts/generate-llms.mjs",
     "build": "next build",
     "postbuild": "node scripts/generate-llms.mjs",
     "start": "next start",
@@ -15,12 +16,17 @@
   "license": "MIT",
   "packageManager": "pnpm@10.33.3",
   "dependencies": {
+    "@fuma-translate/react": "^1.0.2",
     "@fumadocs/mdx-remote": "^1.4.10",
     "@orama/orama": "^3.1.18",
+    "@radix-ui/react-popover": "^1.1.17",
     "@vercel/og": "^0.11.1",
+    "class-variance-authority": "^0.7.1",
+    "cnfast": "^0.0.8",
     "fumadocs-core": "^16.10.5",
     "fumadocs-mdx": "^15.0.12",
     "fumadocs-ui": "^16.10.5",
+    "lucide-react": "^1.22.0",
     "next": "^16.2.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

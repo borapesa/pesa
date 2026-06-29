@@ -3,7 +3,7 @@ title: Architecture
 description: How Bora Pesa is designed — factory pattern, provider abstraction, plugin pipeline, and event store.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from 'fumadocs-ui/components/callout'
 
 <Callout variant="info">Added in v0.1.0</Callout>
 
@@ -16,8 +16,8 @@ Bora Pesa is architecturally inspired by [better-auth](https://better-auth.com).
 ```
 createPesa({ provider, plugins?, db?, webhooks? })
 
-        │
-        ▼
+                │
+                ▼
 
 ┌─────────────────────────────────┐
 │          PesaInstance           │
@@ -35,12 +35,12 @@ createPesa({ provider, plugins?, db?, webhooks? })
 
 Every payment provider implements [`BasePaymentProvider`](/docs/api/pesa/classes/BasePaymentProvider) — an abstract class with four required methods:
 
-| Method | Purpose |
-|---|---|
-| `createOrder(payload)` | Initiate a checkout / USSD push / redirect |
-| `getPaymentStatus(orderId)` | Poll or fetch current status |
-| `handleWebhook(body, headers)` | Parse + verify an incoming webhook |
-| `disburse(payload)` | B2C / wallet-out disbursement |
+| Method                         | Purpose                                    |
+| ------------------------------ | ------------------------------------------ |
+| `createOrder(payload)`         | Initiate a checkout / USSD push / redirect |
+| `getPaymentStatus(orderId)`    | Poll or fetch current status               |
+| `handleWebhook(body, headers)` | Parse + verify an incoming webhook         |
+| `disburse(payload)`            | B2C / wallet-out disbursement              |
 
 Seven optional methods cover previews, refunds, cancellations, name lookups, credential validation, and order listing. Providers override what they support; the rest throw `PesaUnsupportedError`.
 
@@ -89,9 +89,9 @@ Every `pesa` instance exposes a generic `(Request) => Response` handler. Framewo
 ```
               ┌──────────────┐
 Bun.serve() ──┤              │
-Next.js    ──┤   pesa.mount  ├── POST /order
-Express    ──┤ (fetch-like)  ├── GET  /status/:orderId
-Elysia     ──┤              ├── POST /webhook
+Next.js     ──┤  pesa.mount  ├── POST /order
+Express     ──┤ (fetch-like) ├── GET  /status/:orderId
+Elysia      ──┤              ├── POST /webhook
               └──────────────┘
 ```
 
@@ -99,10 +99,10 @@ Elysia     ──┤              ├── POST /webhook
 
 These are locked for v1.0 and should not change without an RFC:
 
-| Decision | Rationale |
-|---|---|
-| **TZS only, whole integers** | TZS has no subunits in digital payments. `15000` = TZS 15,000. Floats are a bug surface. |
-| **MSISDN phone format** | `255XXXXXXXXX`. Local `07XX` rejected at validation. Matches every Tanzanian payment API. |
-| **Auth out of scope** | Pesa is payment infrastructure. Use better-auth or your own auth system. |
-| **Secrets never reach the client** | The `@borapesa/client` package contains zero provider credentials. All provider API calls happen server-side. |
+| Decision                              | Rationale                                                                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **TZS only, whole integers**          | TZS has no subunits in digital payments. `15000` = TZS 15,000. Floats are a bug surface.                                                               |
+| **MSISDN phone format**               | `255XXXXXXXXX`. Local `07XX` rejected at validation. Matches every Tanzanian payment API.                                                              |
+| **Auth out of scope**                 | Pesa is payment infrastructure. Use better-auth or your own auth system.                                                                               |
+| **Secrets never reach the client**    | The `@borapesa/client` package contains zero provider credentials. All provider API calls happen server-side.                                          |
 | **AMBIGUOUS is a first-class status** | Selcom returns this when the transaction outcome is unknown. Normalizing it to `PENDING` or `FAILED` would lose information. Applications should poll. |
