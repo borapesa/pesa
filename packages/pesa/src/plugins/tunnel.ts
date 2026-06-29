@@ -60,6 +60,16 @@ function startTunnel(port: number): Promise<Tunnel> {
     let resolved = false;
     let stderr = '';
 
+    const checkOutput = (output: string) => {
+      const match = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
+      if (match && !resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        const url = match[0].replace(/\/$/, '');
+        resolve({ url, close: () => child.kill() });
+      }
+    };
+
     const timeout = setTimeout(() => {
       if (!resolved) {
         resolved = true;
@@ -69,18 +79,13 @@ function startTunnel(port: number): Promise<Tunnel> {
     }, 15_000);
 
     child.stdout?.on('data', (data: Buffer) => {
-      const output = data.toString();
-      const match = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
-      if (match && !resolved) {
-        resolved = true;
-        clearTimeout(timeout);
-        const url = match[0].replace(/\/$/, '');
-        resolve({ url, close: () => child.kill() });
-      }
+      checkOutput(data.toString());
     });
 
     child.stderr?.on('data', (data: Buffer) => {
-      stderr += data.toString();
+      const text = data.toString();
+      stderr += text;
+      checkOutput(text);
     });
 
     child.on('error', (err) => {
