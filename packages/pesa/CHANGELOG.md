@@ -1,5 +1,11 @@
 # @borapesa/pesa
 
+## 0.4.1
+
+### Patch Changes
+
+- - parse cloudflared output on stderr, not stdout
+
 ## 0.4.0
 
 ### Minor Changes

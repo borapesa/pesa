@@ -1,5 +1,12 @@
 # @borapesa/azampay
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.4.1
+
 ## 0.1.2
 
 ### Patch Changes
