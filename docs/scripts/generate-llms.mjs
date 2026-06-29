@@ -54,15 +54,21 @@ function walk(dir, depth = 0, items = []) {
 const markdownItems = [];
 const treeContent = `# Docs\n\n${walk(CONTENT_DIR, 0, markdownItems)}`;
 
-// Write per-page markdown to public/llms/ (served in dev + prod)
-// Use .md extension (flat files, no trailing slash conflicts)
+// Write per-page markdown to public/ (dev) + out/ (Cloudflare Pages production).
+// public/ is copied to out/ by next build BEFORE postbuild runs, so we must
+// write to out/ directly for the markdown files to be served in production.
+const bodyOnly = (item) => item.content.replace(/^---[\s\S]*?---\n/, '');
+const descLine = (item) => item.description ? `${item.description}\n\n` : '';
+const markdown = (item) => `# ${item.title}\n\n${descLine(item)}${bodyOnly(item)}`;
+
 for (const item of markdownItems) {
   const pubPath = join(PUBLIC_DIR, 'llms', item.relPath);
+  const outPath = join(OUT_DIR, 'llms', item.relPath);
   mkdirSync(pubPath, { recursive: true });
-  const bodyOnly = item.content.replace(/^---[\s\S]*?---\n/, '');
-  const descLine = item.description ? `${item.description}\n\n` : '';
-  const md = `# ${item.title}\n\n${descLine}${bodyOnly}`;
+  mkdirSync(outPath, { recursive: true });
+  const md = markdown(item);
   writeFileSync(join(pubPath, 'index.md'), md, 'utf-8');
+  writeFileSync(join(outPath, 'index.md'), md, 'utf-8');
 }
 console.log(`[generate-llms] wrote ${markdownItems.length} per-page markdown files`);
 
