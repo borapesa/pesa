@@ -87,18 +87,18 @@ pesa.on('DISBURSEMENT_SUCCESS', (event) => {
 
 ## Plugin onPaymentEvent hooks
 
-Plugins also have `onPaymentEvent` hooks that fire **before** user-registered handlers. This is where built-in behavior like webhook verification enforcement runs:
+Plugins also have `onPaymentEvent` hooks that fire **before** user-registered handlers. Plugins fire in registration order; user handlers fire after all plugin hooks complete.
 
 ```ts
-// In webhookVerifyPlugin:
-async onPaymentEvent(event) {
-  if (!process.env.BORAPESA_WEBHOOK_SECRET) {
-    throw new PesaWebhookError('BORAPESA_WEBHOOK_SECRET is not set');
-  }
-}
+const auditPlugin: PesaPlugin = {
+  name: 'audit-log',
+  async onPaymentEvent(event) {
+    console.log(`[audit] ${event.type} for order ${event.orderId}`);
+  },
+};
 ```
 
-Plugins fire in registration order. User handlers fire after all plugin hooks complete.
+Webhook secret enforcement (`BORAPESA_WEBHOOK_SECRET`) is built into `createPesa()` — no plugin needed.
 
 ## Querying past events
 

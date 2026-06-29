@@ -66,6 +66,7 @@ pesa.on('PAYMENT_SUCCESS', async (event) => {
 Swap the BogusProvider for a real provider. Everything else stays the same:
 
 ```ts
+import { retryPlugin, idempotencyPlugin, loggingPlugin } from '@borapesa/pesa/plugins';
 import { ClickPesaProvider } from '@borapesa/clickpesa';
 
 const pesa = createPesa({
@@ -74,7 +75,11 @@ const pesa = createPesa({
     clientId: process.env.CLICKPESA_CLIENT_ID!,
     apiKey:   process.env.CLICKPESA_API_KEY!,
   }),
+  webhooks: {
+    secret: process.env.BORAPESA_WEBHOOK_SECRET!,
+  },
   plugins: [
+    idempotencyPlugin(),
     retryPlugin({ maxAttempts: 3 }),
     loggingPlugin({ level: 'info' }),
   ],

@@ -42,7 +42,7 @@ Every payment provider implements [`BasePaymentProvider`](/docs/api/pesa/classes
 | `handleWebhook(body, headers)` | Parse + verify an incoming webhook         |
 | `disburse(payload)`            | B2C / wallet-out disbursement              |
 
-Seven optional methods cover previews, refunds, cancellations, name lookups, credential validation, and order listing. Providers override what they support; the rest throw `PesaUnsupportedError`.
+Eight optional methods cover previews, refunds, cancellations, balance queries, name lookups, credential validation, and order listing. Providers override what they support; the rest throw `PesaUnsupportedError`. On the returned `PesaInstance`, unsupported operations are `undefined` — use feature detection (`if (pesa.refund)`) rather than catching `PesaUnsupportedError`.
 
 **Application code never imports provider-specific logic.** Swap Selcom for ClickPesa with a one-line config change. The SDK calls only `BasePaymentProvider` methods — no provider internals ever leak.
 
@@ -73,7 +73,7 @@ Plugins are composed **in order** in the `plugins` array. Order matters — plac
 
 Every verified webhook is normalized into a [`PaymentEvent`](/docs/api/pesa/interfaces/PaymentEvent) and persisted. This is the **source of truth** for all payment activity.
 
-The default adapter is SQLite (`better-sqlite3`) — zero configuration, works in any Node.js environment. Swap for Turso ("libSQL"), PostgreSQL, Prisma, or Drizzle via the `db` config field.
+The default adapter is SQLite (`better-sqlite3`) — zero configuration, works in any Node.js environment. Additional adapters (Turso/libSQL, PostgreSQL, Prisma, Drizzle) are planned.
 
 ```ts
 const pesa = createPesa({
@@ -104,5 +104,5 @@ These are locked for v1.0 and should not change without an RFC:
 | **TZS only, whole integers**          | TZS has no subunits in digital payments. `15000` = TZS 15,000. Floats are a bug surface.                                                               |
 | **MSISDN phone format**               | `255XXXXXXXXX`. Local `07XX` rejected at validation. Matches every Tanzanian payment API.                                                              |
 | **Auth out of scope**                 | Pesa is payment infrastructure. Use better-auth or your own auth system.                                                                               |
-| **Secrets never reach the client**    | The `@borapesa/client` package contains zero provider credentials. All provider API calls happen server-side.                                          |
+| **Secrets never reach the client**    | The SDK is server-only — all provider API calls happen server-side. No credentials are ever exposed to the browser.                                   |
 | **AMBIGUOUS is a first-class status** | Selcom returns this when the transaction outcome is unknown. Normalizing it to `PENDING` or `FAILED` would lose information. Applications should poll. |

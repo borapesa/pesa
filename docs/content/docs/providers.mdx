@@ -1,0 +1,76 @@
+---
+title: Providers
+description: Available payment providers — Selcom, ClickPesa, AzamPay — and their capabilities.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout variant="info">Added in v0.1.0</Callout>
+
+Providers are the bridge between the SDK and payment gateways. Pick one that matches your business needs. Swap providers with a one-line config change — no application code changes needed.
+
+## Comparison
+
+|                         | Selcom | ClickPesa | AzamPay |
+| ----------------------- | ------ | --------- | ------- |
+| MNO USSD push           | ✅     | ✅        | ✅      |
+| MNO redirect checkout   | ✅     | ✅        | —       |
+| Bank checkout (OTP)     | —      | —         | ✅      |
+| Hosted payment page     | —      | ✅        | ✅      |
+| Disburse (wallet)       | ✅     | ✅        | ✅      |
+| Disburse (bank)         | ✅     | ✅        | —       |
+| Webhook signature       | HMAC-SHA256 | HMAC-SHA256 | RSA-PKCS#1 |
+| Order cancellation      | ✅     | —         | —       |
+| Order listing           | ✅     | —         | —       |
+| Balance query           | ✅     | —         | —       |
+| Name lookup             | ✅     | ✅        | ✅      |
+| Credential validation   | ✅     | ✅        | ✅      |
+| Auth method             | HMAC per-request | Bearer token | Bearer token |
+
+## Provider-specific features
+
+Some providers expose methods beyond the standard `BasePaymentProvider` interface. These are available on the provider instance directly (`pesa.provider`) but are **not** part of the unified `PesaInstance` API.
+
+### Selcom
+
+- **Bank disbursement (Qwiksend)** — send to bank accounts via `senderAccount`, `senderName`, `senderPhone` config.
+- **Order management** — `cancelOrder()`, `listOrders()` are first-class.
+
+### ClickPesa
+
+- **BillPay** — 7 methods for control number generation, customer management, and payment status.
+- **Payout links** — `generatePayoutLink()` for shareable disbursement URLs.
+- **Exchange rates** — `getExchangeRates()` for currency conversion.
+- **Bank listing** — `getBanks()` for supported bank codes.
+- **Account statements** — `getAccountStatement()` for reconciliation.
+
+### AzamPay
+
+- **Bank checkout** — OTP-based bank payment flow (CRDB, NMB).
+- **Payment partners** — `getPaymentPartners()` to list available MNO partners.
+- **RSA callback verification** — callbacks are signed with RSA-SHA256; the SDK verifies them automatically.
+- **Disbursement routing** — separate base URL for disbursement endpoints (`disbursementBaseUrl` config).
+- **Provider tracking** — `raw._providerName` and `raw._checkoutProvider` on order results for status queries.
+
+## Writing a provider
+
+Every provider extends [`BasePaymentProvider`](/docs/api/pesa/classes/BasePaymentProvider). Four methods are required, eight are optional.
+
+```ts
+import { BasePaymentProvider } from '@borapesa/pesa';
+
+class MyProvider extends BasePaymentProvider {
+  readonly name = 'my-provider';
+
+  // Required
+  async createOrder(payload) { /* ... */ }
+  async getPaymentStatus(orderId) { /* ... */ }
+  async handleWebhook(body, headers) { /* ... */ }
+  async disburse(payload) { /* ... */ }
+
+  // Optional — override what you support
+  async getNameLookup(phoneOrAccount) { /* ... */ }
+}
+```
+
+See the [Architecture](/docs/architecture) page for the full provider lifecycle.

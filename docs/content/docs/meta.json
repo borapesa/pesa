@@ -1,3 +1,13 @@
 {
-  "pages": ["index", "getting-started", "architecture", "events", "plugins", "errors", "api"]
+  "pages": [
+    "index",
+    "getting-started",
+    "architecture",
+    "providers",
+    "events",
+    "plugins",
+    "testing",
+    "errors",
+    "api"
+  ]
 }

@@ -20,6 +20,16 @@ PesaError (base)
 └── PesaUnsupportedError   ← Provider doesn't implement this optional operation
 ```
 
+Every error has a `code` property for programmatic handling without `instanceof`:
+
+| Error class             | `code`              |
+| ----------------------- | ------------------- |
+| `PesaValidationError`   | `VALIDATION_ERROR`  |
+| `PesaNetworkError`      | `NETWORK_ERROR`     |
+| `PesaProviderError`     | `PROVIDER_ERROR`    |
+| `PesaWebhookError`      | `WEBHOOK_ERROR`     |
+| `PesaUnsupportedError`  | `UNSUPPORTED`       |
+
 ## Handling errors
 
 ```ts
@@ -69,22 +79,18 @@ try {
 
 ## Feature detection
 
-Some operations are optional — not all providers support refunds, previews, or cancellations. Check before calling:
+Some operations are optional — not all providers support refunds, previews, or cancellations. On the `PesaInstance`, unsupported operations are `undefined`. Check before calling:
 
 ```ts
-if (pesa.refund) {
-  await pesa.refund('order_123', 5000);
-}
-
-if (pesa.previewOrder) {
-  const preview = await pesa.previewOrder({ ... });
-  console.log('Fee:', preview.fee);
-}
-
-if (pesa.validateCredentials) {
-  const health = await pesa.validateCredentials();
-  console.log('Provider OK:', health.valid);
-}
+// All optional operations support feature detection:
+if (pesa.refund)              await pesa.refund('order_123', 5000);
+if (pesa.cancelOrder)         await pesa.cancelOrder('order_123');
+if (pesa.previewOrder)        await pesa.previewOrder({ ... });
+if (pesa.previewDisburse)     await pesa.previewDisburse({ ... });
+if (pesa.getBalance)          await pesa.getBalance();
+if (pesa.getNameLookup)       await pesa.getNameLookup('255712345678');
+if (pesa.validateCredentials) await pesa.validateCredentials();
+if (pesa.listOrders)          await pesa.listOrders({ fromDate: new Date('2026-01-01') });
 ```
 
-An unsupported operation will be `undefined` on the instance rather than throwing at call time.
+Calling an undefined operation throws `TypeError`, not `PesaUnsupportedError`. The provider-level default implementations throw `PesaUnsupportedError`, but `createPesa()` binds only supported methods — everything else is left `undefined`.

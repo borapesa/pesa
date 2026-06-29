@@ -1,0 +1,104 @@
+---
+title: Testing
+description: BogusPaymentProvider — a deterministic test double for local development and integration tests.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout variant="info">Added in v0.1.0</Callout>
+
+`BogusPaymentProvider` is a test double that implements every `BasePaymentProvider` method — no API keys, no network calls. Perfect for local development, CI, and integration tests.
+
+```ts
+import { createPesa } from '@borapesa/pesa';
+import { BogusPaymentProvider } from '@borapesa/pesa/testing';
+
+const pesa = createPesa({
+  provider: new BogusPaymentProvider(),
+});
+```
+
+## Configuration
+
+```ts
+new BogusPaymentProvider({
+  defaultBehavior: 'success',   // 'success' | 'failure' | 'pending'
+  delay: 200,                    // simulated network delay in ms (default: 0)
+})
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `defaultBehavior` | `'success' \| 'failure' \| 'pending'` | `'success'` | Default outcome for all operations |
+| `delay` | `number` | `0` | Simulated network latency in milliseconds |
+
+## Scripted behaviors
+
+Override the default behavior per-reference for more realistic tests:
+
+```ts
+const provider = new BogusPaymentProvider({
+  defaultBehavior: 'success',
+});
+
+// Script specific outcomes by reference
+provider.script([
+  { reference: 'order_fail', behavior: 'failure' },
+  { reference: 'order_pending', behavior: 'pending' },
+  { reference: 'order_after3', behavior: 'success', after: 3 }, // succeeds on 4th call
+]);
+```
+
+The `after` option simulates flaky endpoints — the first N calls return the default, the N+1th returns the scripted behavior.
+
+## Example: integration test
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { createPesa } from '@borapesa/pesa';
+import { BogusPaymentProvider } from '@borapesa/pesa/testing';
+
+describe('checkout flow', () => {
+  it('creates a successful order', async () => {
+    const pesa = createPesa({
+      provider: new BogusPaymentProvider({ defaultBehavior: 'success' }),
+    });
+
+    const order = await pesa.createOrder({
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'test_001',
+      customer: { name: 'Juma', phone: '255712345678' },
+    });
+
+    expect(order.status).toBe('PENDING');
+    expect(order.orderId).toBeDefined();
+  });
+
+  it('handles payment failure', async () => {
+    const provider = new BogusPaymentProvider({ defaultBehavior: 'success' });
+    provider.script([{ reference: 'bad_card', behavior: 'failure' }]);
+
+    const pesa = createPesa({ provider });
+    const order = await pesa.createOrder({
+      amount: 15000,
+      currency: 'TZS',
+      reference: 'bad_card',
+      customer: { name: 'Juma', phone: '255712345678' },
+    });
+
+    expect(order.status).toBe('FAILED');
+  });
+});
+```
+
+## Supported operations
+
+`BogusPaymentProvider` implements all eight optional methods:
+
+- `refund()` / `cancelOrder()` — return success for existing orders
+- `getBalance()` — returns a fake 1,000,000 TZS balance
+- `previewOrder()` / `previewDisburse()` — return mock fee estimates
+- `getNameLookup()` — returns `{ found: true, accountName: '...' }`
+- `listOrders()` — returns all orders created by this provider instance
+- `validateCredentials()` — returns `{ valid: true }`

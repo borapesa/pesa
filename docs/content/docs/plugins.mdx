@@ -1,6 +1,6 @@
 ---
 title: Plugins
-description: Retry, idempotency, logging, webhook verification, and writing custom plugins.
+description: Retry, idempotency, logging, and writing custom plugins.
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -48,7 +48,7 @@ retryPlugin({
 Prevents duplicate charges on network retries. Keys on `operation + reference` — the same reference sent to the same operation twice throws an error.
 
 ```ts
-idempotencyPlugin({ store: 'memory' }); // default: in-memory set
+idempotencyPlugin(); // in-memory set, persistent store planned for v1.0
 ```
 
 Place this **before** `retryPlugin` in the array. The retry loop in `createPesa` won't re-run `beforeRequest` hooks on retries, so idempotency checks only fire once per logical request.
@@ -65,16 +65,6 @@ loggingPlugin({
 ```
 
 Logs include: operation name, status, duration in ms, and sanitized payload.
-
-### `webhookVerifyPlugin()`
-
-Enforces the `BORAPESA_WEBHOOK_SECRET` environment variable in production. Throws if it's missing.
-
-```ts
-webhookVerifyPlugin('my-secret'); // or reads from process.env.BORAPESA_WEBHOOK_SECRET
-```
-
-Provider-specific cryptographic verification is handled by the provider adapter. This plugin adds an application-layer guard.
 
 ## Plugin interface
 
