@@ -65,6 +65,12 @@ function startTunnel(port: number): Promise<Tunnel> {
       if (match && !resolved) {
         resolved = true;
         clearTimeout(timeout);
+
+        // Detach listeners — cloudflared keeps logging heartbeats
+        // to stderr, which would drown out the server's own output.
+        child.stdout?.removeAllListeners('data');
+        child.stderr?.removeAllListeners('data');
+
         const url = match[0].replace(/\/$/, '');
         resolve({ url, close: () => child.kill() });
       }
