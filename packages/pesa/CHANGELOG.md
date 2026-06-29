@@ -1,5 +1,11 @@
 # @borapesa/pesa
 
+## 0.2.1
+
+### Patch Changes
+
+- - P1 normalizeError + P2 idempotency error types
+
 ## 0.2.0
 
 ### Minor Changes
