@@ -48,6 +48,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
           display: 'flex',
           gap: '0.5rem',
           alignItems: 'center',
+          justifyContent: 'flex-end',
           paddingBottom: '1.5rem',
           marginBottom: '1.5rem',
           borderBottom: '1px solid var(--color-fd-border)',

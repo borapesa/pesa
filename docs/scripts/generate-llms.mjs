@@ -36,13 +36,15 @@ function walk(dir, depth = 0, items = []) {
       const titleMatch =
         content.match(/^title:\s*"?([^"\n]+)"?/m) || content.match(/^#\s+(.+)/m);
       const title = titleMatch ? titleMatch[1].trim() : entry;
+      const descMatch = content.match(/^description:\s*"?([^"\n]+)"?/m);
+      const description = descMatch ? descMatch[1].trim() : '';
       const relPath = relative(CONTENT_DIR, full)
         .replace(/\\/g, '/')
         .replace(/\.(md|mdx)$/, '');
       output += `${'  '.repeat(depth)}- [${title}](/docs/${relPath})\n`;
 
       // Collect for per-file markdown output
-      items.push({ relPath, content, title });
+      items.push({ relPath, content, title, description });
     }
   }
   return output;
@@ -58,7 +60,8 @@ for (const item of markdownItems) {
   const pubPath = join(PUBLIC_DIR, 'llms', item.relPath);
   mkdirSync(pubPath, { recursive: true });
   const bodyOnly = item.content.replace(/^---[\s\S]*?---\n/, '');
-  const md = `# ${item.title}\n\n${bodyOnly}`;
+  const descLine = item.description ? `${item.description}\n\n` : '';
+  const md = `# ${item.title}\n\n${descLine}${bodyOnly}`;
   writeFileSync(join(pubPath, 'index.md'), md, 'utf-8');
 }
 console.log(`[generate-llms] wrote ${markdownItems.length} per-page markdown files`);
@@ -67,7 +70,8 @@ console.log(`[generate-llms] wrote ${markdownItems.length} per-page markdown fil
 const fullContent = markdownItems
   .map((item) => {
     const bodyOnly = item.content.replace(/^---[\s\S]*?---\n/, '');
-    return `# ${item.title}\n\n${bodyOnly}`;
+    const descLine = item.description ? `${item.description}\n\n` : '';
+    return `# ${item.title}\n\n${descLine}${bodyOnly}`;
   })
   .join('\n\n---\n\n');
 writeFileSync(join(OUT_DIR, 'llms-full.txt'), fullContent, 'utf-8');
