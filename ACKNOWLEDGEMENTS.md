@@ -45,7 +45,7 @@ Bora Pesa is built standing on the shoulders of many excellent open-source proje
 
 The provider adapters integrate with the following Tanzanian payment gateways. Community SDKs were referenced to understand provider API contracts and conventions.
 
-- [**AzamPay**](https://azampay.co.tz) — Mobile money, bank checkout, and disbursement APIs.
+- [**AzamPay**](https://azampay.com) — Mobile money, bank checkout, and disbursement APIs.
   - [flexcodelabs/azampay](https://github.com/flexcodelabs/azampay) — Dart/Flutter SDK.
   - [PhilipMuze/AzamPay-Tanzania-Flutter](https://github.com/PhilipMuze/AzamPay-Tanzania-Flutter) — Flutter SDK.
 - [**ClickPesa**](https://clickpesa.com) — Multi-channel payment and BillPay APIs.
