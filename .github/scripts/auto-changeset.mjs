@@ -51,11 +51,17 @@ function git(args, opts = {}) {
 
 function lastTag() {
   try {
-    // Get the most recent version tag reachable from HEAD
-    return git(['describe', '--tags', '--abbrev=0', '--match', 'v*']);
+    // Changesets creates per-package tags: @borapesa/pesa@0.2.1
+    // Use the core package tag to find the last release.
+    return git(['describe', '--tags', '--abbrev=0', '--match', '@borapesa/pesa@*']);
   } catch {
-    // No tags yet — use first commit
-    return git(['rev-list', '--max-parents=0', 'HEAD']);
+    // Fall back to v* style tags (legacy, from before changesets)
+    try {
+      return git(['describe', '--tags', '--abbrev=0', '--match', 'v*']);
+    } catch {
+      // No tags yet — use first commit
+      return git(['rev-list', '--max-parents=0', 'HEAD']);
+    }
   }
 }
 
