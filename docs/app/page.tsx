@@ -1,6 +1,8 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/cn';
 import { CopyButton } from './copy-button';
 
 export const metadata: Metadata = {
@@ -70,26 +72,6 @@ export default function Page() {
       }}
     >
       <style>{`
-        .btn-primary {
-          display: inline-flex; align-items: center; padding: 0.75rem 1.5rem;
-          border-radius: 0.5rem; border: none; font-weight: 500; font-size: 1rem;
-          text-decoration: none; cursor: pointer;
-          background: var(--color-fd-primary); color: var(--color-fd-primary-foreground);
-          transition: opacity 0.15s, transform 0.15s;
-        }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-primary:active { opacity: 0.8; transform: translateY(0); }
-
-        .btn-outline {
-          display: inline-flex; align-items: center; padding: 0.75rem 1.5rem;
-          border-radius: 0.5rem; border: 1px solid var(--color-fd-border); font-size: 1rem;
-          font-weight: 500; text-decoration: none; cursor: pointer;
-          color: var(--color-fd-foreground); background: transparent;
-          transition: background 0.15s, border-color 0.15s, transform 0.15s;
-        }
-        .btn-outline:hover { background: var(--color-fd-accent); border-color: var(--color-fd-primary); transform: translateY(-1px); }
-        .btn-outline:active { transform: translateY(0); }
-
         .install-block {
           display: flex; align-items: center; gap: 0.5rem;
           background: var(--color-fd-secondary); border-radius: 0.5rem;
@@ -115,114 +97,41 @@ export default function Page() {
           .providers-grid { gap: 1rem; justify-content: flex-start; }
         }
       `}</style>
-      <main
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '80vh',
-          textAlign: 'center',
-          padding: '3rem 1rem 0',
-          gap: '1rem',
-        }}
-      >
-        <p
-          style={{
-            fontSize: '1.25rem',
-            color: 'var(--color-fd-muted-foreground)',
-            maxWidth: '40rem',
-            marginBottom: '1rem',
-          }}
-        >
+      <main className="flex flex-col items-center justify-center gap-4 pt-12 px-4 text-center min-h-[80vh]">
+        <p className="text-xl text-fd-muted-foreground max-w-2xl mb-4">
           The unified, open-source payments SDK for Tanzania. One API — all providers.
         </p>
 
         <div className="install-block">
-          <code style={{ overflowWrap: 'anywhere' }}>pnpm add @borapesa/pesa</code>
+          <code className="break-anywhere">pnpm add @borapesa/pesa</code>
           <CopyButton text="pnpm add @borapesa/pesa" />
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '1rem',
-            marginBottom: '3rem',
-          }}
-        >
-          <Link href="/docs" className="btn-primary">
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <Link href="/docs" className={cn(buttonVariants({ color: 'primary' }), 'px-4 py-2')}>
             Read the docs
           </Link>
           <a
             href="https://github.com/borapesa/pesa"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-outline"
+            className={cn(buttonVariants({ color: 'outline' }), 'px-4 py-2')}
           >
             GitHub &rarr;
           </a>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '1.5rem',
-            maxWidth: '56rem',
-            width: '100%',
-            boxSizing: 'border-box',
-            textAlign: 'left',
-            marginBottom: '4rem',
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6 max-w-4xl w-full text-left mb-16">
           {features.map(({ title, desc }) => (
-            <div
-              key={title}
-              style={{
-                padding: '1.5rem',
-                borderRadius: '0.5rem',
-                border: '1px solid var(--color-fd-border)',
-              }}
-            >
-              <h3 style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '1.1rem' }}>
-                {title}
-              </h3>
-              <p
-                style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--color-fd-muted-foreground)',
-                  lineHeight: 1.6,
-                }}
-              >
-                {desc}
-              </p>
+            <div key={title} className="p-6 rounded-lg border border-fd-border">
+              <h3 className="font-semibold mb-2 text-lg">{title}</h3>
+              <p className="text-sm text-fd-muted-foreground leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
 
-        <h2
-          style={{
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            marginBottom: '1.5rem',
-          }}
-        >
-          Supported Providers
-        </h2>
-        <div
-          className="providers-grid"
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '2rem',
-            marginBottom: '4rem',
-            overflowX: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            padding: '0.75rem 0',
-          }}
-        >
+        <h2 className="text-2xl font-bold mb-6">Supported Providers</h2>
+        <div className="providers-grid flex justify-center gap-8 mb-16 overflow-x-auto py-3">
           {providers.map(({ name, logo, href, bg }) => (
             <Link key={name} href={href} className="provider-card" style={{ background: bg }}>
               <img src={logo} alt={`${name} provider`} />

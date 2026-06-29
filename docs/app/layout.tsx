@@ -2,8 +2,8 @@ import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import SearchDialog from '@/components/search';
-import 'fumadocs-ui/style.css';
 import './global.css';
+import 'fumadocs-ui/style.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://borapesa.dev'),
