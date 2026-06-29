@@ -51,8 +51,8 @@ function git(args, opts = {}) {
 
 function lastTag() {
   try {
-    // Get the most recent tag reachable from HEAD
-    return git(['describe', '--tags', '--abbrev=0', '--match=*porapesa*']);
+    // Get the most recent version tag reachable from HEAD
+    return git(['describe', '--tags', '--abbrev=0', '--match', 'v*']);
   } catch {
     // No tags yet — use first commit
     return git(['rev-list', '--max-parents=0', 'HEAD']);
