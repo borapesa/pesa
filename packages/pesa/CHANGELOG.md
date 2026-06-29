@@ -1,5 +1,11 @@
 # @borapesa/pesa
 
+## 0.3.0
+
+### Minor Changes
+
+- - namespace HTTP routes under /pesa/ + built-in tunnel plugin
+
 ## 0.2.1
 
 ### Patch Changes
