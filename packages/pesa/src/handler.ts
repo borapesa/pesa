@@ -17,10 +17,13 @@ export interface PesaHandlerTarget {
 /**
  * Creates a generic fetch-like handler that can be mounted on any framework.
  *
+ * All routes are namespaced under `/pesa/` to avoid collisions with
+ * application routes — following the same convention as better-auth's `/auth/`.
+ *
  * Routes:
- *   POST /order           — create a payment order
- *   GET  /status/:orderId — query payment status
- *   POST /webhook         — receive provider webhooks
+ *   POST /pesa/order           — create a payment order
+ *   GET  /pesa/status/:orderId — query payment status
+ *   POST /pesa/webhook         — receive provider webhooks
  *
  * Usage without a framework adapter:
  *   Bun.serve({ fetch: pesa.mount });
@@ -47,17 +50,17 @@ export function createPesaHandler(
     const path = url.pathname;
 
     try {
-      // POST /order — create a payment order
-      if (request.method === 'POST' && path === '/order') {
+      // POST /pesa/order — create a payment order
+      if (request.method === 'POST' && path === '/pesa/order') {
         const payload = (await request.json()) as CreateOrderPayload;
         validateCreateOrderPayload(payload);
         const result = await pesa.createOrder(payload);
         return Response.json(result, { status: 201 });
       }
 
-      // GET /status/:orderId — query payment status
-      if (request.method === 'GET' && path.startsWith('/status/')) {
-        const orderId = path.split('/status/')[1];
+      // GET /pesa/status/:orderId — query payment status
+      if (request.method === 'GET' && path.startsWith('/pesa/status/')) {
+        const orderId = path.split('/pesa/status/')[1];
         if (!orderId) {
           return Response.json({ error: 'Missing orderId' }, { status: 400 });
         }
@@ -65,8 +68,8 @@ export function createPesaHandler(
         return Response.json({ status });
       }
 
-      // POST /webhook — receive provider webhook
-      if (request.method === 'POST' && path === '/webhook') {
+      // POST /pesa/webhook — receive provider webhook
+      if (request.method === 'POST' && path === '/pesa/webhook') {
         const rawBody = await request.text();
         const headers: Record<string, string> = {};
         request.headers.forEach((value, key) => {

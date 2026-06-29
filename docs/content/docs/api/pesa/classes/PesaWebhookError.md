@@ -2,7 +2,7 @@
 title: "Class: PesaWebhookError"
 ---
 
-Defined in: [packages/pesa/src/errors.ts:28](https://github.com/borapesa/pesa/blob/a805b581d73bcc0f93f26e929b723955868c1bad/packages/pesa/src/errors.ts#L28)
+Defined in: [packages/pesa/src/errors.ts:28](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/errors.ts#L28)
 
 Thrown when a webhook fails signature verification.
 
@@ -18,7 +18,7 @@ Thrown when a webhook fails signature verification.
 new PesaWebhookError(message): PesaWebhookError;
 ```
 
-Defined in: [packages/pesa/src/errors.ts:29](https://github.com/borapesa/pesa/blob/a805b581d73bcc0f93f26e929b723955868c1bad/packages/pesa/src/errors.ts#L29)
+Defined in: [packages/pesa/src/errors.ts:29](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/errors.ts#L29)
 
 #### Parameters
 
@@ -38,4 +38,4 @@ Defined in: [packages/pesa/src/errors.ts:29](https://github.com/borapesa/pesa/bl
 
 | Property | Modifier | Type | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/a805b581d73bcc0f93f26e929b723955868c1bad/packages/pesa/src/errors.ts#L12) |
+| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/errors.ts#L12) |

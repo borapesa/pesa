@@ -11,7 +11,7 @@ type PaymentEventType =
   | "DISBURSEMENT_FAILED";
 ```
 
-Defined in: [packages/pesa/src/types/event.ts:23](https://github.com/borapesa/pesa/blob/a805b581d73bcc0f93f26e929b723955868c1bad/packages/pesa/src/types/event.ts#L23)
+Defined in: [packages/pesa/src/types/event.ts:23](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/event.ts#L23)
 
 Event types emitted after webhook verification and persistence.
 
