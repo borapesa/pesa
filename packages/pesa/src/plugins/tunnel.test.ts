@@ -34,6 +34,7 @@ function mockTunnelOutput(url: string) {
   child.stdout = new EventEmitter();
   child.stderr = new EventEmitter();
   child.kill = vi.fn();
+  child.unref = vi.fn();
   spawnMock.mockReturnValue(child);
 
   // Emit the URL after a tick
@@ -180,6 +181,7 @@ describe('tunnelPlugin', () => {
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = vi.fn();
+    child.unref = vi.fn();
     spawnMock.mockReturnValue(child);
 
     tunnelPlugin().init!({} as any);

@@ -57,6 +57,10 @@ function startTunnel(port: number): Promise<Tunnel> {
       { stdio: ['ignore', 'pipe', 'pipe'] },
     );
 
+    // Don't let cloudflared keep the parent process alive.
+    // SIGINT/Ctrl+C should kill the whole process tree immediately.
+    child.unref();
+
     let resolved = false;
     let stderr = '';
 
@@ -72,14 +76,14 @@ function startTunnel(port: number): Promise<Tunnel> {
         child.stderr?.removeAllListeners('data');
 
         const url = match[0].replace(/\/$/, '');
-        resolve({ url, close: () => child.kill() });
+        resolve({ url, close: () => child.kill('SIGKILL') });
       }
     };
 
     const timeout = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        child.kill();
+        child.kill('SIGKILL');
         reject(new Error(`cloudflared tunnel timed out after 15s.\nStderr: ${stderr || '(none)'}`));
       }
     }, 15_000);
