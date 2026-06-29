@@ -1,5 +1,7 @@
 import { execFileSync, spawn } from 'node:child_process';
-import { platform } from 'node:os';
+import { readFileSync, unlinkSync, writeFileSync } from 'node:fs';
+import { platform, tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { PesaPlugin } from './types';
 
 // ── Cloudflared detection ──────────────────────────────────────────────
@@ -40,10 +42,54 @@ function assertCloudflared(): void {
   );
 }
 
+// ── Persistence ────────────────────────────────────────────────────────
+
+interface TunnelState {
+  url: string;
+  pid: number;
+}
+
+function stateFile(port: number, suffix: string): string {
+  return join(tmpdir(), `borapesa-tunnel-${port}.${suffix}`);
+}
+
+function readState(port: number): TunnelState | null {
+  try {
+    const url = readFileSync(stateFile(port, 'url'), 'utf-8').trim();
+    const pid = parseInt(readFileSync(stateFile(port, 'pid'), 'utf-8').trim(), 10);
+    // Verify the process is still running
+    try {
+      process.kill(pid, 0); // signal 0 just checks existence
+      return { url, pid };
+    } catch {
+      // Process is dead — clean up stale files
+      clearState(port);
+      return null;
+    }
+  } catch {
+    return null;
+  }
+}
+
+function writeState(port: number, state: TunnelState): void {
+  writeFileSync(stateFile(port, 'url'), state.url, 'utf-8');
+  writeFileSync(stateFile(port, 'pid'), String(state.pid), 'utf-8');
+}
+
+function clearState(port: number): void {
+  try {
+    unlinkSync(stateFile(port, 'url'));
+    unlinkSync(stateFile(port, 'pid'));
+  } catch {
+    // already cleaned up
+  }
+}
+
 // ── Tunnel lifecycle ───────────────────────────────────────────────────
 
 export interface Tunnel {
   url: string;
+  pid: number;
   close: () => void;
 }
 
@@ -51,38 +97,41 @@ function startTunnel(port: number): Promise<Tunnel> {
   return new Promise((resolve, reject) => {
     assertCloudflared();
 
+    // Spawn detached — survives parent process restarts (Bun --watch reloads).
+    // This means the tunnel persists across hot reloads and we reuse the same URL.
     const child = spawn(
       'cloudflared',
       ['tunnel', '--url', `http://localhost:${port}`, '--no-autoupdate'],
-      { stdio: ['ignore', 'pipe', 'pipe'] },
+      { stdio: ['ignore', 'pipe', 'pipe'], detached: true },
     );
-
-    // Don't let cloudflared keep the parent event loop alive.
-    child.unref();
 
     let resolved = false;
     let stderr = '';
 
-    const detach = () => {
-      // Swap listeners to no-op — simply removing them causes Bun to
-      // buffer data in the pipe, creating backpressure that blocks the
-      // parent process's event loop (which also blocks console.log).
-      // A no-op listener lets data flow through and be discarded.
-      const noop = () => {};
-      child.stdout?.removeAllListeners('data');
-      child.stderr?.removeAllListeners('data');
-      child.stdout?.on('data', noop);
-      child.stderr?.on('data', noop);
-    };
+    const noop = () => {};
 
     const checkOutput = (output: string) => {
       const match = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
       if (match && !resolved) {
         resolved = true;
         clearTimeout(timeout);
-        detach();
+
+        // Swap listeners to no-op so the pipe keeps draining (prevents
+        // backpressure blocking the event loop) without printing noise.
+        child.stdout?.removeAllListeners('data');
+        child.stderr?.removeAllListeners('data');
+        child.stdout?.on('data', noop);
+        child.stderr?.on('data', noop);
+
         const url = match[0].replace(/\/$/, '');
-        resolve({ url, close: () => child.kill('SIGKILL') });
+        resolve({
+          url,
+          pid: child.pid!,
+          close: () => {
+            child.kill('SIGKILL');
+            clearState(port);
+          },
+        });
       }
     };
 
@@ -143,6 +192,10 @@ export interface TunnelPluginOptions {
  * webhook development.  Requires `cloudflared` on the system PATH
  * (free, no account needed).
  *
+ * The tunnel persists across Bun/Node --watch reloads — the same URL
+ * is reused between restarts so you don't need to reconfigure your
+ * provider dashboard on every file change.
+ *
  * ```ts
  * import { createPesa } from '@borapesa/pesa';
  * import { tunnelPlugin } from '@borapesa/pesa/plugins';
@@ -151,24 +204,43 @@ export interface TunnelPluginOptions {
  *   provider: new SelcomPaymentProvider({...}),
  *   plugins: [tunnelPlugin()],
  * });
- * // → Tunnel ready: https://random.trycloudflare.com
- * // → Webhook URL:  https://random.trycloudflare.com/pesa/webhook
+ * // First launch:
+ * // 🛜  @borapesa/tunnel
+ * //    Tunnel ready:  https://xxx.trycloudflare.com
+ * //    Webhook URL:   https://xxx.trycloudflare.com/pesa/webhook
+ * //
+ * // Subsequent Bun --watch reloads: (silent — reuses same URL)
  * ```
  */
 export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
   const port = opts.port ?? 3000;
   const log = opts.log !== false;
-  let tunnel: Tunnel | null = null;
 
   return {
     name: 'tunnel',
 
     init() {
-      // Fire-and-forget — the tunnel starts in the background and logs
-      // the webhook URL once it's ready.
+      // Check for existing tunnel (persisted across Bun --watch reloads)
+      const existing = readState(port);
+
+      if (existing) {
+        // Tunnel is still alive — reuse silently
+        if (log) {
+          console.log('');
+          console.log('🛜  @borapesa/tunnel');
+          console.log(`   Tunnel ready:  ${existing.url}`);
+          console.log(`   Webhook URL:   ${existing.url}/pesa/webhook`);
+          console.log('   (reused from previous launch)');
+          console.log('');
+        }
+        return;
+      }
+
+      // Start a new tunnel
       startTunnel(port)
         .then((t) => {
-          tunnel = t;
+          // Store the tunnel process PID so it can be checked after reload.
+          writeState(port, { url: t.url, pid: t.pid });
           if (log) {
             console.log('');
             console.log('🛜  @borapesa/tunnel');
@@ -176,6 +248,14 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
             console.log(`   Webhook URL:   ${t.url}/pesa/webhook`);
             console.log('');
           }
+          // Signal cleanup — tunnel is detached and should survive
+          // Bun --watch reloads. Only clear state on actual shutdown.
+          process.on('SIGTERM', () => {
+            t.close();
+            clearState(port);
+          });
+          // on reload the state file persists so the new process
+          // finds the still-running tunnel and reuses the URL.
         })
         .catch((err) => {
           if (log) {
@@ -183,18 +263,6 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
             console.warn(`@borapesa/tunnel: ${message}`);
           }
         });
-
-      const cleanup = () => {
-        if (tunnel) {
-          tunnel.close();
-          tunnel = null;
-        }
-      };
-      // beforeExit fires when the event loop is empty — works across
-      // Node, Bun, and Deno, including Bun's --watch restart cycle.
-      process.on('beforeExit', cleanup);
-      // SIGTERM catches kill signals that bypass beforeExit
-      process.on('SIGTERM', cleanup);
     },
   };
 }

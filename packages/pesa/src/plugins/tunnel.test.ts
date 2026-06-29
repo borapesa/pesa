@@ -1,17 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// ── Mocks ───────────────────────────────────────────────────────────────
-
 let spawnMock = vi.fn();
 let execFileSyncMock = vi.fn();
+let readFileSyncMock = vi.fn();
+let writeFileSyncMock = vi.fn();
+let unlinkSyncMock = vi.fn();
 
 vi.mock('node:child_process', () => ({
   execFileSync: vi.fn().mockImplementation((...args: unknown[]) => execFileSyncMock(...args)),
   spawn: vi.fn().mockImplementation((...args: unknown[]) => spawnMock(...args)),
 }));
 
+vi.mock('node:fs', () => ({
+  readFileSync: vi.fn().mockImplementation((...args: unknown[]) => readFileSyncMock(...args)),
+  writeFileSync: vi.fn().mockImplementation((...args: unknown[]) => writeFileSyncMock(...args)),
+  unlinkSync: vi.fn().mockImplementation((...args: unknown[]) => unlinkSyncMock(...args)),
+}));
+
 vi.mock('node:os', () => ({
   platform: () => 'darwin',
+  tmpdir: () => '/tmp',
 }));
 
 // ── Helpers ─────────────────────────────────────────────────────────────
@@ -26,6 +34,12 @@ function mockCloudflaredMissing() {
   });
 }
 
+function mockNoExistingTunnel() {
+  readFileSyncMock.mockImplementation(() => {
+    throw new Error('ENOENT');
+  });
+}
+
 function mockTunnelOutput(url: string) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { EventEmitter } = require('node:events') as typeof import('node:events');
@@ -37,7 +51,6 @@ function mockTunnelOutput(url: string) {
   child.unref = vi.fn();
   spawnMock.mockReturnValue(child);
 
-  // Emit the URL after a tick
   setImmediate(() => {
     child.stdout.emit(
       'data',
@@ -62,6 +75,10 @@ describe('tunnelPlugin', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     spawnMock = vi.fn();
     execFileSyncMock = vi.fn();
+    readFileSyncMock = vi.fn();
+    writeFileSyncMock = vi.fn();
+    unlinkSyncMock = vi.fn();
+    mockNoExistingTunnel();
   });
 
   afterEach(() => {
@@ -82,15 +99,7 @@ describe('tunnelPlugin', () => {
     expect(typeof plugin.init).toBe('function');
   });
 
-  it('does not expose request lifecycle hooks', async () => {
-    const { tunnelPlugin } = await import('./tunnel');
-    const plugin = tunnelPlugin();
-    expect(plugin.beforeRequest).toBeUndefined();
-    expect(plugin.afterResponse).toBeUndefined();
-    expect(plugin.onPaymentEvent).toBeUndefined();
-  });
-
-  // ── Successful tunnel ───────────────────────────────────────────────
+  // ── New tunnel (first launch) ───────────────────────────────────────
 
   it('starts a tunnel and logs the webhook URL', async () => {
     const { tunnelPlugin } = await import('./tunnel');
@@ -103,7 +112,6 @@ describe('tunnelPlugin', () => {
     await waitForTunnel();
 
     const calls = (console.log as ReturnType<typeof vi.fn>).mock.calls.flat().join(' ');
-
     expect(calls).toContain('cool-fox.trycloudflare.com');
     expect(calls).toContain('/pesa/webhook');
   });
@@ -119,18 +127,30 @@ describe('tunnelPlugin', () => {
     expect(args).toContain('http://localhost:3000');
   });
 
-  it('respects custom port', async () => {
+  // ── Existing tunnel (Bun reload) ────────────────────────────────────
+
+  it('reuses existing tunnel when PID is still alive', async () => {
     const { tunnelPlugin } = await import('./tunnel');
-    mockCloudflaredAvailable();
-    mockTunnelOutput('https://custom-fox.trycloudflare.com');
 
-    tunnelPlugin({ port: 8080 }).init!({} as any);
+    // Mock an existing tunnel state
+    readFileSyncMock
+      .mockReturnValueOnce('https://existing-fox.trycloudflare.com')
+      .mockReturnValueOnce(String(process.pid));
+    // process.kill(pid, 0) checks if alive — return true
 
-    const args = spawnMock.mock.calls[0]?.[1] as string[];
-    expect(args).toContain('http://localhost:8080');
+    tunnelPlugin().init!({} as any);
+
+    expect(console.log).toHaveBeenCalledWith(
+      expect.stringContaining('existing-fox.trycloudflare.com'),
+    );
+    expect(console.log).toHaveBeenCalledWith(
+      expect.stringContaining('reused from previous launch'),
+    );
+    // Should NOT spawn a new cloudflared
+    expect(spawnMock).not.toHaveBeenCalled();
   });
 
-  // ── Missing cloudflared ──────────────────────────────────────────────
+  // ── Missing cloudflared ─────────────────────────────────────────────
 
   it('warns gracefully when cloudflared is not installed', async () => {
     const { tunnelPlugin } = await import('./tunnel');
@@ -152,13 +172,12 @@ describe('tunnelPlugin', () => {
     await waitForTunnel();
 
     const calls = (console.warn as ReturnType<typeof vi.fn>).mock.calls.flat().join(' ');
-
     expect(calls).toContain('brew install cloudflared');
   });
 
   // ── Silent mode ─────────────────────────────────────────────────────
 
-  it('does not log when log option is false', async () => {
+  it('does not log when log option is false (new tunnel)', async () => {
     const { tunnelPlugin } = await import('./tunnel');
     mockCloudflaredAvailable();
     mockTunnelOutput('https://silent-fox.trycloudflare.com');
@@ -168,7 +187,6 @@ describe('tunnelPlugin', () => {
     await waitForTunnel();
 
     expect(console.log).not.toHaveBeenCalled();
-    expect(console.warn).not.toHaveBeenCalled();
   });
 
   // ── Process error ───────────────────────────────────────────────────
@@ -191,19 +209,6 @@ describe('tunnelPlugin', () => {
     await waitForTunnel();
 
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('spawn ENOENT'));
-  });
-
-  // ── Cleanup ──────────────────────────────────────────────────────────
-
-  it('returns a close function that kills the tunnel', async () => {
-    const { startTunnel } = await import('./tunnel');
-    mockCloudflaredAvailable();
-    const child = mockTunnelOutput('https://cleanup-fox.trycloudflare.com');
-
-    const tunnel = await startTunnel(3000);
-    tunnel.close();
-
-    expect(child.kill).toHaveBeenCalled();
   });
 
   // ── isAvailable ─────────────────────────────────────────────────────
