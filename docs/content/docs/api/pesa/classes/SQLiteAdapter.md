@@ -2,7 +2,7 @@
 title: "Class: SQLiteAdapter"
 ---
 
-Defined in: [packages/pesa/src/db/sqlite.ts:14](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/db/sqlite.ts#L14)
+Defined in: [packages/pesa/src/db/sqlite.ts:14](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/db/sqlite.ts#L14)
 
 SQLite event store adapter powered by better-sqlite3.
 
@@ -24,7 +24,7 @@ which targets Turso.
 new SQLiteAdapter(dbPath?): SQLiteAdapter;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:18](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/db/sqlite.ts#L18)
+Defined in: [packages/pesa/src/db/sqlite.ts:18](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/db/sqlite.ts#L18)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [packages/pesa/src/db/sqlite.ts:18](https://github.com/borapesa/pesa
 getEvent(id): Promise<PaymentEvent | null>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:67](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/db/sqlite.ts#L67)
+Defined in: [packages/pesa/src/db/sqlite.ts:67](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/db/sqlite.ts#L67)
 
 Retrieve a single event by its UUID.
 
@@ -70,7 +70,7 @@ Retrieve a single event by its UUID.
 getEventsByOrderId(orderId): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:83](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/db/sqlite.ts#L83)
+Defined in: [packages/pesa/src/db/sqlite.ts:83](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/db/sqlite.ts#L83)
 
 Retrieve all events for a given provider order ID.
 
@@ -96,7 +96,7 @@ Retrieve all events for a given provider order ID.
 getEventsByReference(reference): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:75](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/db/sqlite.ts#L75)
+Defined in: [packages/pesa/src/db/sqlite.ts:75](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/db/sqlite.ts#L75)
 
 Retrieve all events for a given merchant reference.
 
@@ -122,7 +122,7 @@ Retrieve all events for a given merchant reference.
 saveEvent(event): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:46](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/db/sqlite.ts#L46)
+Defined in: [packages/pesa/src/db/sqlite.ts:46](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/db/sqlite.ts#L46)
 
 Persist a verified PaymentEvent.
 

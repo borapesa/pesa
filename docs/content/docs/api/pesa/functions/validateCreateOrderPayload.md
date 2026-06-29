@@ -6,7 +6,7 @@ title: "Function: validateCreateOrderPayload()"
 function validateCreateOrderPayload(payload): void;
 ```
 
-Defined in: [packages/pesa/src/validate.ts:12](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/validate.ts#L12)
+Defined in: [packages/pesa/src/validate.ts:12](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/validate.ts#L12)
 
 Validate a CreateOrderPayload before forwarding to the provider.
 Throws PesaValidationError on invalid input.
