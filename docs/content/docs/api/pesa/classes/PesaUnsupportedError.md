@@ -2,7 +2,7 @@
 title: "Class: PesaUnsupportedError"
 ---
 
-Defined in: [packages/pesa/src/errors.ts:20](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/errors.ts#L20)
+Defined in: [packages/pesa/src/errors.ts:20](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/errors.ts#L20)
 
 Thrown when a provider does not implement an optional operation.
 
@@ -18,7 +18,7 @@ Thrown when a provider does not implement an optional operation.
 new PesaUnsupportedError(message): PesaUnsupportedError;
 ```
 
-Defined in: [packages/pesa/src/errors.ts:21](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/errors.ts#L21)
+Defined in: [packages/pesa/src/errors.ts:21](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/errors.ts#L21)
 
 #### Parameters
 
@@ -38,4 +38,4 @@ Defined in: [packages/pesa/src/errors.ts:21](https://github.com/borapesa/pesa/bl
 
 | Property | Modifier | Type | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/errors.ts#L12) |
+| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/errors.ts#L12) |

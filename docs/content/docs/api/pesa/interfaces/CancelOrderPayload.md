@@ -2,7 +2,7 @@
 title: "Interface: CancelOrderPayload"
 ---
 
-Defined in: [packages/pesa/src/types/order.ts:126](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/order.ts#L126)
+Defined in: [packages/pesa/src/types/order.ts:126](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/order.ts#L126)
 
 Payload for cancelling a pending or in-progress order.
 
@@ -10,4 +10,4 @@ Payload for cancelling a pending or in-progress order.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="orderid"></a> `orderId` | `string` | The provider-assigned order ID. | [packages/pesa/src/types/order.ts:128](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/order.ts#L128) |
+| <a id="orderid"></a> `orderId` | `string` | The provider-assigned order ID. | [packages/pesa/src/types/order.ts:128](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/order.ts#L128) |

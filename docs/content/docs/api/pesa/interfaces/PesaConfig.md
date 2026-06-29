@@ -2,7 +2,7 @@
 title: "Interface: PesaConfig"
 ---
 
-Defined in: [packages/pesa/src/types/config.ts:38](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/config.ts#L38)
+Defined in: [packages/pesa/src/types/config.ts:38](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/config.ts#L38)
 
 Configuration passed to [createPesa](../functions/createPesa).
 
@@ -41,8 +41,8 @@ const pesa = createPesa({
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="db"></a> `db?` | [`PesaDatabaseAdapter`](PesaDatabaseAdapter) | Database adapter for the event store. Defaults to SQLite at `./pesa.db` (zero config). Swap for `LibSQLAdapter` (Turso), `PostgresAdapter`, `PrismaAdapter`, or `DrizzleAdapter` for production deployments. | [packages/pesa/src/types/config.ts:76](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/config.ts#L76) |
-| <a id="plugins"></a> `plugins?` | [`PesaPlugin`](PesaPlugin)[] | Plugin array. Plugins are composed **in order**. Built-in plugins available from `@borapesa/pesa/plugins`: - `retryPlugin` — exponential/linear/fixed backoff - `idempotencyPlugin` — prevents duplicate charges - `loggingPlugin` — structured logging with PII redaction | [packages/pesa/src/types/config.ts:56](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/config.ts#L56) |
-| <a id="provider"></a> `provider` | [`BasePaymentProvider`](../classes/BasePaymentProvider) | The payment provider adapter. Choose from `@borapesa/selcom`, `@borapesa/clickpesa`, `@borapesa/azampay`, `@borapesa/dpo`, `@borapesa/pesapal`, or use the built-in `BogusPaymentProvider` for local development. | [packages/pesa/src/types/config.ts:46](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/config.ts#L46) |
-| <a id="webhooks"></a> `webhooks?` | \{ `secret?`: `string`; \} | Webhook configuration. | [packages/pesa/src/types/config.ts:59](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/config.ts#L59) |
-| `webhooks.secret?` | `string` | Shared secret for HMAC verification of incoming webhooks. Falls back to `process.env.BORAPESA_WEBHOOK_SECRET` if not set. **Required in production.** | [packages/pesa/src/types/config.ts:66](https://github.com/borapesa/pesa/blob/7a2a3f8aafdb5924ee403a0a96f7d04dd7d2b7aa/packages/pesa/src/types/config.ts#L66) |
+| <a id="db"></a> `db?` | [`PesaDatabaseAdapter`](PesaDatabaseAdapter) | Database adapter for the event store. Defaults to SQLite at `./pesa.db` (zero config). Swap for `LibSQLAdapter` (Turso), `PostgresAdapter`, `PrismaAdapter`, or `DrizzleAdapter` for production deployments. | [packages/pesa/src/types/config.ts:76](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/config.ts#L76) |
+| <a id="plugins"></a> `plugins?` | [`PesaPlugin`](PesaPlugin)[] | Plugin array. Plugins are composed **in order**. Built-in plugins available from `@borapesa/pesa/plugins`: - `retryPlugin` — exponential/linear/fixed backoff - `idempotencyPlugin` — prevents duplicate charges - `loggingPlugin` — structured logging with PII redaction | [packages/pesa/src/types/config.ts:56](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/config.ts#L56) |
+| <a id="provider"></a> `provider` | [`BasePaymentProvider`](../classes/BasePaymentProvider) | The payment provider adapter. Choose from `@borapesa/selcom`, `@borapesa/clickpesa`, `@borapesa/azampay`, `@borapesa/dpo`, `@borapesa/pesapal`, or use the built-in `BogusPaymentProvider` for local development. | [packages/pesa/src/types/config.ts:46](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/config.ts#L46) |
+| <a id="webhooks"></a> `webhooks?` | \{ `secret?`: `string`; \} | Webhook configuration. | [packages/pesa/src/types/config.ts:59](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/config.ts#L59) |
+| `webhooks.secret?` | `string` | Shared secret for HMAC verification of incoming webhooks. Falls back to `process.env.BORAPESA_WEBHOOK_SECRET` if not set. **Required in production.** | [packages/pesa/src/types/config.ts:66](https://github.com/borapesa/pesa/blob/d892f187ba44a1149cf97cf1dee8e873c4c12f3b/packages/pesa/src/types/config.ts#L66) |

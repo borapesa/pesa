@@ -21,13 +21,17 @@ export interface PesaHandlerTarget {
  * application routes — following the same convention as better-auth's `/auth/`.
  *
  * Routes:
+ * ```
  *   POST /pesa/order           — create a payment order
  *   GET  /pesa/status/:orderId — query payment status
  *   POST /pesa/webhook         — receive provider webhooks
+ * ```
  *
  * Usage without a framework adapter:
+ * ```js
  *   Bun.serve({ fetch: pesa.mount });
  *   http.createServer((req, res) => { ... pesa.mount(webRequest) });
+ * ```
  *
  * @example
  * // Next.js App Router
