@@ -1,9 +1,26 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions';
 import { source } from '@/lib/source';
+
+const CONTENT_DIR = join(process.cwd(), 'content', 'docs');
+
+/** Resolve the source file path for a page, handling index files. */
+function resolveSource(slugs: string[]): { relPath: string; ext: string } {
+  const base = slugs.length > 0 ? slugs.join('/') : 'index';
+
+  for (const ext of ['.mdx', '.md']) {
+    if (existsSync(join(CONTENT_DIR, `${base}${ext}`))) {
+      return { relPath: base, ext };
+    }
+  }
+  // Not a leaf file — must be a directory index
+  return { relPath: `${base}/index`, ext: '.md' };
+}
 
 export default async function Page(props: { params: Promise<{ slug?: string[] }> }) {
   const params = await props.params;
@@ -12,11 +29,10 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
 
   const MDX = page.data.body;
 
-  // page.slugs is empty for the docs index page ("/docs")
-  const slugPath = page.slugs.length > 0 ? page.slugs.join('/') : 'index';
+  const { relPath, ext } = resolveSource(page.slugs);
 
-  const markdownUrl = `/llms/${slugPath}/index.md`;
-  const githubUrl = `https://github.com/borapesa/pesa/blob/master/docs/content/docs/${slugPath}.mdx`;
+  const markdownUrl = `/llms/${relPath}/index.md`;
+  const githubUrl = `https://github.com/borapesa/pesa/blob/master/docs/content/docs/${relPath}${ext}`;
 
   return (
     <DocsPage

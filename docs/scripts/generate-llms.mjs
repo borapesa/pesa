@@ -32,7 +32,6 @@ function walk(dir, depth = 0, items = []) {
       output += `${'  '.repeat(depth)}- ${entry}\n`;
       output += walk(full, depth + 1, items);
     } else if (entry.endsWith('.md') || entry.endsWith('.mdx')) {
-      if ((entry === 'index.md' || entry === 'index.mdx') && depth > 0) continue;
       const content = readFileSync(full, 'utf-8');
       const titleMatch =
         content.match(/^title:\s*"?([^"\n]+)"?/m) || content.match(/^#\s+(.+)/m);
