@@ -11,7 +11,7 @@ Plugins intercept requests and webhook events at specific points in the lifecycl
 
 ```ts
 import { createPesa } from '@borapesa/pesa';
-import { retryPlugin, idempotencyPlugin, loggingPlugin } from '@borapesa/pesa/plugins';
+import { retryPlugin, idempotencyPlugin, loggingPlugin, tunnelPlugin } from '@borapesa/pesa/plugins';
 
 const pesa = createPesa({
   provider: new ClickPesaProvider({ ... }),
@@ -19,6 +19,7 @@ const pesa = createPesa({
     idempotencyPlugin(),   // must be before retryPlugin
     retryPlugin({ maxAttempts: 3 }),
     loggingPlugin({ level: 'info' }),
+    tunnelPlugin(),         // dev only — auto-starts webhook tunnel
   ],
 });
 ```
@@ -65,6 +66,31 @@ loggingPlugin({
 ```
 
 Logs include: operation name, status, duration in ms, and sanitized payload.
+
+### `tunnelPlugin()`
+
+Starts a Cloudflare Quick Tunnel for local webhook development. Requires [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) on the system PATH (free, no account needed).
+
+```ts
+tunnelPlugin({
+  port: 3000,  // local port to expose (default: 3000)
+  log:  true,  // print the tunnel URL to console (default: true)
+})
+```
+
+On startup, it prints the public webhook URL:
+
+```
+🛜  @borapesa/tunnel
+   Tunnel ready:  https://cool-fox.trycloudflare.com
+   Webhook URL:   https://cool-fox.trycloudflare.com/pesa/webhook
+```
+
+Use this URL as your provider's webhook callback during development. The tunnel automatically shuts down when your process exits.
+
+<Callout variant="warn">
+  This plugin is for **local development only**. Do not use it in production — webhooks should go directly to your deployed server.
+</Callout>
 
 ## Plugin interface
 
