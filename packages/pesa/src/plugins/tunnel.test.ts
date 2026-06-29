@@ -195,16 +195,14 @@ describe('tunnelPlugin', () => {
 
   // ── Cleanup ──────────────────────────────────────────────────────────
 
-  it('kills the tunnel process on SIGINT', async () => {
-    const { tunnelPlugin } = await import('./tunnel');
+  it('returns a close function that kills the tunnel', async () => {
+    const { startTunnel } = await import('./tunnel');
     mockCloudflaredAvailable();
     const child = mockTunnelOutput('https://cleanup-fox.trycloudflare.com');
 
-    tunnelPlugin().init!({} as any);
+    const tunnel = await startTunnel(3000);
+    tunnel.close();
 
-    await waitForTunnel();
-
-    process.emit('SIGINT');
     expect(child.kill).toHaveBeenCalled();
   });
 

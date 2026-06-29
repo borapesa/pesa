@@ -57,24 +57,30 @@ function startTunnel(port: number): Promise<Tunnel> {
       { stdio: ['ignore', 'pipe', 'pipe'] },
     );
 
-    // Don't let cloudflared keep the parent process alive.
-    // SIGINT/Ctrl+C should kill the whole process tree immediately.
+    // Don't let cloudflared keep the parent event loop alive.
     child.unref();
 
     let resolved = false;
     let stderr = '';
+
+    const detach = () => {
+      // Swap listeners to no-op — simply removing them causes Bun to
+      // buffer data in the pipe, creating backpressure that blocks the
+      // parent process's event loop (which also blocks console.log).
+      // A no-op listener lets data flow through and be discarded.
+      const noop = () => {};
+      child.stdout?.removeAllListeners('data');
+      child.stderr?.removeAllListeners('data');
+      child.stdout?.on('data', noop);
+      child.stderr?.on('data', noop);
+    };
 
     const checkOutput = (output: string) => {
       const match = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
       if (match && !resolved) {
         resolved = true;
         clearTimeout(timeout);
-
-        // Detach listeners — cloudflared keeps logging heartbeats
-        // to stderr, which would drown out the server's own output.
-        child.stdout?.removeAllListeners('data');
-        child.stderr?.removeAllListeners('data');
-
+        detach();
         const url = match[0].replace(/\/$/, '');
         resolve({ url, close: () => child.kill('SIGKILL') });
       }
@@ -178,9 +184,16 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
           }
         });
 
-      const cleanup = () => tunnel?.close();
-      process.on('exit', cleanup);
-      process.on('SIGINT', cleanup);
+      const cleanup = () => {
+        if (tunnel) {
+          tunnel.close();
+          tunnel = null;
+        }
+      };
+      // beforeExit fires when the event loop is empty — works across
+      // Node, Bun, and Deno, including Bun's --watch restart cycle.
+      process.on('beforeExit', cleanup);
+      // SIGTERM catches kill signals that bypass beforeExit
       process.on('SIGTERM', cleanup);
     },
   };
