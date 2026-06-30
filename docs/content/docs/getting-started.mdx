@@ -63,11 +63,16 @@ pesa.on('PAYMENT_SUCCESS', async (event) => {
 
 ## Going to production
 
-Swap the BogusProvider for a real provider. Everything else stays the same:
+Swap the BogusProvider for a real provider and add a persistent event store:
+
+```bash
+pnpm add @borapesa/clickpesa @borapesa/sqlite
+```
 
 ```ts
 import { retryPlugin, idempotencyPlugin, loggingPlugin } from '@borapesa/pesa/plugins';
 import { ClickPesaProvider } from '@borapesa/clickpesa';
+import { SQLiteAdapter } from '@borapesa/sqlite';
 
 const pesa = createPesa({
   provider: new ClickPesaProvider({
@@ -75,6 +80,7 @@ const pesa = createPesa({
     clientId: process.env.CLICKPESA_CLIENT_ID!,
     apiKey:   process.env.CLICKPESA_API_KEY!,
   }),
+  db: new SQLiteAdapter('./pesa.db'),
   webhooks: {
     secret: process.env.BORAPESA_WEBHOOK_SECRET!,
   },
@@ -85,6 +91,8 @@ const pesa = createPesa({
   ],
 });
 ```
+
+Any class implementing [`PesaDatabaseAdapter`](/docs/api/pesa/interfaces/PesaDatabaseAdapter) works as an event store — use `@borapesa/sqlite`, bring your own PostgreSQL adapter, or swap to Turso. See [Adapters](/docs/adapters) for the full list.
 
 ## Mount on your server
 

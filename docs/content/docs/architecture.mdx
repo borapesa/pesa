@@ -73,14 +73,18 @@ Plugins are composed **in order** in the `plugins` array. Order matters — plac
 
 Every verified webhook is normalized into a [`PaymentEvent`](/docs/api/pesa/interfaces/PaymentEvent) and persisted. This is the **source of truth** for all payment activity.
 
-The default adapter is in-memory (lost on restart). Swap to a persistent adapter for production. Additional adapters (SQLite, Turso/libSQL, PostgreSQL) are planned.
+The default adapter is in-memory (lost on restart). Swap to a persistent adapter for production:
 
 ```ts
+import { SQLiteAdapter } from '@borapesa/sqlite';
+
 const pesa = createPesa({
   provider: new ClickPesaProvider({ ... }),
-  db: new SQLiteAdapter({ path: './pesa.db' }),
+  db: new SQLiteAdapter('./pesa.db'),
 });
 ```
+
+Additional adapters (Turso/libSQL, PostgreSQL) are planned. See the [`@borapesa/sqlite`](/docs/api/sqlite) API docs for details.
 
 ## HTTP mount
 

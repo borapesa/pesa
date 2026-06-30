@@ -25,6 +25,11 @@ const PACKAGES = [
     name: '@borapesa/selcom',
     desc: 'Selcom provider adapter',
   },
+  {
+    dir: 'adapters/sqlite/src',
+    name: '@borapesa/sqlite',
+    desc: 'SQLite event store adapter',
+  },
 ];
 
 // ── Step 1: Flatten directory structure ─────────────────────────
@@ -46,7 +51,7 @@ for (const pkg of PACKAGES) {
 }
 
 // Clean up empty parent dirs
-for (const dir of ['packages', 'providers']) {
+for (const dir of ['packages', 'providers', 'adapters']) {
   try {
     rmSync(join(API_DIR, dir), { recursive: true });
   } catch {}

@@ -2,7 +2,7 @@
 title: "Interface: PesaHandlerTarget"
 ---
 
-Defined in: [packages/pesa/src/handler.ts:7](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/handler.ts#L7)
+Defined in: [packages/pesa/src/handler.ts:7](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/handler.ts#L7)
 
 Minimal interface for the pesa instance that the handler needs.
 
@@ -14,13 +14,13 @@ Minimal interface for the pesa instance that the handler needs.
 handleWebhook(rawBody, headers): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:8](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/handler.ts#L8)
+Defined in: [packages/pesa/src/handler.ts:8](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/handler.ts#L8)
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `rawBody` | `any` |
+| `rawBody` | `string` \| `Buffer`\<`ArrayBufferLike`\> |
 | `headers` | `Record`\<`string`, `string`\> |
 
 #### Returns
@@ -35,7 +35,7 @@ Defined in: [packages/pesa/src/handler.ts:8](https://github.com/borapesa/pesa/bl
 on(event, handler): void;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:9](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/handler.ts#L9)
+Defined in: [packages/pesa/src/handler.ts:9](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/handler.ts#L9)
 
 #### Parameters
 

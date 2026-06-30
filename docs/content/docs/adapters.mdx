@@ -1,0 +1,77 @@
+---
+title: Adapters
+description: Database adapters for the event store — SQLite, in-memory, and custom.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout variant="info">Added in v0.1.0</Callout>
+
+Adapters persist [`PaymentEvent`](/docs/api/pesa/interfaces/PaymentEvent) entries to the event store. The default is in-memory (lost on restart) — swap to a persistent adapter for production.
+
+## Comparison
+
+|                     | Memory (default) | SQLite            | Custom / Bring-your-own |
+| ------------------- | ---------------- | ----------------- | ----------------------- |
+| Persists on restart | ❌               | ✅                | Depends on your impl    |
+| Zero dependencies   | ✅               | ❌ (better-sqlite3) | Depends               |
+| Dev / CI ready      | ✅               | ✅                | —                       |
+| Production ready    | ❌               | ✅                | ✅                      |
+
+## Available adapters
+
+### SQLite (`@borapesa/sqlite`)
+
+Zero-config persistent storage powered by [better-sqlite3](https://github.com/WiseLibs/better-sqlite3). The database file is created automatically at the given path.
+
+```bash
+pnpm add @borapesa/sqlite
+```
+
+```ts
+import { SQLiteAdapter } from '@borapesa/sqlite';
+
+const pesa = createPesa({
+  provider: new ClickPesaProvider({ ... }),
+  db: new SQLiteAdapter('./pesa.db'),
+});
+```
+
+WAL mode is enabled by default for concurrent read/write performance. See the [`@borapesa/sqlite` API docs](/docs/api/sqlite) for full details.
+
+## Writing an adapter
+
+Any class implementing [`PesaDatabaseAdapter`](/docs/api/pesa/interfaces/PesaDatabaseAdapter) works as an event store. Four methods are required:
+
+```ts
+import type { PesaDatabaseAdapter, PaymentEvent } from '@borapesa/pesa';
+
+class MyAdapter implements PesaDatabaseAdapter {
+  async saveEvent(event: PaymentEvent): Promise<void> {
+    // Persist a verified PaymentEvent
+  }
+
+  async getEvent(id: string): Promise<PaymentEvent | null> {
+    // Retrieve a single event by UUID
+  }
+
+  async getEventsByReference(reference: string): Promise<PaymentEvent[]> {
+    // Retrieve all events for a merchant reference
+  }
+
+  async getEventsByOrderId(orderId: string): Promise<PaymentEvent[]> {
+    // Retrieve all events for a provider order ID
+  }
+}
+```
+
+Pass your adapter via the `db` field in [`PesaConfig`](/docs/api/pesa/interfaces/PesaConfig):
+
+```ts
+const pesa = createPesa({
+  provider: new ClickPesaProvider({ ... }),
+  db: new MyAdapter(),
+});
+```
+
+See the [Architecture](/docs/architecture#event-store) page for how the event store fits into the webhook lifecycle.

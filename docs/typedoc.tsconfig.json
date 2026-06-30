@@ -12,6 +12,7 @@
   },
   "include": [
     "../packages/pesa/src/**/*.ts",
+    "../adapters/sqlite/src/**/*.ts",
     "../providers/azampay/src/**/*.ts",
     "../providers/clickpesa/src/**/*.ts",
     "../providers/selcom/src/**/*.ts"
