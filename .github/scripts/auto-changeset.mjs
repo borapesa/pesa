@@ -198,20 +198,30 @@ function main() {
   }
 
   // ── New packages ──────────────────────────────────────────────────
-  // @changesets/cli bumps 0.0.0 packages to 1.0.0 when there's no
-  // explicit changeset.  Generate patch changesets for any new package
-  // not yet covered, so they start at 0.0.1 instead of 1.0.0.
+  // @changesets/cli bumps unpublished packages to 1.0.0 when there's no
+  // explicit changeset.  Detect new packages via empty CHANGELOG (just
+  // the title line) and generate a patch changeset so they start at the
+  // correct semver level instead of 1.0.0.
 
   for (const [pkg, dir] of Object.entries(PKG_TO_DIR)) {
     if (packages[pkg]) continue; // already covered by a commit
 
-    const pkgJson = JSON.parse(readFileSync(join(process.cwd(), dir, 'package.json'), 'utf-8'));
-    if (pkgJson.version === '0.0.0') {
+    const changelogPath = join(process.cwd(), dir, 'CHANGELOG.md');
+    let changelog = '';
+    try {
+      changelog = readFileSync(changelogPath, 'utf-8').trim();
+    } catch {
+      // no CHANGELOG yet — definitely new
+    }
+
+    // A CHANGELOG with only the title line (or empty) means unpublished
+    const lines = changelog.split('\n').filter((l) => l.trim());
+    if (lines.length <= 1) {
       packages[pkg] = {
         bump: 'patch',
         items: ['- Initial release'],
       };
-      console.log(`  patch   [${pkg}] new package (0.0.0 → 0.0.1)`);
+      console.log(`  patch   [${pkg}] unpublished package`);
     }
   }
 
