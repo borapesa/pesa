@@ -20,6 +20,7 @@ const SCOPE_TO_PKG = {
   azampay: '@borapesa/azampay',
   selcom: '@borapesa/selcom',
   clickpesa: '@borapesa/clickpesa',
+  sqlite: '@borapesa/sqlite',
 };
 
 const PKG_TO_DIR = {
@@ -27,6 +28,7 @@ const PKG_TO_DIR = {
   '@borapesa/azampay': 'providers/azampay',
   '@borapesa/selcom': 'providers/selcom',
   '@borapesa/clickpesa': 'providers/clickpesa',
+  '@borapesa/sqlite': 'adapters/sqlite',
 };
 
 const IGNORED_SCOPES = new Set(['docs', 'chore', 'ci', 'test', 'style', 'refactor']);
