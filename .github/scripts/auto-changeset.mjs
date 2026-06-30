@@ -10,7 +10,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // ── Package mapping ────────────────────────────────────────────────────
@@ -195,6 +195,24 @@ function main() {
     }
 
     console.log(`  ${bump.padEnd(7)} [${affectedPackages.join(', ')}] ${commit.subject.slice(0, 60)}`);
+  }
+
+  // ── New packages ──────────────────────────────────────────────────
+  // @changesets/cli bumps 0.0.0 packages to 1.0.0 when there's no
+  // explicit changeset.  Generate patch changesets for any new package
+  // not yet covered, so they start at 0.0.1 instead of 1.0.0.
+
+  for (const [pkg, dir] of Object.entries(PKG_TO_DIR)) {
+    if (packages[pkg]) continue; // already covered by a commit
+
+    const pkgJson = JSON.parse(readFileSync(join(process.cwd(), dir, 'package.json'), 'utf-8'));
+    if (pkgJson.version === '0.0.0') {
+      packages[pkg] = {
+        bump: 'patch',
+        items: ['- Initial release'],
+      };
+      console.log(`  patch   [${pkg}] new package (0.0.0 → 0.0.1)`);
+    }
   }
 
   // Write changeset files
