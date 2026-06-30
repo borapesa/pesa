@@ -13,3 +13,4 @@ Bora Pesa API reference — auto-generated from JSDoc.
 | [@borapesa/clickpesa](clickpesa) | ClickPesa provider adapter |
 | [@borapesa/selcom](selcom) | Selcom provider adapter |
 | [@borapesa/sqlite](sqlite) | SQLite event store adapter |
+| [@borapesa/devtools](devtools) | Developer tools — cloudflared tunnel, webhook dev utilities |

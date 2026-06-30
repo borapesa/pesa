@@ -2,7 +2,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { platform, tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { PesaPlugin } from './types';
+import type { PesaPlugin } from '@borapesa/pesa';
 
 // ── Cloudflared detection ──────────────────────────────────────────────
 
@@ -230,7 +230,7 @@ export interface TunnelPluginOptions {
  *
  * ```ts
  * import { createPesa } from '@borapesa/pesa';
- * import { tunnelPlugin } from '@borapesa/pesa/plugins';
+ * import { tunnelPlugin } from '@borapesa/devtools';
  *
  * const pesa = createPesa({
  *   provider: new SelcomPaymentProvider({...}),

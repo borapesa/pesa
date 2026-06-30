@@ -20,6 +20,7 @@ const SCOPE_TO_PKG = {
   azampay: '@borapesa/azampay',
   selcom: '@borapesa/selcom',
   clickpesa: '@borapesa/clickpesa',
+  devtools: '@borapesa/devtools',
   sqlite: '@borapesa/sqlite',
 };
 
@@ -28,6 +29,7 @@ const PKG_TO_DIR = {
   '@borapesa/azampay': 'providers/azampay',
   '@borapesa/selcom': 'providers/selcom',
   '@borapesa/clickpesa': 'providers/clickpesa',
+  '@borapesa/devtools': 'packages/devtools',
   '@borapesa/sqlite': 'adapters/sqlite',
 };
 

@@ -30,6 +30,11 @@ const PACKAGES = [
     name: '@borapesa/sqlite',
     desc: 'SQLite event store adapter',
   },
+  {
+    dir: 'packages/devtools/src',
+    name: '@borapesa/devtools',
+    desc: 'Developer tools — cloudflared tunnel, webhook dev utilities',
+  },
 ];
 
 // ── Step 1: Flatten directory structure ─────────────────────────

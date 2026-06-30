@@ -6,7 +6,7 @@ title: "Type Alias: ProviderName"
 type ProviderName = "selcom" | "azampay" | "clickpesa" | "dpo" | "pesapal" | "bogus";
 ```
 
-Defined in: [packages/pesa/src/types/core.ts:64](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/types/core.ts#L64)
+Defined in: [packages/pesa/src/types/core.ts:64](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/core.ts#L64)
 
 All supported payment providers.
 

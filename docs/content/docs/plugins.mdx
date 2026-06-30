@@ -11,7 +11,7 @@ Plugins intercept requests and webhook events at specific points in the lifecycl
 
 ```ts
 import { createPesa } from '@borapesa/pesa';
-import { retryPlugin, idempotencyPlugin, loggingPlugin, tunnelPlugin } from '@borapesa/pesa/plugins';
+import { retryPlugin, idempotencyPlugin, loggingPlugin } from '@borapesa/pesa/plugins';
 
 const pesa = createPesa({
   provider: new ClickPesaProvider({ ... }),
@@ -19,7 +19,6 @@ const pesa = createPesa({
     idempotencyPlugin(),   // must be before retryPlugin
     retryPlugin({ maxAttempts: 3 }),
     loggingPlugin({ level: 'info' }),
-    tunnelPlugin(),         // dev only — auto-starts webhook tunnel
   ],
 });
 ```
@@ -67,9 +66,28 @@ loggingPlugin({
 
 Logs include: operation name, status, duration in ms, and sanitized payload.
 
+## Devtools
+
+The [`@borapesa/devtools`](/docs/api/devtools) package provides developer utilities.
+
 ### `tunnelPlugin()`
 
 Starts a Cloudflare Quick Tunnel for local webhook development. Requires [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) on the system PATH (free, no account needed).
+
+```bash
+pnpm add -D @borapesa/devtools
+```
+
+```ts
+import { tunnelPlugin } from '@borapesa/devtools';
+
+const pesa = createPesa({
+  provider: new ClickPesaProvider({ ... }),
+  plugins: [
+    ...(process.env.NODE_ENV !== 'production' ? [tunnelPlugin({ port: 8080 })] : []),
+  ],
+});
+```
 
 ```ts
 tunnelPlugin({
@@ -83,15 +101,13 @@ tunnelPlugin({
 On startup, it prints the public webhook URL:
 
 ```
-🛜  @borapesa/tunnel
+🛜  @borapesa/devtools
    Tunnel ready:  https://cool-fox.trycloudflare.com
    Webhook URL:   https://cool-fox.trycloudflare.com/pesa/webhook
 ```
 
-Use this URL as your provider's webhook callback during development. The tunnel persists across Bun/Node `--watch` reloads — the same URL is reused so you don't need to reconfigure your provider dashboard on every file change.
-
 <Callout variant="warn">
-  This plugin is for **local development only**. Do not use it in production — webhooks should go directly to your deployed server.
+  This is for **local development only**. Guard it behind `NODE_ENV !== 'production'`. Do not use it in production — webhooks should go directly to your deployed server.
 </Callout>
 
 ## Plugin interface
