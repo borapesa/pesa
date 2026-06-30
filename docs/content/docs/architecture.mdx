@@ -88,10 +88,11 @@ Every `pesa` instance exposes a generic `(Request) => Response` handler. Framewo
 
 ```
               ┌──────────────┐
-Bun.serve() ──┤              │
-Next.js     ──┤  pesa.mount  ├── POST /pesa/order
-Express     ──┤ (fetch-like) ├── GET  /pesa/status/:orderId
-Elysia      ──┤              ├── POST /pesa/webhook
+              ┌──────────────────────┐
+Bun.serve() ──┤                      │
+              │  pesa.mountWebhook   ├── POST /pesa/webhook
+              │  (webhook only)      │
+              └──────────────────────┘
               └──────────────┘
 ```
 

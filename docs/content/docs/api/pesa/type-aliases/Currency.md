@@ -6,7 +6,7 @@ title: "Type Alias: Currency"
 type Currency = "TZS" | "USD";
 ```
 
-Defined in: [packages/pesa/src/types/core.ts:46](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/packages/pesa/src/types/core.ts#L46)
+Defined in: [packages/pesa/src/types/core.ts:46](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/types/core.ts#L46)
 
 Supported currencies.
 

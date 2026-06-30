@@ -88,26 +88,17 @@ const pesa = createPesa({
 
 ## Mount on your server
 
-Every `pesa` instance exposes an HTTP handler. Mount it directly or use a framework adapter:
+Every `pesa` instance exposes a webhook handler. Mount it publicly — providers POST callbacks here:
 
 ```ts
-// Raw — works with any fetch-compatible server
-Bun.serve({ fetch: pesa.mount });
-
-// Next.js (with @borapesa/nextjs)
-// app/api/pesa/[...all]/route.ts
-import { toNextJsHandler } from '@borapesa/nextjs';
-import { pesa } from '@/lib/pesa';
-export const { GET, POST } = toNextJsHandler(pesa);
+Bun.serve({ fetch: pesa.mountWebhook });
 ```
 
-The handler exposes three endpoints (customizable via `basePath` in config):
+The handler serves one endpoint (customizable via `basePath` in config):
 
-- `POST {basePath}/order` — create a payment
-- `GET {basePath}/status/:orderId` — query status
 - `POST {basePath}/webhook` — receive provider callbacks
 
-`basePath` defaults to `/pesa` and can be set to any prefix (e.g., `/api/payments`).
+For order creation and status queries, use `pesa.createOrder()` and `pesa.getPaymentStatus()` in your own routes behind your own auth middleware. `basePath` defaults to `/pesa`.
 
 ## Next steps
 

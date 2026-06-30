@@ -33,7 +33,7 @@ title: "@borapesa/pesa"
 | [PaymentEvent](interfaces/PaymentEvent) | Normalized payment event — the **source of truth** for all payment activity. |
 | [PesaConfig](interfaces/PesaConfig) | Configuration passed to [createPesa](functions/createPesa). |
 | [PesaDatabaseAdapter](interfaces/PesaDatabaseAdapter) | Database adapter interface for the event store. |
-| [PesaHandlerTarget](interfaces/PesaHandlerTarget) | Minimal interface for the pesa instance that the handler needs. Defined here (not imported from pesa.ts) to avoid circular dependencies. |
+| [PesaHandlerTarget](interfaces/PesaHandlerTarget) | Minimal interface for the pesa instance that the handler needs. |
 | [PesaInstance](interfaces/PesaInstance) | Fully configured payments SDK instance — returned by [createPesa](functions/createPesa). |
 | [PesaPlugin](interfaces/PesaPlugin) | Plugin lifecycle hooks. |
 | [PreviewResult](interfaces/PreviewResult) | Result of a preview / dry-run validation before committing an action. |
@@ -52,11 +52,16 @@ title: "@borapesa/pesa"
 | [ProviderName](type-aliases/ProviderName) | All supported payment providers. |
 | [TZSAmount](type-aliases/TZSAmount) | TZS amount as a whole integer. `15000` = TZS 15,000. |
 
+## Variables
+
+| Variable | Description |
+| ------ | ------ |
+| [createPesaHandler](variables/createPesaHandler) | - |
+
 ## Functions
 
 | Function | Description |
 | ------ | ------ |
 | [createPesa](functions/createPesa) | The single entry point for the entire Bora Pesa SDK. |
-| [createPesaHandler](functions/createPesaHandler) | Creates a generic fetch-like handler that can be mounted on any framework. |
 | [validateCreateOrderPayload](functions/validateCreateOrderPayload) | Validate a CreateOrderPayload before forwarding to the provider. Throws PesaValidationError on invalid input. |
 | [validateDisbursePayload](functions/validateDisbursePayload) | Validate a DisbursePayload before forwarding to the provider. Throws PesaValidationError on invalid input. |

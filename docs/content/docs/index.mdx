@@ -67,5 +67,5 @@ pesa.on('PAYMENT_SUCCESS', async (event) => {
 No adapter needed — mount directly on any fetch-compatible server:
 
 ```ts
-Bun.serve({ fetch: pesa.mount });
+Bun.serve({ fetch: pesa.mountWebhook });
 ```

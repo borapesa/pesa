@@ -1,90 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import type { PesaHandlerTarget } from './handler';
-import { createPesaHandler } from './handler';
+import { createPesaWebhookHandler } from './handler';
 
 function mockPesa(overrides: Partial<PesaHandlerTarget> = {}): PesaHandlerTarget {
   return {
-    createOrder: async () => ({
-      orderId: 'test_123',
-      reference: 'ref_1',
-      status: 'SUCCESS',
-      ussdPushInitiated: true,
-    }),
-    getPaymentStatus: async () => 'SUCCESS',
     handleWebhook: async () => {},
     on: () => {},
     ...overrides,
   };
 }
 
-describe('createPesaHandler', () => {
-  // ── POST /pesa/order ────────────────────────────────────────────
-
-  it('routes POST {basePath}/order to createOrder and returns 201', async () => {
-    const handler = createPesaHandler(mockPesa(), '/custom');
-
-    const req = new Request('http://localhost/custom/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount: 15000,
-        currency: 'TZS',
-        reference: 'ref_1',
-        customer: { name: 'Juma', phone: '255712345678' },
-      }),
-    });
-
-    const res = await handler(req);
-    expect(res.status).toBe(201);
-  });
-
-  it('routes POST /pesa/order to createOrder and returns 201', async () => {
-    const handler = createPesaHandler(mockPesa());
-
-    const req = new Request('http://localhost/pesa/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount: 15000,
-        currency: 'TZS',
-        reference: 'ref_1',
-        customer: { name: 'Juma', phone: '255712345678' },
-      }),
-    });
-
-    const res = await handler(req);
-    expect(res.status).toBe(201);
-
-    const body = (await res.json()) as { status: string };
-    expect(body.status).toBe('SUCCESS');
-  });
-
-  // ── GET /pesa/status/:orderId ────────────────────────────────────
-
-  it('routes GET /pesa/status/:orderId to getPaymentStatus', async () => {
-    const handler = createPesaHandler(mockPesa());
-
-    const req = new Request('http://localhost/pesa/status/test_123');
-    const res = await handler(req);
-    const body = (await res.json()) as { status: string };
-
-    expect(res.status).toBe(200);
-    expect(body.status).toBe('SUCCESS');
-  });
-
-  it('returns 400 for GET /pesa/status/ with no orderId', async () => {
-    const handler = createPesaHandler(mockPesa());
-
-    const req = new Request('http://localhost/pesa/status/');
-    const res = await handler(req);
-
-    expect(res.status).toBe(400);
-  });
-
-  // ── POST /pesa/webhook ───────────────────────────────────────────
+describe('createPesaWebhookHandler', () => {
+  // ── POST {basePath}/webhook ───────────────────────────────────────
 
   it('routes POST /pesa/webhook to handleWebhook and returns 200', async () => {
-    const handler = createPesaHandler(mockPesa());
+    const handler = createPesaWebhookHandler(mockPesa());
 
     const req = new Request('http://localhost/pesa/webhook', {
       method: 'POST',
@@ -95,9 +25,33 @@ describe('createPesaHandler', () => {
     expect(res.status).toBe(200);
   });
 
-  it('handles webhook with custom headers', async () => {
+  it('routes POST with trailing slash /pesa/webhook/', async () => {
+    const handler = createPesaWebhookHandler(mockPesa());
+
+    const req = new Request('http://localhost/pesa/webhook/', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+
+    const res = await handler(req);
+    expect(res.status).toBe(200);
+  });
+
+  it('routes POST with custom basePath', async () => {
+    const handler = createPesaWebhookHandler(mockPesa(), '/api/payments');
+
+    const req = new Request('http://localhost/api/payments/webhook', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+
+    const res = await handler(req);
+    expect(res.status).toBe(200);
+  });
+
+  it('passes headers to handleWebhook', async () => {
     let receivedHeaders: Record<string, string> = {};
-    const handler = createPesaHandler(
+    const handler = createPesaWebhookHandler(
       mockPesa({
         handleWebhook: async (_body, headers) => {
           receivedHeaders = headers;
@@ -120,7 +74,7 @@ describe('createPesaHandler', () => {
   it('returns 401 when provider throws PesaWebhookError', async () => {
     const { PesaWebhookError } = await import('./errors');
 
-    const handler = createPesaHandler(
+    const handler = createPesaWebhookHandler(
       mockPesa({
         handleWebhook: async () => {
           throw new PesaWebhookError('bad signature');
@@ -138,7 +92,7 @@ describe('createPesaHandler', () => {
   });
 
   it('returns 500 for unexpected errors', async () => {
-    const handler = createPesaHandler(
+    const handler = createPesaWebhookHandler(
       mockPesa({
         handleWebhook: async () => {
           throw new Error('boom');
@@ -156,7 +110,7 @@ describe('createPesaHandler', () => {
   });
 
   it('returns generic 500 for non-Error throws', async () => {
-    const handler = createPesaHandler(
+    const handler = createPesaWebhookHandler(
       mockPesa({
         handleWebhook: async () => {
           throw 'raw string error';
@@ -178,12 +132,24 @@ describe('createPesaHandler', () => {
 
   // ── Unknown routes ───────────────────────────────────────────────
 
-  it('returns 404 for unknown routes', async () => {
-    const handler = createPesaHandler(mockPesa());
+  it('returns 404 for non-webhook routes', async () => {
+    const handler = createPesaWebhookHandler(mockPesa());
 
-    const req = new Request('http://localhost/unknown');
+    const req = new Request('http://localhost/pesa/order', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+
     const res = await handler(req);
+    expect(res.status).toBe(404);
+  });
 
+  it('returns 404 for GET requests', async () => {
+    const handler = createPesaWebhookHandler(mockPesa());
+
+    const req = new Request('http://localhost/pesa/webhook');
+
+    const res = await handler(req);
     expect(res.status).toBe(404);
   });
 });

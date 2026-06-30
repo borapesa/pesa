@@ -9,7 +9,7 @@ export {
   PesaWebhookError,
 } from './errors';
 export type { PesaHandlerTarget } from './handler';
-export { createPesaHandler } from './handler';
+export { createPesaWebhookHandler } from './handler';
 export type { PesaInstance } from './pesa';
 export { createPesa } from './pesa';
 export type { PesaPlugin, RequestContext, ResponseContext } from './plugins/types';

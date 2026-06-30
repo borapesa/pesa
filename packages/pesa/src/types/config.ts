@@ -46,7 +46,7 @@ export interface PesaConfig {
   provider: BasePaymentProvider;
 
   /**
-   * Base path for the built-in HTTP handler (`pesa.mount`).
+   * Base path for the built-in webhook handler (`pesa.mountWebhook`).
    *
    * All routes are prefixed with this value:
    * - `POST {basePath}/order` — create a payment order

@@ -8,7 +8,7 @@ import {
   PesaValidationError,
   PesaWebhookError,
 } from './errors';
-import { createPesaHandler } from './handler';
+import { createPesaWebhookHandler } from './handler';
 import type { RequestContext, ResponseContext } from './plugins/types';
 import type { BasePaymentProvider } from './providers/base';
 import type { BalanceResult } from './types/account';
@@ -80,11 +80,10 @@ import { validateCreateOrderPayload, validateDisbursePayload } from './validate'
  * ## HTTP mount
  *
  * ```ts
- * // Mount directly on any fetch-compatible server
- * Bun.serve({ fetch: pesa.mount });
- * // Or use a framework adapter:
- * // - @borapesa/nextjs → export const { GET, POST } = toNextJsHandler(pesa);
- * // - @borapesa/express → app.use('/api/pesa', toPesaRouter(pesa));
+ * // Mount the webhook handler — the one route that must be public
+ * Bun.serve({ fetch: pesa.mountWebhook });
+ * // For orders/status, use pesa.createOrder() and pesa.getPaymentStatus()
+ * // in your own routes behind your own auth middleware.
  * ```
  */
 export interface PesaInstance {
@@ -171,11 +170,14 @@ export interface PesaInstance {
   provider: BasePaymentProvider;
 
   /**
-   * Generic fetch-like handler. Works with any framework.
+   * Webhook handler — mount this publicly so providers can POST callbacks.
    *
-   * Routes: `POST /order`, `GET /status/:orderId`, `POST /webhook`.
+   * Route: `POST {basePath}/webhook`
+   *
+   * For order creation and status queries, use {@link createOrder} and
+   * {@link getPaymentStatus} in your own routes behind your own auth.
    */
-  mount: (request: Request) => Promise<Response>;
+  mountWebhook: (request: Request) => Promise<Response>;
 }
 
 /**
@@ -430,12 +432,12 @@ export function createPesa(config: PesaConfig): PesaInstance {
     getNameLookup,
     listOrders,
     provider,
-    // mount set below after assembly
+    // mountWebhook set below after assembly
     // biome-ignore lint/style/noNonNullAssertion: placeholder, set immediately after
-    mount: undefined!,
+    mountWebhook: undefined!,
   };
 
-  instance.mount = createPesaHandler(instance, config.basePath);
+  instance.mountWebhook = createPesaWebhookHandler(instance, config.basePath);
 
   // ── Bootstrap plugins ───────────────────────────────────────────────
 
