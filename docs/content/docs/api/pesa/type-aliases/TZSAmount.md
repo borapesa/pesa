@@ -6,7 +6,7 @@ title: "Type Alias: TZSAmount"
 type TZSAmount = number;
 ```
 
-Defined in: [packages/pesa/src/types/core.ts:27](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/types/core.ts#L27)
+Defined in: [packages/pesa/src/types/core.ts:27](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/packages/pesa/src/types/core.ts#L27)
 
 TZS amount as a whole integer. `15000` = TZS 15,000.
 

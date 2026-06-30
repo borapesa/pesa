@@ -3,34 +3,29 @@ title: "Function: createPesaHandler()"
 ---
 
 ```ts
-function createPesaHandler(pesa): (request) => Promise<Response>;
+function createPesaHandler(pesa, basePath?): (request) => Promise<Response>;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:49](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/handler.ts#L49)
+Defined in: [packages/pesa/src/handler.ts:51](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/packages/pesa/src/handler.ts#L51)
 
 Creates a generic fetch-like handler that can be mounted on any framework.
 
-All routes are namespaced under `/pesa/` to avoid collisions with
+All routes are namespaced under a base path to avoid collisions with
 application routes — following the same convention as better-auth's `/auth/`.
 
 Routes:
 ```
-  POST /pesa/order           — create a payment order
-  GET  /pesa/status/:orderId — query payment status
-  POST /pesa/webhook         — receive provider webhooks
-```
-
-Usage without a framework adapter:
-```js
-  Bun.serve({ fetch: pesa.mount });
-  http.createServer((req, res) => { ... pesa.mount(webRequest) });
+  POST {basePath}/order           — create a payment order
+  GET  {basePath}/status/:orderId — query payment status
+  POST {basePath}/webhook         — receive provider webhooks
 ```
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `pesa` | [`PesaHandlerTarget`](../interfaces/PesaHandlerTarget) |
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `pesa` | [`PesaHandlerTarget`](../interfaces/PesaHandlerTarget) | `undefined` | - |
+| `basePath` | `string` | `'/pesa'` | — defaults to `'/pesa'` Usage without a framework adapter: `Bun.serve({ fetch: pesa.mount }); http.createServer((req, res) => { ... pesa.mount(webRequest) });` |
 
 ## Returns
 

@@ -101,10 +101,13 @@ import { pesa } from '@/lib/pesa';
 export const { GET, POST } = toNextJsHandler(pesa);
 ```
 
-The handler exposes three endpoints under `/pesa/`:
-- `POST /pesa/order` — create a payment
-- `GET /pesa/status/:orderId` — query status
-- `POST /pesa/webhook` — receive provider callbacks
+The handler exposes three endpoints (customizable via `basePath` in config):
+
+- `POST {basePath}/order` — create a payment
+- `GET {basePath}/status/:orderId` — query status
+- `POST {basePath}/webhook` — receive provider callbacks
+
+`basePath` defaults to `/pesa` and can be set to any prefix (e.g., `/api/payments`).
 
 ## Next steps
 

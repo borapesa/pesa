@@ -6,7 +6,7 @@ title: "Function: validateDisbursePayload()"
 function validateDisbursePayload(payload): void;
 ```
 
-Defined in: [packages/pesa/src/validate.ts:46](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/validate.ts#L46)
+Defined in: [packages/pesa/src/validate.ts:46](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/packages/pesa/src/validate.ts#L46)
 
 Validate a DisbursePayload before forwarding to the provider.
 Throws PesaValidationError on invalid input.

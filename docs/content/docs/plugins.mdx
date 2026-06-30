@@ -73,8 +73,10 @@ Starts a Cloudflare Quick Tunnel for local webhook development. Requires [`cloud
 
 ```ts
 tunnelPlugin({
-  port: 3000,  // local port to expose (default: 3000)
-  log:  true,  // print the tunnel URL to console (default: true)
+  port:        3000,               // local port to expose (default: 3000)
+  log:         true,               // print the tunnel URL to console (default: true)
+  webhookPath: '/pesa/webhook',    // path shown in the banner (default: '/pesa/webhook')
+  binary:      'cloudflared',      // override for testing with mock binaries
 })
 ```
 
@@ -86,7 +88,7 @@ On startup, it prints the public webhook URL:
    Webhook URL:   https://cool-fox.trycloudflare.com/pesa/webhook
 ```
 
-Use this URL as your provider's webhook callback during development. The tunnel automatically shuts down when your process exits.
+Use this URL as your provider's webhook callback during development. The tunnel persists across Bun/Node `--watch` reloads — the same URL is reused so you don't need to reconfigure your provider dashboard on every file change.
 
 <Callout variant="warn">
   This plugin is for **local development only**. Do not use it in production — webhooks should go directly to your deployed server.

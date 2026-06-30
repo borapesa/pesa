@@ -6,7 +6,7 @@ title: "Type Alias: MobileNetwork"
 type MobileNetwork = "MPESA" | "TIGOPESA" | "AIRTELMONEY" | "HALOPESA" | "AZAMPESA";
 ```
 
-Defined in: [packages/pesa/src/types/disbursement.ts:20](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/packages/pesa/src/types/disbursement.ts#L20)
+Defined in: [packages/pesa/src/types/disbursement.ts:20](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/packages/pesa/src/types/disbursement.ts#L20)
 
 Supported mobile money networks for disbursement (B2C payouts).
 

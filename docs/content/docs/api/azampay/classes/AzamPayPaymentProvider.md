@@ -2,7 +2,7 @@
 title: "Class: AzamPayPaymentProvider"
 ---
 
-Defined in: [providers/azampay/src/azampay.ts:148](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L148)
+Defined in: [providers/azampay/src/azampay.ts:148](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L148)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [providers/azampay/src/azampay.ts:148](https://github.com/borapesa/p
 new AzamPayPaymentProvider(config): AzamPayPaymentProvider;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:162](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L162)
+Defined in: [providers/azampay/src/azampay.ts:162](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L162)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ BasePaymentProvider.constructor
 
 | Property | Modifier | Type | Default value | Description | Overrides | Defined in |
 | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
-| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'azampay'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/azampay/src/azampay.ts:149](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L149) |
+| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'azampay'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/azampay/src/azampay.ts:149](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L149) |
 
 ## Methods
 
@@ -85,7 +85,7 @@ createBankCheckout(params): Promise<{
 }>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:671](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L671)
+Defined in: [providers/azampay/src/azampay.ts:671](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L671)
 
 Bank checkout — accepts OTP from the customer (obtained via USSD).
 
@@ -122,7 +122,7 @@ This is a two-step flow:
 createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:369](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L369)
+Defined in: [providers/azampay/src/azampay.ts:369](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L369)
 
 Initiate a checkout / USSD push / redirect.
 
@@ -154,7 +154,7 @@ BasePaymentProvider.createOrder
 createPostCheckout(params): Promise<string>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:697](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L697)
+Defined in: [providers/azampay/src/azampay.ts:697](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L697)
 
 Generate a hosted checkout page URL. Returns the URL to redirect to.
 
@@ -185,7 +185,7 @@ Generate a hosted checkout page URL. Returns the URL to redirect to.
 disburse(payload): Promise<DisburseResult>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:499](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L499)
+Defined in: [providers/azampay/src/azampay.ts:499](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L499)
 
 Disburse (B2C payout).
 
@@ -257,7 +257,7 @@ BasePaymentProvider.getBalance
 getNameLookup(phoneOrAccount): Promise<NameLookupResult>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:620](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L620)
+Defined in: [providers/azampay/src/azampay.ts:620](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L620)
 
 Name lookup.
 
@@ -289,7 +289,7 @@ BasePaymentProvider.getNameLookup
 getPaymentPartners(): Promise<PartnerResponse[]>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:744](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L744)
+Defined in: [providers/azampay/src/azampay.ts:744](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L744)
 
 List available payment partners for the configured merchant.
 
@@ -308,7 +308,7 @@ not a `{ partners: [...] }` wrapper.
 getPaymentStatus(orderId, providerName?): Promise<PaymentStatus>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:457](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L457)
+Defined in: [providers/azampay/src/azampay.ts:457](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L457)
 
 Query payment status.
 
@@ -339,7 +339,7 @@ BasePaymentProvider.getPaymentStatus
 handleWebhook(rawBody, _headers): Promise<PaymentEvent>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:557](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L557)
+Defined in: [providers/azampay/src/azampay.ts:557](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L557)
 
 Parse and verify an incoming AzamPay callback (webhook).
 
@@ -523,7 +523,7 @@ validateCredentials(): Promise<{
 }>;
 ```
 
-Defined in: [providers/azampay/src/azampay.ts:649](https://github.com/borapesa/pesa/blob/3de08d45a33185320b62b57cdb2941dba74b4d9f/providers/azampay/src/azampay.ts#L649)
+Defined in: [providers/azampay/src/azampay.ts:649](https://github.com/borapesa/pesa/blob/b07aee7503efdb35e9de5a2777ab7a4f391cf081/providers/azampay/src/azampay.ts#L649)
 
 Validate that a provider config works (health check).
 
