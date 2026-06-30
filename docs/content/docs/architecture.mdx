@@ -87,13 +87,12 @@ const pesa = createPesa({
 Every `pesa` instance exposes a generic `(Request) => Response` handler. Framework adapters are thin wrappers around this handler — they add idiomatic route mounting but contain no business logic.
 
 ```
-              ┌──────────────┐
               ┌──────────────────────┐
-Bun.serve() ──┤                      │
-              │  pesa.mountWebhook   ├── POST /pesa/webhook
-              │  (webhook only)      │
+              │                      │
+Bun.serve() ──┤  pesa.mountWebhook   ├── POST /pesa/webhook
+              │    (webhook only)    │
+              │                      │
               └──────────────────────┘
-              └──────────────┘
 ```
 
 The route prefix defaults to `/pesa` and is configurable via `basePath` in [`PesaConfig`](/docs/api/pesa/interfaces/PesaConfig).
@@ -107,5 +106,5 @@ These are locked for v1.0 and should not change without an RFC:
 | **TZS only, whole integers**          | TZS has no subunits in digital payments. `15000` = TZS 15,000. Floats are a bug surface.                                                               |
 | **MSISDN phone format**               | `255XXXXXXXXX`. Local `07XX` rejected at validation. Matches every Tanzanian payment API.                                                              |
 | **Auth out of scope**                 | Pesa is payment infrastructure. Use better-auth or your own auth system.                                                                               |
-| **Secrets never reach the client**    | The SDK is server-only — all provider API calls happen server-side. No credentials are ever exposed to the browser.                                   |
+| **Secrets never reach the client**    | The SDK is server-only — all provider API calls happen server-side. No credentials are ever exposed to the browser.                                    |
 | **AMBIGUOUS is a first-class status** | Selcom returns this when the transaction outcome is unknown. Normalizing it to `PENDING` or `FAILED` would lose information. Applications should poll. |
