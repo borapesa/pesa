@@ -167,7 +167,7 @@ export interface PesaInstance {
   /** List payment orders. `undefined` if unsupported. */
   listOrders?(params: ListOrdersParams): Promise<ListOrdersResult>;
 
-  // ── Internals (exposed for framework adapters) ──────────────────────
+  // ── Internals (exposed for advanced use cases) ──────────────────────
 
   /** The underlying provider adapter. */
   provider: BasePaymentProvider;

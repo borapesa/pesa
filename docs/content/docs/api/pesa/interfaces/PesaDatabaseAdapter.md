@@ -2,13 +2,13 @@
 title: "Interface: PesaDatabaseAdapter"
 ---
 
-Defined in: [packages/pesa/src/db/adapter.ts:10](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/db/adapter.ts#L10)
+Defined in: [packages/pesa/src/db/adapter.ts:10](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/db/adapter.ts#L10)
 
 Database adapter interface for the event store.
 
 The default is an in-memory adapter (zero deps, dev/CI ready).
-Swap for `@borapesa/sqlite`, PostgreSQL, or your own adapter via
-the `db` field in PesaConfig.
+Swap for `@borapesa/sqlite`, or implement your own adapter via
+the `db` field in PesaConfig — the four methods work with any database.
 
 ## Methods
 
@@ -18,7 +18,7 @@ the `db` field in PesaConfig.
 getEvent(id): Promise<PaymentEvent | null>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:15](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/db/adapter.ts#L15)
+Defined in: [packages/pesa/src/db/adapter.ts:15](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/db/adapter.ts#L15)
 
 Retrieve a single event by its UUID.
 
@@ -40,7 +40,7 @@ Retrieve a single event by its UUID.
 getEventsByOrderId(orderId): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:21](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/db/adapter.ts#L21)
+Defined in: [packages/pesa/src/db/adapter.ts:21](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/db/adapter.ts#L21)
 
 Retrieve all events for a given provider order ID.
 
@@ -62,7 +62,7 @@ Retrieve all events for a given provider order ID.
 getEventsByReference(reference): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:18](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/db/adapter.ts#L18)
+Defined in: [packages/pesa/src/db/adapter.ts:18](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/db/adapter.ts#L18)
 
 Retrieve all events for a given merchant reference.
 
@@ -84,7 +84,7 @@ Retrieve all events for a given merchant reference.
 saveEvent(event): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:12](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/db/adapter.ts#L12)
+Defined in: [packages/pesa/src/db/adapter.ts:12](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/db/adapter.ts#L12)
 
 Persist a verified PaymentEvent.
 

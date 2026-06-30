@@ -39,9 +39,11 @@ const pesa = createPesa({
 
 WAL mode is enabled by default for concurrent read/write performance. See the [`@borapesa/sqlite` API docs](/docs/api/sqlite) for full details.
 
-## Writing an adapter
+`@borapesa/sqlite` is the only adapter package provided. For other databases, implement the interface yourself — the [`SQLiteAdapter` source](https://github.com/borapesa/pesa/blob/master/adapters/sqlite/src/index.ts) is the reference.
 
-Any class implementing [`PesaDatabaseAdapter`](/docs/api/pesa/interfaces/PesaDatabaseAdapter) works as an event store. Four methods are required:
+## Writing your own
+
+Implement [`PesaDatabaseAdapter`](/docs/api/pesa/interfaces/PesaDatabaseAdapter) — four methods:
 
 ```ts
 import type { PesaDatabaseAdapter, PaymentEvent } from '@borapesa/pesa';

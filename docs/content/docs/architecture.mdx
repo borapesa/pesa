@@ -84,11 +84,11 @@ const pesa = createPesa({
 });
 ```
 
-Additional adapters (Turso/libSQL, PostgreSQL) are planned. See the [`@borapesa/sqlite`](/docs/api/sqlite) API docs for details.
+For other storage backends, implement the [`PesaDatabaseAdapter`](/docs/api/pesa/interfaces/PesaDatabaseAdapter) interface — four methods (`saveEvent`, `getEvent`, `getEventsByReference`, `getEventsByOrderId`) that work with any database. See the [`@borapesa/sqlite`](/docs/api/sqlite) source for the reference implementation.
 
 ## HTTP mount
 
-Every `pesa` instance exposes a generic `(Request) => Response` handler. Framework adapters are thin wrappers around this handler — they add idiomatic route mounting but contain no business logic.
+`pesa.mountWebhook` is a standard fetch handler — a `(Request) => Promise<Response>` function. Mount it on any fetch-compatible server with no adapter needed:
 
 ```
               ┌──────────────────────┐
@@ -97,6 +97,20 @@ Bun.serve() ──┤  pesa.mountWebhook   ├── POST /pesa/webhook
               │    (webhook only)    │
               │                      │
               └──────────────────────┘
+```
+
+```ts
+// Bun, Deno, Cloudflare Workers, Node 18+
+Bun.serve({ fetch: pesa.mountWebhook });
+
+// Elysia
+new Elysia().mount(pesa.mountWebhook);
+
+// Hono
+new Hono().mount('/pesa', pesa.mountWebhook);
+
+// Next.js App Router
+export const POST = pesa.mountWebhook;
 ```
 
 The route prefix defaults to `/pesa` and is configurable via `basePath` in [`PesaConfig`](/docs/api/pesa/interfaces/PesaConfig).

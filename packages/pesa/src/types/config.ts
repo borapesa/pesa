@@ -41,7 +41,7 @@ export interface PesaConfig {
    * The payment provider adapter.
    *
    * Choose from `@borapesa/selcom`, `@borapesa/clickpesa`,
-   * `@borapesa/azampay`, `@borapesa/dpo`, `@borapesa/pesapal`,
+   * `@borapesa/azampay` (DPO and Pesapal are planned),
    * or use the built-in `BogusPaymentProvider` for local development.
    */
   provider: BasePaymentProvider;
@@ -84,8 +84,9 @@ export interface PesaConfig {
   /**
    * Database adapter for the event store.
    *
-   * Defaults to an in-memory store (lost on restart). Swap to a persistent
-   * adapter (`@borapesa/sqlite`, etc.) for production deployments.
+   * Defaults to an in-memory store (lost on restart). Swap to the
+   * `@borapesa/sqlite` adapter for production deployments, or implement
+   * the {@link PesaDatabaseAdapter} interface for your own database.
    */
   db?: PesaDatabaseAdapter;
 }

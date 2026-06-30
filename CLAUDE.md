@@ -1,6 +1,6 @@
 # CLAUDE.md — Bora Pesa
 
-A unified, open-source payments SDK for Tanzania. `@borapesa/pesa` is a single factory function that wires together a payment provider, plugins, an event store, and framework adapters — inspired by better-auth's architecture.
+A unified, open-source payments SDK for Tanzania. `@borapesa/pesa` is a single factory function that wires together a payment provider, plugins, and an event store — inspired by better-auth's architecture.
 
 ## Project map
 
@@ -12,16 +12,17 @@ pesa/                            # Turborepo + pnpm workspaces
 │       ├── handler.ts           # Generic HTTP mount handler
 │       ├── providers/base.ts    # BasePaymentProvider (abstract, 4 required + 7 optional)
 │       ├── plugins/             # retry, idempotency, logging, webhook-verify
-│       ├── db/                  # SQLiteAdapter (default), PesaDatabaseAdapter interface
+│       ├── db/                  # MemoryAdapter (default), PesaDatabaseAdapter interface
 │       ├── testing/bogus.ts     # BogusPaymentProvider (test double, all methods)
 │       ├── types/               # All type definitions (foundation, order, event, disburse, etc.)
 │       ├── errors.ts            # PesaError hierarchy (6 subclasses)
 │       └── validate.ts          # MSISDN phone, positive integer amount, non-empty reference
 ├── providers/clickpesa/         # @borapesa/clickpesa — ClickPesa adapter (token auth)
-├── providers/{selcom,azampay,dpo,pesapal}/  # Placeholders (empty)
-├── packages/{nextjs,express,elysia,react,client,...}/  # Placeholders (empty)
+├── providers/selcom/            # @borapesa/selcom — Selcom adapter (HMAC auth)
+├── providers/azampay/           # @borapesa/azampay — AzamPay adapter (token auth)
+├── providers/{dpo,pesapal}/     # Planned (empty)
+├── adapters/sqlite/             # @borapesa/sqlite — SQLite event store adapter
 ├── docs/                        # Fumadocs documentation site
-├── examples/                    # Runnable integration examples
 ├── biome.json                   # Formatter + linter config
 ├── lefthook.yml                 # Git hooks (pre-commit: format+typecheck, pre-push: test)
 └── turbo.json                   # Task pipeline
@@ -34,7 +35,7 @@ pesa/                            # Turborepo + pnpm workspaces
 ```
 config.provider: BasePaymentProvider  ← Selcom, ClickPesa, AzamPay, Bogus
 config.plugins: PesaPlugin[]          ← retry, idempotency, logging, webhook-verify
-config.db: PesaDatabaseAdapter        ← SQLite (default), LibSQL, Postgres, etc.
+config.db: PesaDatabaseAdapter        ← in-memory (default), SQLite (@borapesa/sqlite)
 
                     ↓
 
@@ -43,7 +44,7 @@ pesa.getPaymentStatus(id)   → PaymentStatus
 pesa.disburse(payload)      → DisburseResult
 pesa.handleWebhook(body, h) → void (verify → persist → emit)
 pesa.on('PAYMENT_SUCCESS', handler)
-pesa.mount                  → (Request) → Response  (generic HTTP handler)
+pesa.mountWebhook            → (Request) → Promise<Response>  (standard fetch handler)
 ```
 
 ### Plugin pipeline

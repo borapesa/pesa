@@ -4,8 +4,8 @@ import type { PaymentEvent } from '../types/event';
  * Database adapter interface for the event store.
  *
  * The default is an in-memory adapter (zero deps, dev/CI ready).
- * Swap for `@borapesa/sqlite`, PostgreSQL, or your own adapter via
- * the `db` field in PesaConfig.
+ * Swap for `@borapesa/sqlite`, or implement your own adapter via
+ * the `db` field in PesaConfig — the four methods work with any database.
  */
 export interface PesaDatabaseAdapter {
   /** Persist a verified PaymentEvent. */

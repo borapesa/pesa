@@ -38,8 +38,8 @@ const order = await pesa.createOrder({
 - **Provider-agnostic** — swap providers without changing application code
 - **TypeScript-first** — fully typed, zero `any` in public APIs
 - **Zero-config defaults** — SQLite event store, BogusProvider for local dev
-- **Framework-native** — idiomatic adapters for Next.js, Express, ElysiaJS, NestJS, and TanStack Start
-- **Secrets never leave the server** — client packages contain zero provider credentials
+- **Universal HTTP** — `pesa.mountWebhook` is a standard fetch handler; mount on any server with zero framework-specific code
+- **Server-only** — all provider API calls happen server-side; no credentials ever reach the browser
 - **Tanzania-first** — TZS only, MSISDN-centric, Swahili-aware error messages in roadmap
 
 ## Packages
@@ -50,19 +50,9 @@ const order = await pesa.createOrder({
 | `@borapesa/selcom`    | Selcom provider adapter                           |
 | `@borapesa/azampay`   | AzamPay provider adapter                          |
 | `@borapesa/clickpesa` | ClickPesa provider adapter                        |
-| `@borapesa/dpo`       | DPO provider adapter                              |
-| `@borapesa/pesapal`   | Pesapal provider adapter                          |
-| `@borapesa/nextjs`    | Next.js App Router adapter                        |
-| `@borapesa/express`   | Express / Fastify adapter                         |
-| `@borapesa/nestjs`    | NestJS PesaModule + PesaService                   |
-| `@borapesa/elysia`    | ElysiaJS Bun-native plugin                        |
-| `@borapesa/tanstack`  | TanStack Start + Query integration                |
-| `@borapesa/react`     | `usePesaPayment()` React hook                     |
-| `@borapesa/client`    | Browser / RN client — zero secrets                |
-| `@borapesa/libsql`    | Turso / libSQL event store adapter                |
-| `@borapesa/pg`        | PostgreSQL event store adapter                    |
-| `@borapesa/prisma`    | Prisma event store adapter                        |
-| `@borapesa/drizzle`   | Drizzle ORM event store adapter                   |
+| `@borapesa/dpo`       | DPO provider adapter (planned)                    |
+| `@borapesa/pesapal`   | Pesapal provider adapter (planned)                |
+| `@borapesa/sqlite`    | SQLite event store adapter                        |
 
 ## Quick Start
 

@@ -50,22 +50,15 @@ pesa.on('PAYMENT_SUCCESS', async (event) => {
 | ClickPesa | `@borapesa/clickpesa` | Bearer token |
 | Selcom | `@borapesa/selcom` | HMAC-SHA256 |
 | AzamPay | `@borapesa/azampay` | Bearer token |
-| DPO | `@borapesa/dpo` | Token redirect |
-| Pesapal | `@borapesa/pesapal` | OAuth2 + IPN |
+| DPO | `@borapesa/dpo` | Planned |
+| Pesapal | `@borapesa/pesapal` | Planned |
 
-## Frameworks
+## Mount on your server
 
-| Framework | Package |
-|---|---|
-| Next.js | `@borapesa/nextjs` |
-| Express / Fastify | `@borapesa/express` |
-| ElysiaJS | `@borapesa/elysia` |
-| NestJS | `@borapesa/nestjs` |
-
-### Raw HTTP
-
-No adapter needed — mount directly on any fetch-compatible server:
+`pesa.mountWebhook` is a standard fetch handler — mount it anywhere:
 
 ```ts
 Bun.serve({ fetch: pesa.mountWebhook });
 ```
+
+See [Integrations](/docs/integrations) for one-liners across frameworks.

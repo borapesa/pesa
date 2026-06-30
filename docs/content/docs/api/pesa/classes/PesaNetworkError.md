@@ -2,7 +2,7 @@
 title: "Class: PesaNetworkError"
 ---
 
-Defined in: [packages/pesa/src/errors.ts:36](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/errors.ts#L36)
+Defined in: [packages/pesa/src/errors.ts:36](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/errors.ts#L36)
 
 Thrown when a provider API is unreachable or returns a network error.
 
@@ -18,7 +18,7 @@ Thrown when a provider API is unreachable or returns a network error.
 new PesaNetworkError(message): PesaNetworkError;
 ```
 
-Defined in: [packages/pesa/src/errors.ts:37](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/errors.ts#L37)
+Defined in: [packages/pesa/src/errors.ts:37](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/errors.ts#L37)
 
 #### Parameters
 
@@ -38,4 +38,4 @@ Defined in: [packages/pesa/src/errors.ts:37](https://github.com/borapesa/pesa/bl
 
 | Property | Modifier | Type | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/2a2bfc77e53f612f2116dfed02985155a049cb84/packages/pesa/src/errors.ts#L12) |
+| <a id="code"></a> `code` | `readonly` | `string` | [`PesaError`](PesaError).[`code`](PesaError.md#code) | [packages/pesa/src/errors.ts:12](https://github.com/borapesa/pesa/blob/e1b0c17945c282a80288d2c9b1806ce515062340/packages/pesa/src/errors.ts#L12) |

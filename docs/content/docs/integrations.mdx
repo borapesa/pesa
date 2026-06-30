@@ -1,0 +1,139 @@
+---
+title: Integrations
+description: Mount pesa.mountWebhook on any server or framework — one-liners for all major runtimes.
+---
+
+`pesa.mountWebhook` is a standard fetch handler — a `(Request) => Promise<Response>` function. Mount it anywhere with no framework-specific package needed.
+
+## Bun
+
+```ts
+Bun.serve({ fetch: pesa.mountWebhook });
+```
+
+## Node (native http)
+
+```ts
+import { createServer } from 'node:http';
+
+const server = createServer(async (req, res) => {
+  const webRequest = new Request(`http://${req.headers.host}${req.url}`, {
+    method: req.method,
+    headers: req.headers as Record<string, string>,
+    body: req.method !== 'GET' && req.method !== 'HEAD' ? req : undefined,
+  });
+
+  const webResponse = await pesa.mountWebhook(webRequest);
+
+  res.writeHead(webResponse.status, Object.fromEntries(webResponse.headers));
+  res.end(await webResponse.text());
+});
+
+server.listen(3000);
+```
+
+## Deno
+
+```ts
+Deno.serve(pesa.mountWebhook);
+```
+
+## Elysia
+
+```ts
+new Elysia().mount(pesa.mountWebhook);
+```
+
+## Hono
+
+```ts
+new Hono().mount('/pesa', pesa.mountWebhook);
+```
+
+## Next.js (App Router)
+
+```ts
+// app/pesa/webhook/route.ts
+export const POST = pesa.mountWebhook;
+```
+
+## SvelteKit
+
+```ts
+// src/routes/pesa/webhook/+server.ts
+export const POST = ({ request }) => pesa.mountWebhook(request);
+```
+
+## Express
+
+```ts
+app.post('/pesa/webhook', async (req, res) => {
+  const webResponse = await pesa.mountWebhook(
+    new Request('https://<host>/pesa/webhook', {
+      method: 'POST',
+      headers: req.headers as Record<string, string>,
+      body: JSON.stringify(req.body),
+    }),
+  );
+
+  res.status(webResponse.status).send(await webResponse.text());
+});
+```
+
+## Fastify
+
+```ts
+fastify.post('/pesa/webhook', async (request, reply) => {
+  const webResponse = await pesa.mountWebhook(
+    new Request('https://<host>/pesa/webhook', {
+      method: 'POST',
+      headers: request.headers as Record<string, string>,
+      body: JSON.stringify(request.body),
+    }),
+  );
+
+  reply.status(webResponse.status).send(await webResponse.text());
+});
+```
+
+## NestJS
+
+```ts
+@Controller('pesa')
+class PesaController {
+  @Post('webhook')
+  async webhook(@Req() req: Request) {
+    return pesa.mountWebhook(req);
+  }
+}
+```
+
+## TanStack Start
+
+```ts
+// app/routes/pesa/webhook.ts
+export const action = async ({ request }: { request: Request }) => {
+  return pesa.mountWebhook(request);
+};
+```
+
+## Cloudflare Workers
+
+```ts
+export default {
+  async fetch(request: Request) {
+    return pesa.mountWebhook(request);
+  },
+};
+```
+
+## Astro
+
+```ts
+// src/pages/pesa/webhook.ts
+export const POST = ({ request }: { request: Request }) => pesa.mountWebhook(request);
+```
+
+---
+
+The route prefix defaults to `/pesa` and is configurable via `basePath` in [`PesaConfig`](/docs/api/pesa/interfaces/PesaConfig). For order creation and status queries, use `pesa.createOrder()` and `pesa.getPaymentStatus()` in your own routes behind your own auth middleware.

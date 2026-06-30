@@ -92,7 +92,7 @@ const pesa = createPesa({
 });
 ```
 
-Any class implementing [`PesaDatabaseAdapter`](/docs/api/pesa/interfaces/PesaDatabaseAdapter) works as an event store — use `@borapesa/sqlite`, bring your own PostgreSQL adapter, or swap to Turso. See [Adapters](/docs/adapters) for the full list.
+Any class implementing [`PesaDatabaseAdapter`](/docs/api/pesa/interfaces/PesaDatabaseAdapter) works as an event store — use `@borapesa/sqlite`, or implement the four-method interface for your own database. See [Adapters](/docs/adapters) for details.
 
 ## Mount on your server
 

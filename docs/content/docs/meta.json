@@ -5,6 +5,7 @@
     "architecture",
     "providers",
     "adapters",
+    "integrations",
     "events",
     "plugins",
     "testing",
