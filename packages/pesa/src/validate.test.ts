@@ -127,4 +127,58 @@ describe('validateDisbursePayload', () => {
       }),
     ).toThrow('MSISDN format');
   });
+
+  it('rejects non-finite amount', () => {
+    expect(() => validateDisbursePayload({ ...validDisburse, amount: NaN })).toThrow(
+      PesaValidationError,
+    );
+    expect(() => validateDisbursePayload({ ...validDisburse, amount: Infinity })).toThrow(
+      PesaValidationError,
+    );
+  });
+
+  it('rejects negative amount', () => {
+    expect(() => validateDisbursePayload({ ...validDisburse, amount: -5000 })).toThrow(
+      'amount must be greater than 0',
+    );
+  });
+
+  it('rejects non-integer amount', () => {
+    expect(() => validateDisbursePayload({ ...validDisburse, amount: 15000.5 })).toThrow(
+      'amount must be a whole integer (TZS)',
+    );
+  });
+
+  it('requires bic when accountNumber is present for bank payout', () => {
+    expect(() =>
+      validateDisbursePayload({
+        amount: 50000,
+        currency: 'TZS',
+        reference: 'payout_bank',
+        recipient: { accountNumber: '1234567890' },
+      }),
+    ).toThrow('recipient.bic is required for bank payouts');
+  });
+
+  it('accepts valid bank payout payload', () => {
+    expect(() =>
+      validateDisbursePayload({
+        amount: 50000,
+        currency: 'TZS',
+        reference: 'payout_bank',
+        recipient: { accountNumber: '1234567890', bic: 'NMBTZTZ' },
+      }),
+    ).not.toThrow();
+  });
+
+  it('rejects missing phone when no accountNumber is present', () => {
+    expect(() =>
+      validateDisbursePayload({
+        amount: 50000,
+        currency: 'TZS',
+        reference: 'payout_nophone',
+        recipient: {} as any,
+      }),
+    ).toThrow('MSISDN format');
+  });
 });

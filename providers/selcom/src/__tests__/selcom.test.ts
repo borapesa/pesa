@@ -332,6 +332,41 @@ describe('SelcomPaymentProvider', () => {
     expect(event.provider).toBe('selcom');
   });
 
+  it('throws on invalid JSON webhook body', async () => {
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    await expect(provider.handleWebhook('not json', {})).rejects.toThrow(
+      'Selcom webhook: invalid JSON body',
+    );
+  });
+
+  it('throws when webhook is missing required amount field', async () => {
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const body = JSON.stringify({
+      transid: 'T_MISSING',
+      reference: 'ref_no_amount',
+      order_id: 'order_no_amount',
+      result: 'SUCCESS',
+      resultcode: '000',
+      // no amount field
+    });
+
+    await expect(provider.handleWebhook(body, {})).rejects.toThrow(
+      'Selcom webhook: missing required field "amount"',
+    );
+  });
+
   // ── cancelOrder ─────────────────────────────────────────────────
 
   it('cancels an order', async () => {
