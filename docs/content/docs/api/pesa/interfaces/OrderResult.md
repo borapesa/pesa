@@ -2,7 +2,7 @@
 title: "Interface: OrderResult"
 ---
 
-Defined in: [packages/pesa/src/types/order.ts:104](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/order.ts#L104)
+Defined in: [packages/pesa/src/types/order.ts:104](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/order.ts#L104)
 
 Result returned after initiating a payment.
 
@@ -26,9 +26,9 @@ if (order.checkoutUrl) {
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="checkouturl"></a> `checkoutUrl?` | `string` | Redirect URL for DPO / Pesapal redirect flows. | [packages/pesa/src/types/order.ts:115](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/order.ts#L115) |
-| <a id="orderid"></a> `orderId` | `string` | Provider-assigned transaction ID. Use this to query status via [PesaInstance.getPaymentStatus](PesaInstance.md#getpaymentstatus). | [packages/pesa/src/types/order.ts:109](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/order.ts#L109) |
-| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. **Escape hatch — never rely on this.** Use the normalized fields instead. | [packages/pesa/src/types/order.ts:122](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/order.ts#L122) |
-| <a id="reference"></a> `reference` | `string` | Your reference, echoed back. | [packages/pesa/src/types/order.ts:111](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/order.ts#L111) |
-| <a id="status"></a> `status` | [`PaymentStatus`](../type-aliases/PaymentStatus) | Current payment status. | [packages/pesa/src/types/order.ts:113](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/order.ts#L113) |
-| <a id="ussdpushinitiated"></a> `ussdPushInitiated?` | `boolean` | Whether a USSD push was initiated (Selcom / MNO push flows). | [packages/pesa/src/types/order.ts:117](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/order.ts#L117) |
+| <a id="checkouturl"></a> `checkoutUrl?` | `string` | Redirect URL for DPO / Pesapal redirect flows. | [packages/pesa/src/types/order.ts:115](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/order.ts#L115) |
+| <a id="orderid"></a> `orderId` | `string` | Provider-assigned transaction ID. Use this to query status via [PesaInstance.getPaymentStatus](PesaInstance.md#getpaymentstatus). | [packages/pesa/src/types/order.ts:109](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/order.ts#L109) |
+| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. **Escape hatch — never rely on this.** Use the normalized fields instead. | [packages/pesa/src/types/order.ts:122](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/order.ts#L122) |
+| <a id="reference"></a> `reference` | `string` | Your reference, echoed back. | [packages/pesa/src/types/order.ts:111](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/order.ts#L111) |
+| <a id="status"></a> `status` | [`PaymentStatus`](../type-aliases/PaymentStatus) | Current payment status. | [packages/pesa/src/types/order.ts:113](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/order.ts#L113) |
+| <a id="ussdpushinitiated"></a> `ussdPushInitiated?` | `boolean` | Whether a USSD push was initiated (Selcom / MNO push flows). | [packages/pesa/src/types/order.ts:117](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/order.ts#L117) |

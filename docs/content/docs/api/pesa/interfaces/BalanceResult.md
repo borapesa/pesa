@@ -2,7 +2,7 @@
 title: "Interface: BalanceResult"
 ---
 
-Defined in: [packages/pesa/src/types/account.ts:21](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/account.ts#L21)
+Defined in: [packages/pesa/src/types/account.ts:21](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/account.ts#L21)
 
 Result of a balance inquiry — returns available balances
 across all active currencies in the provider's wallet.
@@ -28,5 +28,5 @@ if (pesa.getBalance) {
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="balances"></a> `balances` | [`BalanceEntry`](BalanceEntry)[] | Per-currency balance entries. | [packages/pesa/src/types/account.ts:23](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/account.ts#L23) |
-| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. | [packages/pesa/src/types/account.ts:25](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/types/account.ts#L25) |
+| <a id="balances"></a> `balances` | [`BalanceEntry`](BalanceEntry)[] | Per-currency balance entries. | [packages/pesa/src/types/account.ts:23](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/account.ts#L23) |
+| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. | [packages/pesa/src/types/account.ts:25](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/types/account.ts#L25) |

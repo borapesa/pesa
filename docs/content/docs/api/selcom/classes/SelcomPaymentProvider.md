@@ -2,7 +2,7 @@
 title: "Class: SelcomPaymentProvider"
 ---
 
-Defined in: [providers/selcom/src/selcom.ts:70](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L70)
+Defined in: [providers/selcom/src/selcom.ts:70](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L70)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [providers/selcom/src/selcom.ts:70](https://github.com/borapesa/pesa
 new SelcomPaymentProvider(config): SelcomPaymentProvider;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:78](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L78)
+Defined in: [providers/selcom/src/selcom.ts:78](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L78)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ BasePaymentProvider.constructor
 
 | Property | Modifier | Type | Default value | Description | Overrides | Defined in |
 | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
-| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'selcom'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/selcom/src/selcom.ts:71](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L71) |
+| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'selcom'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/selcom/src/selcom.ts:71](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L71) |
 
 ## Methods
 
@@ -52,7 +52,7 @@ cancelOrder(orderId): Promise<{
 }>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:486](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L486)
+Defined in: [providers/selcom/src/selcom.ts:486](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L486)
 
 Cancel a pending or in-progress order.
 
@@ -90,7 +90,7 @@ BasePaymentProvider.cancelOrder
 createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:226](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L226)
+Defined in: [providers/selcom/src/selcom.ts:226](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L226)
 
 Initiate a checkout / USSD push / redirect.
 
@@ -122,7 +122,7 @@ BasePaymentProvider.createOrder
 disburse(payload): Promise<DisburseResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:306](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L306)
+Defined in: [providers/selcom/src/selcom.ts:306](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L306)
 
 B2C / wallet-out disbursement.
 
@@ -152,7 +152,7 @@ BasePaymentProvider.disburse
 getBalance(): Promise<BalanceResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:530](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L530)
+Defined in: [providers/selcom/src/selcom.ts:530](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L530)
 
 Retrieve available balances across all active currencies.
 
@@ -190,7 +190,7 @@ BasePaymentProvider.getBalance
 getNameLookup(phoneOrAccount): Promise<NameLookupResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:551](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L551)
+Defined in: [providers/selcom/src/selcom.ts:551](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L551)
 
 Resolve the account holder name for a phone or account number.
 
@@ -226,7 +226,7 @@ BasePaymentProvider.getNameLookup
 getPaymentStatus(orderId): Promise<PaymentStatus>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:292](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L292)
+Defined in: [providers/selcom/src/selcom.ts:292](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L292)
 
 Poll or fetch the current payment status for an order.
 
@@ -254,7 +254,7 @@ BasePaymentProvider.getPaymentStatus
 handleWebhook(rawBody, headers): Promise<PaymentEvent>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:413](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L413)
+Defined in: [providers/selcom/src/selcom.ts:413](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L413)
 
 Parse + verify an incoming webhook.
 
@@ -291,7 +291,7 @@ BasePaymentProvider.handleWebhook
 listOrders(params): Promise<ListOrdersResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:500](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L500)
+Defined in: [providers/selcom/src/selcom.ts:500](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L500)
 
 List payment orders for a date range.
 
@@ -433,7 +433,7 @@ validateCredentials(): Promise<{
 }>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:572](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/providers/selcom/src/selcom.ts#L572)
+Defined in: [providers/selcom/src/selcom.ts:572](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/providers/selcom/src/selcom.ts#L572)
 
 Validate that a provider config works (health check).
 

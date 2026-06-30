@@ -6,7 +6,7 @@ title: "Function: createPesa()"
 function createPesa(config): PesaInstance;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:236](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/pesa.ts#L236)
+Defined in: [packages/pesa/src/pesa.ts:236](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/pesa.ts#L236)
 
 The single entry point for the entire Bora Pesa SDK.
 

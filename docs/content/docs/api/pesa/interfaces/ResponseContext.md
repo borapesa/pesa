@@ -2,7 +2,7 @@
 title: "Interface: ResponseContext"
 ---
 
-Defined in: [packages/pesa/src/plugins/types.ts:21](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/plugins/types.ts#L21)
+Defined in: [packages/pesa/src/plugins/types.ts:21](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/plugins/types.ts#L21)
 
 Context passed to afterResponse hooks.
 Allows plugins to inspect the provider response and decide on retries.
@@ -11,9 +11,9 @@ Allows plugins to inspect the provider response and decide on retries.
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| <a id="durationms"></a> `durationMs` | `number` | [packages/pesa/src/plugins/types.ts:25](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/plugins/types.ts#L25) |
-| <a id="metadata"></a> `metadata` | `Record`\<`string`, `unknown`\> | [packages/pesa/src/plugins/types.ts:27](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/plugins/types.ts#L27) |
-| <a id="operation"></a> `operation` | `"createOrder"` \| `"disburse"` \| `"refund"` \| `"cancelOrder"` | [packages/pesa/src/plugins/types.ts:22](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/plugins/types.ts#L22) |
-| <a id="payload"></a> `payload` | \| [`CreateOrderPayload`](CreateOrderPayload) \| [`DisbursePayload`](DisbursePayload) \| `Record`\<`string`, `unknown`\> | [packages/pesa/src/plugins/types.ts:23](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/plugins/types.ts#L23) |
-| <a id="result"></a> `result` | \| [`OrderResult`](OrderResult) \| [`DisburseResult`](DisburseResult) \| `Record`\<`string`, `unknown`\> | [packages/pesa/src/plugins/types.ts:24](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/plugins/types.ts#L24) |
-| <a id="retry"></a> `retry` | `boolean` | [packages/pesa/src/plugins/types.ts:26](https://github.com/borapesa/pesa/blob/0b5f9dc84f728a559f636e4b78cea49ddb18b7ab/packages/pesa/src/plugins/types.ts#L26) |
+| <a id="durationms"></a> `durationMs` | `number` | [packages/pesa/src/plugins/types.ts:25](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/plugins/types.ts#L25) |
+| <a id="metadata"></a> `metadata` | `Record`\<`string`, `unknown`\> | [packages/pesa/src/plugins/types.ts:27](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/plugins/types.ts#L27) |
+| <a id="operation"></a> `operation` | `"createOrder"` \| `"disburse"` \| `"refund"` \| `"cancelOrder"` | [packages/pesa/src/plugins/types.ts:22](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/plugins/types.ts#L22) |
+| <a id="payload"></a> `payload` | \| [`CreateOrderPayload`](CreateOrderPayload) \| [`DisbursePayload`](DisbursePayload) \| `Record`\<`string`, `unknown`\> | [packages/pesa/src/plugins/types.ts:23](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/plugins/types.ts#L23) |
+| <a id="result"></a> `result` | \| [`OrderResult`](OrderResult) \| [`DisburseResult`](DisburseResult) \| `Record`\<`string`, `unknown`\> | [packages/pesa/src/plugins/types.ts:24](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/plugins/types.ts#L24) |
+| <a id="retry"></a> `retry` | `boolean` | [packages/pesa/src/plugins/types.ts:26](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/plugins/types.ts#L26) |
