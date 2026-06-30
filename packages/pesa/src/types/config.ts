@@ -46,6 +46,18 @@ export interface PesaConfig {
   provider: BasePaymentProvider;
 
   /**
+   * Base path for the built-in HTTP handler (`pesa.mount`).
+   *
+   * All routes are prefixed with this value:
+   * - `POST {basePath}/order` — create a payment order
+   * - `GET {basePath}/status/:orderId` — query payment status
+   * - `POST {basePath}/webhook` — receive provider webhooks
+   *
+   * @default '/pesa'
+   */
+  basePath?: string;
+
+  /**
    * Plugin array. Plugins are composed **in order**.
    *
    * Built-in plugins available from `@borapesa/pesa/plugins`:

@@ -210,6 +210,13 @@ export interface TunnelPluginOptions {
    * @default 'cloudflared'
    */
   binary?: string;
+
+  /**
+   * The webhook endpoint path on your server.
+   * Printed in the console as the webhook URL to use for provider callbacks.
+   * @default '/pesa/webhook'
+   */
+  webhookPath?: string;
 }
 
 /**
@@ -232,7 +239,7 @@ export interface TunnelPluginOptions {
  * // First launch:
  * // 🛜  @borapesa/tunnel
  * //    Tunnel ready:  https://xxx.trycloudflare.com
- * //    Webhook URL:   https://xxx.trycloudflare.com/pesa/webhook
+ * //    Webhook URL:   https://xxx.trycloudflare.com/pesa/webhook  (or custom webhookPath)
  * //
  * // Subsequent Bun --watch reloads: (silent — reuses same URL)
  * ```
@@ -241,6 +248,7 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
   const port = opts.port ?? 3000;
   const log = opts.log !== false;
   const binary = opts.binary ?? 'cloudflared';
+  const webhookPath = opts.webhookPath ?? '/pesa/webhook';
 
   return {
     name: 'tunnel',
@@ -255,7 +263,7 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
           console.log('');
           console.log('🛜  @borapesa/tunnel');
           console.log(`   Tunnel ready:  ${existing.url}`);
-          console.log(`   Webhook URL:   ${existing.url}/pesa/webhook`);
+          console.log(`   Webhook URL:   ${existing.url}${webhookPath}`);
           console.log('   (reused from previous launch)');
           console.log('');
         }
@@ -271,7 +279,7 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
             console.log('');
             console.log('🛜  @borapesa/tunnel');
             console.log(`   Tunnel ready:  ${t.url}`);
-            console.log(`   Webhook URL:   ${t.url}/pesa/webhook`);
+            console.log(`   Webhook URL:   ${t.url}${webhookPath}`);
             console.log('');
           }
           // The tunnel is detached — it survives Bun --watch reloads

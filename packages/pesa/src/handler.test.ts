@@ -20,6 +20,24 @@ function mockPesa(overrides: Partial<PesaHandlerTarget> = {}): PesaHandlerTarget
 describe('createPesaHandler', () => {
   // ── POST /pesa/order ────────────────────────────────────────────
 
+  it('routes POST {basePath}/order to createOrder and returns 201', async () => {
+    const handler = createPesaHandler(mockPesa(), '/custom');
+
+    const req = new Request('http://localhost/custom/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: 15000,
+        currency: 'TZS',
+        reference: 'ref_1',
+        customer: { name: 'Juma', phone: '255712345678' },
+      }),
+    });
+
+    const res = await handler(req);
+    expect(res.status).toBe(201);
+  });
+
   it('routes POST /pesa/order to createOrder and returns 201', async () => {
     const handler = createPesaHandler(mockPesa());
 

@@ -17,15 +17,17 @@ export interface PesaHandlerTarget {
 /**
  * Creates a generic fetch-like handler that can be mounted on any framework.
  *
- * All routes are namespaced under `/pesa/` to avoid collisions with
+ * All routes are namespaced under a base path to avoid collisions with
  * application routes — following the same convention as better-auth's `/auth/`.
  *
  * Routes:
  * ```
- *   POST /pesa/order           — create a payment order
- *   GET  /pesa/status/:orderId — query payment status
- *   POST /pesa/webhook         — receive provider webhooks
+ *   POST {basePath}/order           — create a payment order
+ *   GET  {basePath}/status/:orderId — query payment status
+ *   POST {basePath}/webhook         — receive provider webhooks
  * ```
+ *
+ * @param basePath — defaults to `'/pesa'`
  *
  * Usage without a framework adapter:
  * ```js
@@ -48,23 +50,26 @@ export interface PesaHandlerTarget {
  */
 export function createPesaHandler(
   pesa: PesaHandlerTarget,
+  basePath = '/pesa',
 ): (request: Request) => Promise<Response> {
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
     const path = url.pathname;
 
     try {
-      // POST /pesa/order — create a payment order
-      if (request.method === 'POST' && path === '/pesa/order') {
+      // POST {basePath}/order — create a payment order
+      const orderPath = `${basePath}/order`;
+      if (request.method === 'POST' && (path === orderPath || path === `${orderPath}/`)) {
         const payload = (await request.json()) as CreateOrderPayload;
         validateCreateOrderPayload(payload);
         const result = await pesa.createOrder(payload);
         return Response.json(result, { status: 201 });
       }
 
-      // GET /pesa/status/:orderId — query payment status
-      if (request.method === 'GET' && path.startsWith('/pesa/status/')) {
-        const orderId = path.split('/pesa/status/')[1];
+      // GET {basePath}/status/:orderId — query payment status
+      const statusPrefix = `${basePath}/status/`;
+      if (request.method === 'GET' && path.startsWith(statusPrefix)) {
+        const orderId = path.split(statusPrefix)[1]?.replace(/\/$/, '');
         if (!orderId) {
           return Response.json({ error: 'Missing orderId' }, { status: 400 });
         }
@@ -72,8 +77,9 @@ export function createPesaHandler(
         return Response.json({ status });
       }
 
-      // POST /pesa/webhook — receive provider webhook
-      if (request.method === 'POST' && path === '/pesa/webhook') {
+      // POST {basePath}/webhook — receive provider webhook
+      const webhookPath = `${basePath}/webhook`;
+      if (request.method === 'POST' && (path === webhookPath || path === `${webhookPath}/`)) {
         const rawBody = await request.text();
         const headers: Record<string, string> = {};
         request.headers.forEach((value, key) => {

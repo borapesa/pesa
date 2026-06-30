@@ -435,7 +435,7 @@ export function createPesa(config: PesaConfig): PesaInstance {
     mount: undefined!,
   };
 
-  instance.mount = createPesaHandler(instance);
+  instance.mount = createPesaHandler(instance, config.basePath);
 
   // ── Bootstrap plugins ───────────────────────────────────────────────
 
