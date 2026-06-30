@@ -6,7 +6,7 @@ import type { BasePaymentProvider } from '../providers/base';
  * Configuration passed to {@link createPesa}.
  *
  * Only `provider` is required. Everything else ships with sensible defaults:
- * - SQLite event store at `./pesa.db`
+ * - In-memory event store (lost on restart — swap to a persistent adapter for production)
  * - No plugins
  * - `BORAPESA_WEBHOOK_SECRET` read from environment
  *
@@ -21,7 +21,8 @@ import type { BasePaymentProvider } from '../providers/base';
  *     apiKey:    process.env.SELCOM_API_KEY!,
  *     apiSecret: process.env.SELCOM_API_SECRET!,
  *     vendor:    process.env.SELCOM_VENDOR!,
- *     env:       'sandbox',
+ *     pin:       process.env.SELCOM_PIN!,
+ *     baseUrl:   'https://apigw.selcommobile.com',
  *   }),
  *   plugins: [
  *     retryPlugin({ maxAttempts: 3 }),
@@ -31,7 +32,7 @@ import type { BasePaymentProvider } from '../providers/base';
  *     secret: process.env.BORAPESA_WEBHOOK_SECRET,
  *   },
  *   // Override for production:
- *   // db: new LibSQLAdapter({ url: process.env.TURSO_DATABASE_URL! }),
+ *   // db: new SQLiteAdapter({ path: './pesa.db' }),
  * });
  * ```
  */
@@ -48,10 +49,12 @@ export interface PesaConfig {
   /**
    * Base path for the built-in webhook handler (`pesa.mountWebhook`).
    *
-   * All routes are prefixed with this value:
-   * - `POST {basePath}/order` — create a payment order
-   * - `GET {basePath}/status/:orderId` — query payment status
+   * The handler serves a single route:
    * - `POST {basePath}/webhook` — receive provider webhooks
+   *
+   * For order creation and status queries, use {@link PesaInstance.createOrder}
+   * and {@link PesaInstance.getPaymentStatus} in your own routes behind your
+   * own auth middleware.
    *
    * @default '/pesa'
    */
@@ -81,9 +84,8 @@ export interface PesaConfig {
   /**
    * Database adapter for the event store.
    *
-   * Defaults to SQLite at `./pesa.db` (zero config).
-   * Swap for `LibSQLAdapter` (Turso), `PostgresAdapter`, `PrismaAdapter`,
-   * or `DrizzleAdapter` for production deployments.
+   * Defaults to an in-memory store (lost on restart). Swap to a persistent
+   * adapter (`@borapesa/sqlite`, etc.) for production deployments.
    */
   db?: PesaDatabaseAdapter;
 }

@@ -7,13 +7,13 @@ title: "@borapesa/pesa"
 | Class | Description |
 | ------ | ------ |
 | [BasePaymentProvider](classes/BasePaymentProvider) | Abstract base class every provider adapter must implement. |
+| [MemoryAdapter](classes/MemoryAdapter) | In-memory event store — zero dependencies, perfect for dev and CI. |
 | [PesaError](classes/PesaError) | Base error class for all Bora Pesa errors. |
 | [PesaNetworkError](classes/PesaNetworkError) | Thrown when a provider API is unreachable or returns a network error. |
 | [PesaProviderError](classes/PesaProviderError) | Thrown when the provider returns an error response (provider error). |
 | [PesaUnsupportedError](classes/PesaUnsupportedError) | Thrown when a provider does not implement an optional operation. |
 | [PesaValidationError](classes/PesaValidationError) | Thrown when payload validation fails (client error). |
 | [PesaWebhookError](classes/PesaWebhookError) | Thrown when a webhook fails signature verification. |
-| [SQLiteAdapter](classes/SQLiteAdapter) | SQLite event store adapter powered by better-sqlite3. |
 
 ## Interfaces
 
@@ -52,16 +52,11 @@ title: "@borapesa/pesa"
 | [ProviderName](type-aliases/ProviderName) | All supported payment providers. |
 | [TZSAmount](type-aliases/TZSAmount) | TZS amount as a whole integer. `15000` = TZS 15,000. |
 
-## Variables
-
-| Variable | Description |
-| ------ | ------ |
-| [createPesaHandler](variables/createPesaHandler) | - |
-
 ## Functions
 
 | Function | Description |
 | ------ | ------ |
 | [createPesa](functions/createPesa) | The single entry point for the entire Bora Pesa SDK. |
+| [createPesaWebhookHandler](functions/createPesaWebhookHandler) | Creates a webhook handler — the one route that must be publicly exposed. |
 | [validateCreateOrderPayload](functions/validateCreateOrderPayload) | Validate a CreateOrderPayload before forwarding to the provider. Throws PesaValidationError on invalid input. |
 | [validateDisbursePayload](functions/validateDisbursePayload) | Validate a DisbursePayload before forwarding to the provider. Throws PesaValidationError on invalid input. |

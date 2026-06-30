@@ -6,7 +6,7 @@ title: "Function: createPesa()"
 function createPesa(config): PesaInstance;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:232](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/pesa.ts#L232)
+Defined in: [packages/pesa/src/pesa.ts:236](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/pesa.ts#L236)
 
 The single entry point for the entire Bora Pesa SDK.
 
@@ -14,7 +14,7 @@ The single entry point for the entire Bora Pesa SDK.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `config` | [`PesaConfig`](../interfaces/PesaConfig) | — only `provider` is required. Everything else has sensible defaults (SQLite event store, no plugins, webhook secret from `BORAPESA_WEBHOOK_SECRET` environment variable). |
+| `config` | [`PesaConfig`](../interfaces/PesaConfig) | — only `provider` is required. Everything else has sensible defaults (in-memory event store, no plugins, webhook secret from `BORAPESA_WEBHOOK_SECRET` environment variable). |
 
 ## Returns
 
@@ -40,7 +40,8 @@ const pesa = createPesa({
     apiKey:    process.env.SELCOM_API_KEY!,
     apiSecret: process.env.SELCOM_API_SECRET!,
     vendor:    process.env.SELCOM_VENDOR!,
-    env:       'live',
+    pin:       process.env.SELCOM_PIN!,
+    baseUrl:   'https://apigw.selcommobile.com',
   }),
   plugins: [
     retryPlugin({ maxAttempts: 3, backoff: 'exponential' }),

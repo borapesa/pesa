@@ -114,6 +114,9 @@ export interface PesaInstance {
    *
    * The SDK validates the payload before forwarding to the provider.
    *
+   * Returns a {@link DisburseResult} whose `status` is `'QUEUED'`
+   * (processing — poll for updates), `'SUCCESS'`, or `'FAILED'`.
+   *
    * @throws `PesaValidationError` — if the payload is invalid.
    * @throws `PesaNetworkError` — if the provider is unreachable.
    * @throws `PesaProviderError` — if the provider returns an error.
@@ -204,7 +207,8 @@ export interface PesaInstance {
  *     apiKey:    process.env.SELCOM_API_KEY!,
  *     apiSecret: process.env.SELCOM_API_SECRET!,
  *     vendor:    process.env.SELCOM_VENDOR!,
- *     env:       'live',
+ *     pin:       process.env.SELCOM_PIN!,
+ *     baseUrl:   'https://apigw.selcommobile.com',
  *   }),
  *   plugins: [
  *     retryPlugin({ maxAttempts: 3, backoff: 'exponential' }),

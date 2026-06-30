@@ -27,7 +27,7 @@ createPesa({ provider, plugins?, db?, webhooks? })
 │  .disburse(payload)             │
 │  .handleWebhook(body, headers)  │
 │  .on(event, handler)            │
-│  .mount                         │
+│  .mountWebhook                  │
 └─────────────────────────────────┘
 ```
 
@@ -54,10 +54,10 @@ Plugins intercept provider requests and webhook events at specific lifecycle poi
 app calls pesa.createOrder(payload)
   ├─ 1. validateCreateOrderPayload()     ← SDK-level input validation
   ├─ 2. beforeRequest hooks (once)       ← idempotency, logging
-  ├─ 3. for attempt in 0..3:
+  ├─ 3. for attempt in retryPlugin maxAttempts:
   │   ├─ provider.createOrder()
   │   └─ afterResponse hooks             ← retry decision, logging
-  └─ returns result
+  └─ returns result (or throws after safety cap: 100)
 
 webhook arrives:
   ├─ 1. Provider verifies signature
@@ -73,12 +73,12 @@ Plugins are composed **in order** in the `plugins` array. Order matters — plac
 
 Every verified webhook is normalized into a [`PaymentEvent`](/docs/api/pesa/interfaces/PaymentEvent) and persisted. This is the **source of truth** for all payment activity.
 
-The default adapter is SQLite (`better-sqlite3`) — zero configuration, works in any Node.js environment. Additional adapters (Turso/libSQL, PostgreSQL, Prisma, Drizzle) are planned.
+The default adapter is in-memory (lost on restart). Swap to a persistent adapter for production. Additional adapters (SQLite, Turso/libSQL, PostgreSQL) are planned.
 
 ```ts
 const pesa = createPesa({
   provider: new ClickPesaProvider({ ... }),
-  db: new LibSQLAdapter({ url: process.env.TURSO_DATABASE_URL! }),
+  db: new SQLiteAdapter({ path: './pesa.db' }),
 });
 ```
 

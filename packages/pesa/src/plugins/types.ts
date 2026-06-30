@@ -51,8 +51,15 @@ export interface PesaPlugin {
   afterResponse?: (ctx: ResponseContext) => Promise<ResponseContext>;
 
   /**
-   * Called after a verified PaymentEvent is stored in the event store.
-   * Use for side effects: sending emails, updating your database, etc.
+   * Called **before** a verified PaymentEvent is persisted to the event store.
+   *
+   * Throw to reject the event — it will bubble up as a webhook error and the
+   * event will not be saved. Do **not** query the event store for this event
+   * here — it hasn't been persisted yet.
+   *
+   * Use for: webhook deduplication, custom verification, spam filtering.
+   * For side effects after persistence, register a {@link PesaInstance.on}
+   * handler instead.
    */
   onPaymentEvent?: (event: PaymentEvent) => Promise<void>;
 

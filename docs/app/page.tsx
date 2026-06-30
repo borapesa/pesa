@@ -33,7 +33,7 @@ const features = [
   },
   {
     title: 'Zero-config defaults',
-    desc: 'SQLite event store, BogusProvider for local dev. No infrastructure required to get started.',
+    desc: 'In-memory event store, BogusProvider for local dev. No infrastructure required to get started.',
   },
 ];
 

@@ -1,16 +1,14 @@
 ---
-title: "Class: SQLiteAdapter"
+title: "Class: MemoryAdapter"
 ---
 
-Defined in: [packages/pesa/src/db/sqlite.ts:14](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/db/sqlite.ts#L14)
+Defined in: [packages/pesa/src/db/memory.ts:11](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/db/memory.ts#L11)
 
-SQLite event store adapter powered by better-sqlite3.
+In-memory event store — zero dependencies, perfect for dev and CI.
 
-This is the default adapter — zero configuration, no network required.
-The database file is created at `./pesa.db` if it doesn't exist.
-
-For serverless / edge workloads, swap to LibSQLAdapter (@borapesa/libsql)
-which targets Turso.
+This is the default adapter for borapesa. Events are stored in a Map
+and lost on process exit. For production, swap to a persistent adapter
+(e.g., `@borapesa/sqlite`, `@borapesa/postgres`).
 
 ## Implements
 
@@ -21,20 +19,12 @@ which targets Turso.
 ### Constructor
 
 ```ts
-new SQLiteAdapter(dbPath?): SQLiteAdapter;
+new MemoryAdapter(): MemoryAdapter;
 ```
-
-Defined in: [packages/pesa/src/db/sqlite.ts:18](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/db/sqlite.ts#L18)
-
-#### Parameters
-
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `dbPath` | `string` | `'./pesa.db'` |
 
 #### Returns
 
-`SQLiteAdapter`
+`MemoryAdapter`
 
 ## Methods
 
@@ -44,7 +34,7 @@ Defined in: [packages/pesa/src/db/sqlite.ts:18](https://github.com/borapesa/pesa
 getEvent(id): Promise<PaymentEvent | null>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:67](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/db/sqlite.ts#L67)
+Defined in: [packages/pesa/src/db/memory.ts:18](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/db/memory.ts#L18)
 
 Retrieve a single event by its UUID.
 
@@ -70,7 +60,7 @@ Retrieve a single event by its UUID.
 getEventsByOrderId(orderId): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:83](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/db/sqlite.ts#L83)
+Defined in: [packages/pesa/src/db/memory.ts:26](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/db/memory.ts#L26)
 
 Retrieve all events for a given provider order ID.
 
@@ -96,7 +86,7 @@ Retrieve all events for a given provider order ID.
 getEventsByReference(reference): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:75](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/db/sqlite.ts#L75)
+Defined in: [packages/pesa/src/db/memory.ts:22](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/db/memory.ts#L22)
 
 Retrieve all events for a given merchant reference.
 
@@ -122,7 +112,7 @@ Retrieve all events for a given merchant reference.
 saveEvent(event): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/db/sqlite.ts:46](https://github.com/borapesa/pesa/blob/49ea5b664fa2d117c65866f1980324917cea45d1/packages/pesa/src/db/sqlite.ts#L46)
+Defined in: [packages/pesa/src/db/memory.ts:14](https://github.com/borapesa/pesa/blob/fd0db8b0df993c6583d9e24a7ce47f1b6a556685/packages/pesa/src/db/memory.ts#L14)
 
 Persist a verified PaymentEvent.
 

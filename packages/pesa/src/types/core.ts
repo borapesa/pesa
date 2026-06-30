@@ -31,8 +31,11 @@ export type TZSAmount = number;
  *
  * Extensible via module augmentation.
  *
+ * Currently only `'TZS'` is fully supported. `'USD'` is available
+ * experimentally via ClickPesa card payments but multi-currency is
+ * not yet a stable v1 feature.
+ *
  * @since 0.1.0 — `'TZS'`
- * @since 0.2.0 — `'USD'` (card payments via ClickPesa)
  *
  * @example
  * ```ts
