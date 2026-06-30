@@ -26,8 +26,8 @@ function which(command: string): string | null {
   }
 }
 
-function assertCloudflared(): void {
-  if (which('cloudflared')) return;
+function assertCloudflared(binary: string): void {
+  if (which(binary)) return;
 
   const os = platform();
   const hint =
@@ -53,19 +53,34 @@ function stateFile(port: number, suffix: string): string {
   return join(tmpdir(), `borapesa-tunnel-${port}.${suffix}`);
 }
 
+function isAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    // PID is alive, but could be reused by an unrelated process.
+    // Double-check it's actually cloudflared (or our mock cloudflaredd).
+    // Use args (full command line), not comm (binary name).  Scripts
+    // run via shebang show as /bin/bash, but the full args include the
+    // script name (cloudflared / cloudflaredd).
+    const args = execFileSync('ps', ['-p', String(pid), '-o', 'args='], {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return args.includes('cloudflared');
+  } catch {
+    return false;
+  }
+}
+
 function readState(port: number): TunnelState | null {
   try {
     const url = readFileSync(stateFile(port, 'url'), 'utf-8').trim();
     const pid = parseInt(readFileSync(stateFile(port, 'pid'), 'utf-8').trim(), 10);
-    // Verify the process is still running
-    try {
-      process.kill(pid, 0); // signal 0 just checks existence
+    if (isAlive(pid)) {
       return { url, pid };
-    } catch {
-      // Process is dead — clean up stale files
-      clearState(port);
-      return null;
     }
+    // Process is dead or PID reused — clean up stale files
+    clearState(port);
+    return null;
   } catch {
     return null;
   }
@@ -93,70 +108,71 @@ export interface Tunnel {
   close: () => void;
 }
 
-function startTunnel(port: number): Promise<Tunnel> {
+function startTunnel(port: number, binary = 'cloudflared'): Promise<Tunnel> {
   return new Promise((resolve, reject) => {
-    assertCloudflared();
+    assertCloudflared(binary);
 
-    // Spawn detached — survives parent process restarts (Bun --watch reloads).
-    // This means the tunnel persists across hot reloads and we reuse the same URL.
+    const logFile = stateFile(port, 'log');
+
+    // Spawn detached in its own process group — Ctrl+C on the dev server
+    // won't kill the tunnel, and SIGINT won't race with Bun's handler.
+    // Use --logfile to capture the URL since detached disconnects stdio.
     const child = spawn(
-      'cloudflared',
-      ['tunnel', '--url', `http://localhost:${port}`, '--no-autoupdate'],
-      { stdio: ['ignore', 'pipe', 'pipe'], detached: true },
+      binary,
+      ['tunnel', '--url', `http://localhost:${port}`, '--no-autoupdate', '--logfile', logFile],
+      { stdio: 'ignore', detached: true },
     );
+    child.unref();
 
     let resolved = false;
-    let stderr = '';
+    const start = Date.now();
 
-    const noop = () => {};
-
-    const checkOutput = (output: string) => {
-      const match = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
-      if (match && !resolved) {
-        resolved = true;
-        clearTimeout(timeout);
-
-        // Swap listeners to no-op so the pipe keeps draining (prevents
-        // backpressure blocking the event loop) without printing noise.
-        child.stdout?.removeAllListeners('data');
-        child.stderr?.removeAllListeners('data');
-        child.stdout?.on('data', noop);
-        child.stderr?.on('data', noop);
-
-        const url = match[0].replace(/\/$/, '');
-        resolve({
-          url,
-          pid: child.pid!,
-          close: () => {
-            child.kill('SIGKILL');
-            clearState(port);
-          },
-        });
+    const poll = () => {
+      if (resolved) return;
+      try {
+        const content = readFileSync(logFile, 'utf-8');
+        const match = content.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
+        if (match) {
+          resolved = true;
+          const url = match[0].replace(/\/$/, '');
+          resolve({
+            url,
+            pid: child.pid!,
+            close: () => {
+              child.kill('SIGKILL');
+              clearState(port);
+              try {
+                unlinkSync(logFile);
+              } catch {}
+            },
+          });
+          return;
+        }
+      } catch {
+        // log file not written yet — keep polling
       }
-    };
 
-    const timeout = setTimeout(() => {
-      if (!resolved) {
+      if (Date.now() - start > 15_000) {
         resolved = true;
         child.kill('SIGKILL');
-        reject(new Error(`cloudflared tunnel timed out after 15s.\nStderr: ${stderr || '(none)'}`));
+        try {
+          unlinkSync(logFile);
+        } catch {}
+        reject(new Error('cloudflared tunnel timed out after 15s'));
+        return;
       }
-    }, 15_000);
 
-    child.stdout?.on('data', (data: Buffer) => {
-      checkOutput(data.toString());
-    });
+      setTimeout(poll, 200);
+    };
 
-    child.stderr?.on('data', (data: Buffer) => {
-      const text = data.toString();
-      stderr += text;
-      checkOutput(text);
-    });
+    poll();
 
     child.on('error', (err) => {
       if (!resolved) {
         resolved = true;
-        clearTimeout(timeout);
+        try {
+          unlinkSync(logFile);
+        } catch {}
         reject(new Error(`Failed to start cloudflared: ${err.message}`));
       }
     });
@@ -164,8 +180,10 @@ function startTunnel(port: number): Promise<Tunnel> {
     child.on('exit', (code) => {
       if (!resolved) {
         resolved = true;
-        clearTimeout(timeout);
-        reject(new Error(`cloudflared exited with code ${code}.\nStderr: ${stderr || '(none)'}`));
+        try {
+          unlinkSync(logFile);
+        } catch {}
+        reject(new Error(`cloudflared exited with code ${code}`));
       }
     });
   });
@@ -185,6 +203,13 @@ export interface TunnelPluginOptions {
    * @default true
    */
   log?: boolean;
+
+  /**
+   * Override the cloudflared binary path or name.
+   * Useful for testing with a mock binary that mimics cloudflared's I/O.
+   * @default 'cloudflared'
+   */
+  binary?: string;
 }
 
 /**
@@ -215,6 +240,7 @@ export interface TunnelPluginOptions {
 export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
   const port = opts.port ?? 3000;
   const log = opts.log !== false;
+  const binary = opts.binary ?? 'cloudflared';
 
   return {
     name: 'tunnel',
@@ -237,7 +263,7 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
       }
 
       // Start a new tunnel
-      startTunnel(port)
+      startTunnel(port, binary)
         .then((t) => {
           // Store the tunnel process PID so it can be checked after reload.
           writeState(port, { url: t.url, pid: t.pid });
@@ -248,14 +274,9 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
             console.log(`   Webhook URL:   ${t.url}/pesa/webhook`);
             console.log('');
           }
-          // Signal cleanup — tunnel is detached and should survive
-          // Bun --watch reloads. Only clear state on actual shutdown.
-          process.on('SIGTERM', () => {
-            t.close();
-            clearState(port);
-          });
-          // on reload the state file persists so the new process
-          // finds the still-running tunnel and reuses the URL.
+          // The tunnel is detached — it survives Bun --watch reloads
+          // without us doing anything. We never kill it — it lives until
+          // the machine reboots and we reuse it via the state file.
         })
         .catch((err) => {
           if (log) {
@@ -269,6 +290,6 @@ export function tunnelPlugin(opts: TunnelPluginOptions = {}): PesaPlugin {
 
 export { isAvailable, startTunnel };
 
-function isAvailable(): boolean {
-  return which('cloudflared') !== null;
+function isAvailable(binary = 'cloudflared'): boolean {
+  return which(binary) !== null;
 }
