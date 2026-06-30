@@ -51,6 +51,17 @@ export interface PesaPlugin {
   afterResponse?: (ctx: ResponseContext) => Promise<ResponseContext>;
 
   /**
+   * Called when a provider request throws an error.
+   *
+   * Plugins can inspect the error and set `ctx.retry = true` + a delay in
+   * `ctx.metadata.retryDelayMs` to trigger a retry.  If no plugin sets
+   * `retry = true`, the error is re-thrown.
+   *
+   * @since 0.6.0
+   */
+  onError?: (error: Error, ctx: RequestContext) => Promise<ResponseContext | undefined>;
+
+  /**
    * Called **before** a verified PaymentEvent is persisted to the event store.
    *
    * Throw to reject the event — it will bubble up as a webhook error and the

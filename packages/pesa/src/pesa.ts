@@ -238,14 +238,6 @@ export function createPesa(config: PesaConfig): PesaInstance {
   const plugins = config.plugins ?? [];
   const db: PesaDatabaseAdapter = config.db ?? new MemoryAdapter();
 
-  // Enforce webhook secret in production — the deleted webhookVerifyPlugin lived here.
-  const webhookSecret = config.webhooks?.secret ?? process.env.BORAPESA_WEBHOOK_SECRET;
-  if (!webhookSecret && process.env.NODE_ENV === 'production') {
-    throw new PesaWebhookError(
-      'BORAPESA_WEBHOOK_SECRET is not set. Webhook verification is required in production.',
-    );
-  }
-
   // Event emitter
   const handlers = new Map<PaymentEventType, Set<(event: PaymentEvent) => Promise<void> | void>>();
 
@@ -324,7 +316,29 @@ export function createPesa(config: PesaConfig): PesaInstance {
         const delay = (rCtx.metadata.retryDelayMs as number) ?? 1000;
         await new Promise((resolve) => setTimeout(resolve, delay));
       } catch (err) {
-        throw normalizeError(err);
+        const normalized = normalizeError(err);
+
+        // Let plugins decide whether to retry on error
+        let retryOnError = false;
+        let errorDelayMs = 1000;
+        for (const plugin of plugins) {
+          if (plugin.onError) {
+            const rCtx = await plugin.onError(normalized, ctx);
+            if (rCtx?.retry) {
+              retryOnError = true;
+              if (rCtx.metadata.retryDelayMs) {
+                errorDelayMs = rCtx.metadata.retryDelayMs as number;
+              }
+            }
+          }
+        }
+
+        if (retryOnError) {
+          await new Promise((resolve) => setTimeout(resolve, errorDelayMs));
+          continue;
+        }
+
+        throw normalized;
       }
     }
 

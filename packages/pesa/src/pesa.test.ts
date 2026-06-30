@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { MemoryAdapter } from './db/memory';
 import { PesaNetworkError, PesaProviderError, PesaWebhookError } from './errors';
 import { createPesa } from './pesa';
@@ -673,22 +673,6 @@ describe('createPesa() factory', () => {
     await pesa.handleWebhook(JSON.stringify({ reference: 'order_test', status: 'SUCCESS' }), {});
 
     expect(order).toEqual(['plugin', 'user']);
-  });
-
-  // ── Webhook secret enforcement ──────────────────────────────────
-
-  it('throws in production when no webhook secret is configured', () => {
-    vi.stubEnv('NODE_ENV', 'production');
-    vi.stubEnv('BORAPESA_WEBHOOK_SECRET', '');
-
-    expect(() =>
-      createPesa({
-        provider: new BogusPaymentProvider({ delay: 0 }),
-        db,
-      }),
-    ).toThrow('BORAPESA_WEBHOOK_SECRET is not set');
-
-    vi.unstubAllEnvs();
   });
 
   // ── Plugin init hook ──────────────────────────────────────────

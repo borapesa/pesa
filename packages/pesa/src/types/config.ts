@@ -70,13 +70,13 @@ export interface PesaConfig {
    */
   plugins?: PesaPlugin[];
 
-  /** Webhook configuration. */
+  /** Webhook configuration. Reserved for future hosted verification services. */
   webhooks?: {
     /**
-     * Shared secret for HMAC verification of incoming webhooks.
+     * Reserved for future hosted webhook verification.
      *
-     * Falls back to `process.env.BORAPESA_WEBHOOK_SECRET` if not set.
-     * **Required in production.**
+     * Provider-level signature verification (HMAC, RSA, checksum) happens
+     * automatically in each provider adapter — no additional secret needed.
      */
     secret?: string;
   };

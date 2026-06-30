@@ -159,6 +159,10 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
   private token: string | null = null;
   private tokenExpiresAt = 0;
 
+  /** Maps orderId → providerName so getPaymentStatus resolves the correct MNO. */
+  private orderProviders = new Map<string, string>();
+  private static readonly MAX_ORDER_MAP = 10_000;
+
   constructor(config: AzamPayConfig) {
     super();
     const sandbox = config.sandbox !== false;
@@ -382,8 +386,16 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
 
     const res = await this.request<CheckoutResult>('POST', '/azampay/mno/checkout', body);
 
+    // Store the provider name so getPaymentStatus resolves correctly even
+    // when called through the SDK (which only passes orderId).
+    const orderId = res.transactionId;
+    if (this.orderProviders.size >= AzamPayPaymentProvider.MAX_ORDER_MAP) {
+      this.orderProviders.clear();
+    }
+    this.orderProviders.set(orderId, disburseProvider);
+
     return {
-      orderId: res.transactionId,
+      orderId,
       reference: payload.reference,
       status: res.success ? 'PENDING' : 'FAILED',
       ussdPushInitiated: res.success,
@@ -444,21 +456,18 @@ export class AzamPayPaymentProvider extends BasePaymentProvider {
    * Uses the **disbursement** base URL per the OpenAPI spec.
    *
    * @param orderId - The AzamPay transaction ID returned by {@link createOrder}.
-   * @param providerName - The mobile money provider used for the order
-   *   (e.g. `'airtel'`, `'tigo'`, `'azampesa'`). Defaults to `'azampesa'`
-   *   when called through the SDK — the default exists because the SDK only
-   *   passes `orderId`. **When calling this method directly, always pass the
-   *   explicit provider name** from {@link createOrder}'s `raw._providerName`
-   *   to avoid silently querying with the wrong bank name.
-   *   The checkout-side provider is at `raw._checkoutProvider` (PascalCase,
-   *   matches what was sent to the checkout API — may differ from
-   *   `_providerName` for HaloPesa/M-Pesa due to spec enum constraints).
+   * @param providerName - The MNO name for the query (e.g. `'airtel'`,
+   *   `'tigo'`, `'azampesa'`). When called through the SDK, this is resolved
+   *   automatically from the order-to-provider mapping stored by
+   *   {@link createOrder}. Callers who bypass `createOrder` must pass it
+   *   explicitly.
    */
-  async getPaymentStatus(orderId: string, providerName = 'azampesa'): Promise<PaymentStatus> {
+  async getPaymentStatus(orderId: string, providerName?: string): Promise<PaymentStatus> {
     try {
+      const bankName = providerName ?? this.orderProviders.get(orderId) ?? 'azampesa';
       const qs = new URLSearchParams({
         pgReferenceId: orderId,
-        bankName: providerName,
+        bankName,
       });
       const res = await this.request<TransactionStatusResponse>(
         'GET',
