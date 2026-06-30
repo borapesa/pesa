@@ -1,5 +1,5 @@
 export type { PesaDatabaseAdapter } from './db/adapter';
-export { SQLiteAdapter } from './db/sqlite';
+export { MemoryAdapter } from './db/memory';
 export {
   PesaError,
   PesaNetworkError,

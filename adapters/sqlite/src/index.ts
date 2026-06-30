@@ -1,15 +1,20 @@
+import type { PaymentEvent, PesaDatabaseAdapter } from '@borapesa/pesa';
 import Database from 'better-sqlite3';
-import type { PaymentEvent } from '../types/event';
-import type { PesaDatabaseAdapter } from './adapter';
 
 /**
  * SQLite event store adapter powered by better-sqlite3.
  *
- * This is the default adapter — zero configuration, no network required.
- * The database file is created at `./pesa.db` if it doesn't exist.
+ * The database file is created at the given path if it doesn't exist.
  *
- * For serverless / edge workloads, swap to LibSQLAdapter (@borapesa/libsql)
- * which targets Turso.
+ * ```ts
+ * import { createPesa } from '@borapesa/pesa';
+ * import { SQLiteAdapter } from '@borapesa/sqlite';
+ *
+ * const pesa = createPesa({
+ *   provider: new SelcomPaymentProvider({...}),
+ *   db: new SQLiteAdapter('./pesa.db'),
+ * });
+ * ```
  */
 export class SQLiteAdapter implements PesaDatabaseAdapter {
   private db: Database.Database;

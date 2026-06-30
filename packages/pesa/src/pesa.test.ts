@@ -1,6 +1,5 @@
-import { unlinkSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SQLiteAdapter } from './db/sqlite';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { MemoryAdapter } from './db/memory';
 import { PesaNetworkError, PesaProviderError, PesaWebhookError } from './errors';
 import { createPesa } from './pesa';
 import { retryPlugin } from './plugins/retry';
@@ -18,31 +17,12 @@ import type {
 } from './types/index';
 
 const customer = { name: 'Juma Ali', phone: '255712345678' };
-const TEST_DB = './test-factory.db';
 
 describe('createPesa() factory', () => {
-  let db: SQLiteAdapter;
+  let db: MemoryAdapter;
 
   beforeEach(() => {
-    db = new SQLiteAdapter(TEST_DB);
-  });
-
-  afterEach(() => {
-    try {
-      unlinkSync(TEST_DB);
-    } catch {
-      /* ok */
-    }
-    try {
-      unlinkSync(`${TEST_DB}-wal`);
-    } catch {
-      /* ok */
-    }
-    try {
-      unlinkSync(`${TEST_DB}-shm`);
-    } catch {
-      /* ok */
-    }
+    db = new MemoryAdapter();
   });
 
   // ── createOrder ────────────────────────────────────────────────
@@ -237,33 +217,15 @@ describe('createPesa() factory', () => {
     expect(preview.fee).toBe(100);
   });
 
-  // ── Default SQLiteAdapter ──────────────────────────────────────
+  // ── Default memory adapter ────────────────────────────────────
 
-  it('defaults to SQLiteAdapter when no db is provided', async () => {
-    // Use a clean DB path to avoid conflicts
+  it('defaults to in-memory adapter when no db is provided', async () => {
     const pesa = createPesa({
       provider: new BogusPaymentProvider({ delay: 0 }),
     });
 
-    const body = JSON.stringify({ reference: 'default_db', status: 'SUCCESS' });
+    const body = JSON.stringify({ reference: 'memory_db', status: 'SUCCESS' });
     await pesa.handleWebhook(body, {});
-
-    // Clean up the default DB
-    try {
-      unlinkSync('./pesa.db');
-    } catch {
-      /* ok */
-    }
-    try {
-      unlinkSync('./pesa.db-wal');
-    } catch {
-      /* ok */
-    }
-    try {
-      unlinkSync('./pesa.db-shm');
-    } catch {
-      /* ok */
-    }
   }, 10000);
 
   // ── Error normalization ────────────────────────────────────────

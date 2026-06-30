@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import type { PesaDatabaseAdapter } from './db/adapter';
-import { SQLiteAdapter } from './db/sqlite';
+import { MemoryAdapter } from './db/memory';
 import {
   PesaNetworkError,
   PesaProviderError,
@@ -189,7 +189,7 @@ export interface PesaInstance {
  * plugin pipeline, and event store wired together.
  *
  * @param config — only `provider` is required. Everything else has
- * sensible defaults (SQLite event store, no plugins, webhook secret
+ * sensible defaults (in-memory event store, no plugins, webhook secret
  * from `BORAPESA_WEBHOOK_SECRET` environment variable).
  *
  * @example
@@ -232,7 +232,7 @@ export interface PesaInstance {
 export function createPesa(config: PesaConfig): PesaInstance {
   const provider = config.provider;
   const plugins = config.plugins ?? [];
-  const db: PesaDatabaseAdapter = config.db ?? new SQLiteAdapter();
+  const db: PesaDatabaseAdapter = config.db ?? new MemoryAdapter();
 
   // Enforce webhook secret in production — the deleted webhookVerifyPlugin lived here.
   const webhookSecret = config.webhooks?.secret ?? process.env.BORAPESA_WEBHOOK_SECRET;

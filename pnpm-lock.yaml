@@ -27,6 +27,28 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  adapters/sqlite:
+    dependencies:
+      '@borapesa/pesa':
+        specifier: workspace:*
+        version: link:../../packages/pesa
+      better-sqlite3:
+        specifier: ^12.11.1
+        version: 12.11.1
+    devDependencies:
+      '@types/better-sqlite3':
+        specifier: ^7.6.13
+        version: 7.6.13
+      '@types/node':
+        specifier: ^26.0.1
+        version: 26.0.1
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@26.0.1)(@vitest/coverage-v8@4.1.9)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+
   docs:
     dependencies:
       '@fuma-translate/react':
@@ -102,16 +124,10 @@ importers:
 
   packages/pesa:
     dependencies:
-      better-sqlite3:
-        specifier: ^12.11.1
-        version: 12.11.1
       uuid:
         specifier: ^14.0.1
         version: 14.0.1
     devDependencies:
-      '@types/better-sqlite3':
-        specifier: ^7.6.13
-        version: 7.6.13
       '@types/node':
         specifier: ^26.0.1
         version: 26.0.1
@@ -121,22 +137,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.9
         version: 4.1.9(vitest@4.1.9)
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.0.1)(@vitest/coverage-v8@4.1.9)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
-
-  packages/tunnel:
-    dependencies:
-      '@borapesa/pesa':
-        specifier: workspace:*
-        version: link:../pesa
-    devDependencies:
-      '@types/node':
-        specifier: ^26.0.1
-        version: 26.0.1
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -3295,8 +3295,8 @@ packages:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
 
-  tar-fs@2.1.4:
-    resolution: {integrity: sha512-mDAjwmZdh7LTT6pNleZ05Yt65HC3E+NiQzl672vQG38jIrehtJk/J3mNwIg+vShQPcLF/LV7CMnDW6vjj6sfYQ==}
+  tar-fs@2.1.5:
+    resolution: {integrity: sha512-OboTd8mmMhZDNPV+UjQcK9yKAatXu2aJ+r1w4im1Otd4M4fl2hwvdoXUxIYHFTHWK/3y3FarBP70v3vwmGlOxw==}
 
   tar-stream@2.2.0:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
@@ -6476,7 +6476,7 @@ snapshots:
       pump: 3.0.4
       rc: 1.2.8
       simple-get: 4.0.1
-      tar-fs: 2.1.4
+      tar-fs: 2.1.5
       tunnel-agent: 0.6.0
 
   prettier@2.8.8: {}
@@ -6832,7 +6832,7 @@ snapshots:
 
   tapable@2.3.3: {}
 
-  tar-fs@2.1.4:
+  tar-fs@2.1.5:
     dependencies:
       chownr: 1.1.4
       mkdirp-classic: 0.5.3

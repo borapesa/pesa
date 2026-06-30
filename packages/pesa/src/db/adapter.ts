@@ -3,9 +3,9 @@ import type { PaymentEvent } from '../types/event';
 /**
  * Database adapter interface for the event store.
  *
- * The default SQLiteAdapter requires zero configuration and works in
- * any Node.js environment. Swap adapters for Turso/libSQL, PostgreSQL,
- * Prisma, or Drizzle via the `db` field in PesaConfig.
+ * The default is an in-memory adapter (zero deps, dev/CI ready).
+ * Swap for `@borapesa/sqlite`, PostgreSQL, or your own adapter via
+ * the `db` field in PesaConfig.
  */
 export interface PesaDatabaseAdapter {
   /** Persist a verified PaymentEvent. */
