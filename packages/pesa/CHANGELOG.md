@@ -1,5 +1,18 @@
 # @borapesa/pesa
 
+## 0.5.0
+
+### Minor Changes
+
+- - in-memory adapter by default, extract SQLite to adapters/sqlite
+  - rename pesa.mount → pesa.mountWebhook (webhook only)
+  - add basePath config + tunnel webhookPath option
+  - use detached + logfile to isolate Ctrl+C from dev server
+  - persist tunnel across Bun watch reloads to avoid rate limits
+  - prevent console blockage and process orphans
+  - unref child process so Ctrl+C kills the dev server instantly
+  - detach cloudflared listeners after tunnel is established
+
 ## 0.4.1
 
 ### Patch Changes
