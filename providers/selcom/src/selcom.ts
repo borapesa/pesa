@@ -656,4 +656,304 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   // Not supported by Selcom
   // previewOrder, previewDisburse, and refund fall back to
   // BasePaymentProvider default (throws PesaUnsupportedError).
+
+  // ── Provider-specific: Wallet Pull Payment ───────────────────────
+  //
+  // These methods live on pesa.provider directly — not part of the
+  // unified PesaInstance API.
+
+  /**
+   * Trigger a USSD push from an existing checkout order.
+   *
+   * Use this for in-app payments where the customer is already on your
+   * checkout page and you want to trigger a mobile money PIN prompt
+   * without redirecting to Selcom's payment gateway.
+   */
+  async checkoutWalletPayment(
+    orderId: string,
+    msisdn: string,
+  ): Promise<{
+    reference: string;
+    transid: string;
+    status: string;
+  }> {
+    const body = {
+      transid: uuid(),
+      order_id: orderId,
+      msisdn,
+    };
+
+    const res = await this.request<SelcomResponse>('POST', '/v1/checkout/wallet-payment', body);
+    return {
+      reference: res.reference,
+      transid: body.transid,
+      status: res.result,
+    };
+  }
+
+  // ── Provider-specific: Utility Payments ──────────────────────────
+
+  /**
+   * Pay a utility bill (electricity, water, TV, airtime, etc.).
+   *
+   * @param utilitycode — e.g. `'LUKU'`, `'DSTV'`, `'GEPG'`, `'TOP'`.
+   *   See the Selcom API reference for the full list.
+   * @param utilityref — meter number, smartcard number, or phone number.
+   * @param amount — amount in TZS.
+   * @param msisdn — end-user mobile number (optional for most utilities).
+   */
+  async payUtility(params: {
+    utilitycode: string;
+    utilityref: string;
+    amount: number;
+    msisdn?: string;
+  }): Promise<{
+    reference: string;
+    transid: string;
+    status: string;
+    message: string;
+  }> {
+    const transid = uuid();
+
+    const body: Record<string, unknown> = {
+      transid,
+      utilitycode: params.utilitycode,
+      utilityref: params.utilityref,
+      amount: String(params.amount),
+      vendor: this.config.vendor,
+      pin: this.config.pin,
+    };
+    if (params.msisdn) body.msisdn = params.msisdn;
+
+    const res = await this.request<SelcomResponse>('POST', '/v1/utilitypayment/process', body);
+
+    return {
+      reference: res.reference,
+      transid,
+      status: res.result,
+      message: res.message,
+    };
+  }
+
+  /**
+   * Look up a utility account before payment.
+   *
+   * Returns the account holder name and (for some utilities) amount due.
+   */
+  async lookupUtility(
+    utilitycode: string,
+    utilityref: string,
+  ): Promise<{
+    reference: string;
+    transid: string;
+    status: string;
+    message: string;
+    data: unknown[];
+  }> {
+    const transid = uuid();
+    const res = await this.request<SelcomResponse>('GET', '/v1/utilitypayment/lookup', {
+      utilitycode,
+      utilityref,
+      transid,
+    });
+
+    return {
+      reference: res.reference,
+      transid,
+      status: res.result,
+      message: res.message,
+      data: res.data,
+    };
+  }
+
+  /**
+   * Query the status of a utility payment.
+   */
+  async queryUtilityStatus(transid: string): Promise<{
+    reference: string;
+    status: string;
+    message: string;
+    data: unknown[];
+  }> {
+    const res = await this.request<SelcomResponse>('GET', '/v1/utilitypayment/query', {
+      transid,
+    });
+
+    return {
+      reference: res.reference,
+      status: res.result,
+      message: res.message,
+      data: res.data,
+    };
+  }
+
+  // ── Provider-specific: Selcom Pesa ───────────────────────────────
+
+  /**
+   * Send funds to a Selcom Pesa account.
+   *
+   * @param utilityref — Selcom Pesa account number or mobile number.
+   * @param amount — amount in TZS.
+   * @param msisdn — sender mobile number (optional).
+   */
+  async selcomPesaCashin(
+    utilityref: string,
+    amount: number,
+    msisdn?: string,
+  ): Promise<{
+    reference: string;
+    transid: string;
+    status: string;
+    message: string;
+  }> {
+    const transid = uuid();
+
+    const body: Record<string, unknown> = {
+      transid,
+      utilityref,
+      amount: String(amount),
+      vendor: this.config.vendor,
+      pin: this.config.pin,
+    };
+    if (msisdn) body.msisdn = msisdn;
+
+    const res = await this.request<SelcomResponse>('POST', '/v1/selcompesa/cashin', body);
+
+    return {
+      reference: res.reference,
+      transid,
+      status: res.result,
+      message: res.message,
+    };
+  }
+
+  /**
+   * Look up a Selcom Pesa account holder name.
+   */
+  async selcomPesaNameLookup(utilityref: string): Promise<{
+    reference: string;
+    transid: string;
+    status: string;
+    message: string;
+    name?: string;
+  }> {
+    const transid = uuid();
+    const res = await this.request<SelcomResponse>('GET', '/v1/selcompesa/namelookup', {
+      utilityref,
+      transid,
+    });
+
+    const firstItem = res.data[0] as Record<string, unknown> | undefined;
+    return {
+      reference: res.reference,
+      transid,
+      status: res.result,
+      message: res.message,
+      name: firstItem?.name as string | undefined,
+    };
+  }
+
+  // ── Provider-specific: Agent Cashout ─────────────────────────────
+
+  /**
+   * Send funds to a customer for cash pickup at any Selcom Huduma agent.
+   *
+   * The customer dials `*150*50#`, selects Huduma Cashout, enters the
+   * agent code and amount to complete the withdrawal.
+   *
+   * @param msisdn — customer mobile number (receives the cashout token).
+   * @param amount — amount in TZS.
+   * @param name — customer name (optional).
+   */
+  async agentCashout(
+    msisdn: string,
+    amount: number,
+    name?: string,
+  ): Promise<{
+    reference: string;
+    transid: string;
+    status: string;
+    message: string;
+  }> {
+    const transid = uuid();
+
+    const body: Record<string, unknown> = {
+      transid,
+      utilitycode: 'HUDUMACI',
+      utilityref: msisdn,
+      amount: String(amount),
+      vendor: this.config.vendor,
+      pin: this.config.pin,
+    };
+    if (name) body.name = name;
+
+    const res = await this.request<SelcomResponse>('POST', '/v1/hudumacashin/process', body);
+
+    return {
+      reference: res.reference,
+      transid,
+      status: res.result,
+      message: res.message,
+    };
+  }
+
+  // ── Provider-specific: Stored Cards ──────────────────────────────
+
+  /**
+   * Fetch stored (tokenized) cards for a buyer.
+   *
+   * @param gatewayBuyerUuid — returned from the first create-order call
+   *   for this buyer (`raw.data[0].gateway_buyer_uuid`).
+   * @param buyerUserid — your internal user ID for the buyer.
+   */
+  async fetchStoredCards(
+    gatewayBuyerUuid: string,
+    buyerUserid: string,
+  ): Promise<{
+    cards: Array<{
+      maskedCard: string;
+      cardToken: string;
+      name: string;
+      cardType: string;
+      creationDate: string;
+      id: string;
+    }>;
+  }> {
+    const res = await this.request<SelcomResponse>('GET', '/v1/checkout/stored-cards', {
+      gateway_buyer_uuid: gatewayBuyerUuid,
+      buyer_userid: buyerUserid,
+    });
+
+    return {
+      cards: (res.data as Array<Record<string, unknown>>).map((card) => ({
+        maskedCard: (card.masked_card as string) ?? '',
+        cardToken: (card.card_token as string) ?? '',
+        name: (card.name as string) ?? '',
+        cardType: (card.card_type as string) ?? '',
+        creationDate: (card.creation_date as string) ?? '',
+        id: (card.id as string) ?? '',
+      })),
+    };
+  }
+
+  /**
+   * Delete a stored card token.
+   */
+  async deleteStoredCard(
+    id: string,
+    gatewayBuyerUuid: string,
+  ): Promise<{
+    status: string;
+    message: string;
+  }> {
+    const res = await this.request<SelcomResponse>('DELETE', '/v1/checkout/delete-card', {
+      id,
+      gateway_buyer_uuid: gatewayBuyerUuid,
+    });
+
+    return {
+      status: res.result,
+      message: res.message,
+    };
+  }
 }

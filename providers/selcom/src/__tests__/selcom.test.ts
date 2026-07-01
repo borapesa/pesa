@@ -652,4 +652,197 @@ describe('SelcomPaymentProvider', () => {
 
     await expect(provider.getPaymentStatus('order_net')).rejects.toThrow(/Selcom|PesaNetworkError/);
   });
+
+  // ── Provider-specific: Wallet Pull Payment ───────────────────────
+
+  it('triggers wallet pull payment from a checkout order', async () => {
+    mockFetch({
+      transid: 'wpay_001',
+      reference: 'ref_wpay',
+      resultcode: '111',
+      result: 'PENDING',
+      message: 'Request in progress.',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const result = await provider.checkoutWalletPayment('order_123', '255682812345');
+    expect(result.status).toBe('PENDING');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.order_id).toBe('order_123');
+    expect(body.msisdn).toBe('255682812345');
+  });
+
+  // ── Provider-specific: Utility Payments ──────────────────────────
+
+  it('pays a utility bill', async () => {
+    mockFetch({
+      transid: 'util_001',
+      reference: 'ref_util',
+      resultcode: '000',
+      result: 'SUCCESS',
+      message: 'LUKU Confirmation\nFIROZ\nMeter# 4300071XXXX\n',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const result = await provider.payUtility({
+      utilitycode: 'LUKU',
+      utilityref: '01234567891',
+      amount: 10000,
+    });
+
+    expect(result.status).toBe('SUCCESS');
+    expect(result.message).toContain('LUKU');
+  });
+
+  it('looks up a utility account', async () => {
+    mockFetch({
+      reference: '6927759116',
+      transid: 'lookup_001',
+      resultcode: '000',
+      result: 'SUCCESS',
+      message: 'LUKU Confirmation\nFIROZ\nMeter# 4300071XXXX\n',
+      data: [{ name: 'FIROZ MOH' }],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const result = await provider.lookupUtility('LUKU', '01234567891');
+    expect(result.status).toBe('SUCCESS');
+    expect(result.data).toHaveLength(1);
+  });
+
+  // ── Provider-specific: Selcom Pesa ───────────────────────────────
+
+  it('sends funds to a Selcom Pesa account', async () => {
+    mockFetch({
+      transid: 'sp_001',
+      reference: 'ref_sp',
+      resultcode: '000',
+      result: 'SUCCESS',
+      message: 'Selcom Pesa cashin successful',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const result = await provider.selcomPesaCashin('255781234567', 5000);
+    expect(result.status).toBe('SUCCESS');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.utilityref).toBe('255781234567');
+    expect(body.amount).toBe('5000');
+  });
+
+  // ── Provider-specific: Agent Cashout ─────────────────────────────
+
+  it('sends agent cashout', async () => {
+    mockFetch({
+      transid: 'ac_001',
+      reference: 'ref_ac',
+      resultcode: '000',
+      result: 'SUCCESS',
+      message: '0312332222 Confirmed. You have received TZS 1,000.',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const result = await provider.agentCashout('255761234567', 1000, 'John Mushi');
+    expect(result.status).toBe('SUCCESS');
+
+    const body = JSON.parse(
+      (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[1]?.body as string,
+    );
+    expect(body.utilitycode).toBe('HUDUMACI');
+    expect(body.amount).toBe('1000');
+    expect(body.name).toBe('John Mushi');
+  });
+
+  // ── Provider-specific: Stored Cards ──────────────────────────────
+
+  it('fetches stored cards for a buyer', async () => {
+    mockFetch({
+      reference: 'ref_cards',
+      transid: 'cards_001',
+      resultcode: '000',
+      result: 'SUCCESS',
+      message: 'Order fetch successful',
+      data: [
+        {
+          masked_card: '5555-12XX-XXXX-1234',
+          creation_date: '2019-06-06 22:00:00',
+          card_token: 'ABC123423232',
+          name: 'JOE JOHN',
+          card_type: '001',
+          id: 'card_1',
+        },
+      ],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const result = await provider.fetchStoredCards('uuid_123', 'user_456');
+    expect(result.cards).toHaveLength(1);
+    expect(result.cards[0]?.cardToken).toBe('ABC123423232');
+  });
+
+  it('deletes a stored card', async () => {
+    mockFetch({
+      reference: 'ref_del',
+      transid: 'del_001',
+      resultcode: '000',
+      result: 'SUCCESS',
+      message: 'Delete successful',
+      data: [],
+    });
+
+    const provider = new SelcomPaymentProvider({
+      apiKey: 'test-api-key',
+      apiSecret: 'test-api-secret',
+      vendor: 'VENDOR001',
+      pin: '1234',
+    });
+
+    const result = await provider.deleteStoredCard('card_1', 'uuid_123');
+    expect(result.status).toBe('SUCCESS');
+  });
 });
