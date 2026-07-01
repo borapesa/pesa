@@ -83,6 +83,8 @@ The signing string is built as `timestamp=<ts>&field1=val1&field2=val2...` with 
 | `senderName` | `string` | ❌ | Account holder display name for bank transfers |
 | `senderPhone` | `string` | ❌ | Sender mobile number for bank transfers |
 | `redirectUrl` | `string` | ❌ | Default redirect URL for checkout orders. Overridable per-payment via `payload.redirectUrl` |
+| `cancelUrl` | `string` | ❌ | Cancel URL for checkout orders — the customer is sent here if they abandon the payment |
+| `webhookUrl` | `string` | ❌ | Webhook callback URL for payment status notifications. Typically your `pesa.mountWebhook` endpoint |
 
 ## Supported Operations
 
@@ -113,9 +115,68 @@ The signing string is built as `timestamp=<ts>&field1=val1&field2=val2...` with 
 | `HALOPESA` | `HPCASHIN` |
 | Other / not set | `CASHIN` (auto-route via MNP lookup) |
 
+## Provider-specific features
+
+These methods live on `pesa.provider` directly — not part of the unified `PesaInstance` API.
+
+### Wallet Pull Payment
+
+Trigger a USSD push from an existing checkout order for in-app payments:
+
+```ts
+await (pesa.provider as SelcomPaymentProvider).checkoutWalletPayment('order_123', '255682812345');
+```
+
+### Utility Payments
+
+Pay bills, buy airtime, and query utility accounts:
+
+```ts
+// Pay LUKU electricity
+await (pesa.provider as SelcomPaymentProvider).payUtility({
+  utilitycode: 'LUKU',
+  utilityref: '01234567891',
+  amount: 10000,
+});
+
+// Look up an account before paying
+const info = await (pesa.provider as SelcomPaymentProvider).lookupUtility('LUKU', '01234567891');
+
+// Check payment status
+const status = await (pesa.provider as SelcomPaymentProvider).queryUtilityStatus('transid_123');
+```
+
+Supported utility codes: `LUKU`, `DSTV`, `AZAMTV`, `STARTIMES`, `GEPG`, `TOP` (airtime), and more — see the [Selcom API reference](https://developers.selcommobile.com).
+
+### Selcom Pesa
+
+Send funds to Selcom Pesa accounts and look up account names:
+
+```ts
+await (pesa.provider as SelcomPaymentProvider).selcomPesaCashin('255781234567', 5000);
+const lookup = await (pesa.provider as SelcomPaymentProvider).selcomPesaNameLookup('255781234567');
+```
+
+### Agent Cashout (Huduma)
+
+Send funds for cash pickup at any Selcom Huduma agent via `*150*50#`:
+
+```ts
+await (pesa.provider as SelcomPaymentProvider).agentCashout('255761234567', 1000, 'John Mushi');
+```
+
+### Stored Cards
+
+Manage tokenized cards for recurring payments:
+
+```ts
+const { cards } = await (pesa.provider as SelcomPaymentProvider).fetchStoredCards('uuid_123', 'user_456');
+await (pesa.provider as SelcomPaymentProvider).deleteStoredCard('card_1', 'uuid_123');
+```
+
 ## Webhooks
 
-Set your webhook URL in the Selcom dashboard. The provider verifies the `Digest` header against the callback payload using HMAC-SHA256 constant-time comparison.
+Set your webhook URL in the Selcom dashboard. For per-order callbacks, configure `webhookUrl` in the provider config. The provider verifies the `Digest` header against the callback payload using HMAC-SHA256 constant-time comparison.
 
 ## Credentials
 

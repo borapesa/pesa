@@ -80,6 +80,8 @@ import { SelcomPaymentProvider } from '@borapesa/selcom'
 | `senderName`    |          | Account holder display name for bank transfers. Defaults to `vendor`.             |
 | `senderPhone`   |          | Sender mobile number for bank transfers.                                          |
 | `redirectUrl`   |          | Default redirect URL for checkout orders. Overridable per-payment via `payload.redirectUrl`. |
+| `cancelUrl`     |          | Cancel URL for checkout orders. Customer is sent here if they abandon payment.    |
+| `webhookUrl`    |          | Webhook callback URL for payment status. Typically `pesa.mountWebhook` endpoint.  |
 
 ```ts
 const pesa = createPesa({
@@ -161,6 +163,11 @@ Some providers expose methods beyond the standard `BasePaymentProvider` interfac
 
 - **Bank disbursement (Qwiksend)** — send to bank accounts via `senderAccount`, `senderName`, `senderPhone` config.
 - **Order management** — `cancelOrder()`, `listOrders()` are first-class.
+- **Wallet pull payment** — `checkoutWalletPayment()` triggers USSD from an existing checkout order for in-app payments.
+- **Utility payments** — `payUtility()`, `lookupUtility()`, `queryUtilityStatus()` for LUKU, DSTV, GEPG, airtime, and more.
+- **Selcom Pesa** — `selcomPesaCashin()`, `selcomPesaNameLookup()` for Selcom's mobile wallet.
+- **Agent cashout** — `agentCashout()` sends funds for cash pickup at Huduma agents via `*150*50#`.
+- **Stored cards** — `fetchStoredCards()`, `deleteStoredCard()` for tokenized card management.
 
 ### ClickPesa
 
