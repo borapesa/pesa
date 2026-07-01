@@ -52,6 +52,12 @@ export interface SelcomConfig {
    * Sender mobile number for bank transfers.
    */
   senderPhone?: string;
+  /**
+   * Default redirect URL for checkout orders.  The customer is sent here
+   * after completing payment.  Overridable per-payment via
+   * {@link CreateOrderPayload.redirectUrl}.
+   */
+  redirectUrl?: string;
 }
 
 // ── Response types ──────────────────────────────────────────────────
@@ -71,9 +77,11 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
   readonly name: ProviderName = 'selcom';
 
   private config: Required<
-    Omit<SelcomConfig, 'baseUrl' | 'senderAccount' | 'senderName' | 'senderPhone'>
+    Omit<SelcomConfig, 'baseUrl' | 'redirectUrl' | 'senderAccount' | 'senderName' | 'senderPhone'>
   > &
-    Pick<SelcomConfig, 'senderAccount' | 'senderName' | 'senderPhone'> & { baseUrl: string };
+    Pick<SelcomConfig, 'redirectUrl' | 'senderAccount' | 'senderName' | 'senderPhone'> & {
+      baseUrl: string;
+    };
 
   constructor(config: SelcomConfig) {
     super();
@@ -86,6 +94,7 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       senderAccount: config.senderAccount,
       senderName: config.senderName,
       senderPhone: config.senderPhone,
+      redirectUrl: config.redirectUrl,
     };
   }
 
@@ -244,7 +253,9 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       buyer_phone: payload.customer.phone,
       amount: String(payload.amount),
       currency: payload.currency,
-      webhook: Buffer.from(payload.redirectUrl ?? '').toString('base64'),
+      webhook: Buffer.from((payload.redirectUrl || this.config.redirectUrl) ?? '').toString(
+        'base64',
+      ),
       buyer_remarks: payload.description ?? '',
       merchant_remarks: '',
       no_of_items: 1,

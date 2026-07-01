@@ -58,6 +58,12 @@ export interface ClickPesaConfig {
    * `sandbox: true` for testing and `sandbox: false` for production.
    */
   baseUrl?: string;
+  /**
+   * Default redirect URL for hosted checkout.  The customer is sent here
+   * after completing payment.  Overridable per-payment via
+   * {@link CreateOrderPayload.redirectUrl}.
+   */
+  redirectUrl?: string;
 }
 
 // ── Response types (ClickPesa-specific shapes) ──────────────────────
@@ -165,7 +171,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
   };
 
   private config: Required<Pick<ClickPesaConfig, 'clientId' | 'apiKey'>> &
-    Pick<ClickPesaConfig, 'checksumKey'> & { baseUrl: string };
+    Pick<ClickPesaConfig, 'checksumKey' | 'redirectUrl'> & { baseUrl: string };
   private token: string | null = null;
   private tokenExpiresAt = 0;
 
@@ -177,6 +183,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
       clientId: config.clientId,
       apiKey: config.apiKey,
       checksumKey: config.checksumKey,
+      redirectUrl: config.redirectUrl,
     };
   }
 
@@ -348,7 +355,7 @@ export class ClickPesaProvider extends BasePaymentProvider {
             email: payload.customer.email,
             phone: payload.customer.phone,
           },
-          returnUrl: payload.redirectUrl,
+          returnUrl: payload.redirectUrl || this.config.redirectUrl,
           description: payload.description,
         }),
       },
