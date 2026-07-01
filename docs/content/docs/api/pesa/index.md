@@ -58,5 +58,6 @@ title: "@borapesa/pesa"
 | ------ | ------ |
 | [createPesa](functions/createPesa) | The single entry point for the entire Bora Pesa SDK. |
 | [createPesaWebhookHandler](functions/createPesaWebhookHandler) | Creates a webhook handler — the one route that must be publicly exposed. |
+| [normalisePhone](functions/normalisePhone) | Normalise a Tanzania phone number to canonical MSISDN format (255XXXXXXXXX). |
 | [validateCreateOrderPayload](functions/validateCreateOrderPayload) | Validate a CreateOrderPayload before forwarding to the provider. Throws PesaValidationError on invalid input. |
 | [validateDisbursePayload](functions/validateDisbursePayload) | Validate a DisbursePayload before forwarding to the provider. Throws PesaValidationError on invalid input. |

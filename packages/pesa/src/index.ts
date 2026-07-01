@@ -37,4 +37,4 @@ export type {
   RefundResult,
   TZSAmount,
 } from './types/index';
-export { validateCreateOrderPayload, validateDisbursePayload } from './validate';
+export { normalisePhone, validateCreateOrderPayload, validateDisbursePayload } from './validate';

@@ -61,4 +61,11 @@ export type Currency = 'TZS' | 'USD';
  * const provider: ProviderName = 'selcom';
  * ```
  */
-export type ProviderName = 'selcom' | 'azampay' | 'clickpesa' | 'dpo' | 'pesapal' | 'bogus';
+export type ProviderName =
+  | 'selcom'
+  | 'azampay'
+  | 'clickpesa'
+  | 'snippe'
+  | 'dpo'
+  | 'pesapal'
+  | 'bogus';

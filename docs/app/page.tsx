@@ -56,6 +56,12 @@ const providers = [
     href: '/docs/api/selcom',
     bg: 'hsla(347.07, 100%, 45.49%, 1)',
   },
+  {
+    name: 'Snippe',
+    logo: '/snippe.svg',
+    href: '/docs/api/snippe',
+    bg: '#E1EFD7',
+  },
 ];
 
 export default function Page() {

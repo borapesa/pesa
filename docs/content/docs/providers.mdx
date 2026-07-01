@@ -1,9 +1,9 @@
 ---
 title: Providers
-description: Available payment providers — Selcom, ClickPesa, AzamPay — and their capabilities.
+description: Available payment providers — Selcom, ClickPesa, AzamPay, Snippe — and their capabilities.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from 'fumadocs-ui/components/callout'
 
 <Callout variant="info">Added in v0.1.0</Callout>
 
@@ -11,21 +11,27 @@ Providers are the bridge between the SDK and payment gateways. Pick one that mat
 
 ## Comparison
 
-|                         | Selcom | ClickPesa | AzamPay |
-| ----------------------- | ------ | --------- | ------- |
-| MNO USSD push           | ✅     | ✅        | ✅      |
-| MNO redirect checkout   | ✅     | ✅        | —       |
-| Bank checkout (OTP)     | —      | —         | ✅      |
-| Hosted payment page     | —      | ✅        | ✅      |
-| Disburse (wallet)       | ✅     | ✅        | ✅      |
-| Disburse (bank)         | ✅     | ✅        | —       |
-| Webhook signature       | HMAC-SHA256 | HMAC-SHA256 | RSA-PKCS#1 |
-| Order cancellation      | ✅     | —         | —       |
-| Order listing           | ✅     | —         | —       |
-| Balance query           | ✅     | —         | —       |
-| Name lookup             | ✅     | ✅        | ✅      |
-| Credential validation   | ✅     | ✅        | ✅      |
-| Auth method             | HMAC per-request | Bearer token | Bearer token |
+<Callout variant="info">
+  A ✅ means the feature is implemented in our provider adapter. A `—` does not guarantee the upstream provider API lacks the feature — it may simply not be wired up yet. Open an issue if you need it.
+</Callout>
+
+|                       | Selcom           | ClickPesa    | AzamPay      | Snippe       |
+| --------------------- | ---------------- | ------------ | ------------ | ------------ |
+| MNO USSD push         | ✅               | ✅           | ✅           | ✅           |
+| MNO redirect checkout | ✅               | ✅           | —            | —            |
+| Card payment          | —                | ✅           | —            | ✅           |
+| Bank checkout (OTP)   | —                | —            | ✅           | —            |
+| Hosted payment page   | —                | ✅           | ✅           | ✅           |
+| Disburse (wallet)     | ✅               | ✅           | ✅           | ✅           |
+| Disburse (bank)       | ✅               | ✅           | —            | ✅           |
+| Webhook signature     | HMAC-SHA256      | HMAC-SHA256  | RSA-PKCS#1   | HMAC-SHA256  |
+| Order cancellation    | ✅               | —            | —            | —            |
+| Order listing         | ✅               | —            | —            | ✅           |
+| Balance query         | ✅               | —            | —            | ✅           |
+| Name lookup           | ✅               | ✅           | ✅           | —            |
+| Credential validation | ✅               | ✅           | ✅           | ✅           |
+| Auth method           | HMAC per-request | Bearer token | Bearer token | Bearer token |
+| Payout fee preview    | —                | ✅           | —            | —            |
 
 ## Configuration
 
@@ -34,85 +40,106 @@ Each provider has a different config surface — fields match what each provider
 ### ClickPesa
 
 ```ts
-import { ClickPesaProvider } from '@borapesa/clickpesa';
+import { ClickPesaProvider } from '@borapesa/clickpesa'
 ```
 
-| Field | Required | Description |
-|---|---|---|
-| `clientId` | ✅ | Client ID from ClickPesa dashboard |
-| `apiKey` | ✅ | API key from ClickPesa dashboard |
-| `checksumKey` | | HMAC-SHA256 signing key for webhook verification. Generate in the ClickPesa dashboard. When set, all POST/PUT/PATCH bodies are signed and incoming webhooks are verified. **Without it, webhooks are accepted unverified.** |
-| `sandbox` | | `true` → `https://api-sandbox.clickpesa.com`. `false` (default) → `https://api.clickpesa.com`. |
-| `baseUrl` | | Explicit base URL override — takes precedence over `sandbox`. |
+| Field         | Required | Description                                                                                                                                                                                                                 |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clientId`    | ✅       | Client ID from ClickPesa dashboard                                                                                                                                                                                          |
+| `apiKey`      | ✅       | API key from ClickPesa dashboard                                                                                                                                                                                            |
+| `checksumKey` |          | HMAC-SHA256 signing key for webhook verification. Generate in the ClickPesa dashboard. When set, all POST/PUT/PATCH bodies are signed and incoming webhooks are verified. **Without it, webhooks are accepted unverified.** |
+| `sandbox`     |          | `true` → `https://api-sandbox.clickpesa.com`. `false` (default) → `https://api.clickpesa.com`.                                                                                                                              |
+| `baseUrl`     |          | Explicit base URL override — takes precedence over `sandbox`.                                                                                                                                                               |
 
 ```ts
 const pesa = createPesa({
   provider: new ClickPesaProvider({
     clientId: process.env.CLICKPESA_CLIENT_ID!,
-    apiKey:   process.env.CLICKPESA_API_KEY!,
-    sandbox:  false,
+    apiKey: process.env.CLICKPESA_API_KEY!,
+    sandbox: false,
   }),
-});
+})
 ```
 
 ### Selcom
 
 ```ts
-import { SelcomPaymentProvider } from '@borapesa/selcom';
+import { SelcomPaymentProvider } from '@borapesa/selcom'
 ```
 
-| Field | Required | Description |
-|---|---|---|
-| `apiKey` | ✅ | API key from Selcom |
-| `apiSecret` | ✅ | API secret for HMAC-SHA256 signing |
-| `vendor` | ✅ | Float account / vendor identifier |
-| `pin` | ✅ | Float account PIN — required for disbursement and balance queries |
-| `baseUrl` | | Defaults to `https://apigw.selcommobile.com`. Set to the sandbox URL for testing. |
-| `senderAccount` | | Source account number for Qwiksend bank transfers. Defaults to `vendor`. |
-| `senderName` | | Account holder display name for bank transfers. Defaults to `vendor`. |
-| `senderPhone` | | Sender mobile number for bank transfers. |
+| Field           | Required | Description                                                                       |
+| --------------- | -------- | --------------------------------------------------------------------------------- |
+| `apiKey`        | ✅       | API key from Selcom                                                               |
+| `apiSecret`     | ✅       | API secret for HMAC-SHA256 signing                                                |
+| `vendor`        | ✅       | Float account / vendor identifier                                                 |
+| `pin`           | ✅       | Float account PIN — required for disbursement and balance queries                 |
+| `baseUrl`       |          | Defaults to `https://apigw.selcommobile.com`. Set to the sandbox URL for testing. |
+| `senderAccount` |          | Source account number for Qwiksend bank transfers. Defaults to `vendor`.          |
+| `senderName`    |          | Account holder display name for bank transfers. Defaults to `vendor`.             |
+| `senderPhone`   |          | Sender mobile number for bank transfers.                                          |
 
 ```ts
 const pesa = createPesa({
   provider: new SelcomPaymentProvider({
-    apiKey:    process.env.SELCOM_API_KEY!,
+    apiKey: process.env.SELCOM_API_KEY!,
     apiSecret: process.env.SELCOM_API_SECRET!,
-    vendor:    process.env.SELCOM_VENDOR!,
-    pin:       process.env.SELCOM_PIN!,
+    vendor: process.env.SELCOM_VENDOR!,
+    pin: process.env.SELCOM_PIN!,
   }),
-});
+})
 ```
 
 ### AzamPay
 
 ```ts
-import { AzamPayPaymentProvider } from '@borapesa/azampay';
+import { AzamPayPaymentProvider } from '@borapesa/azampay'
 ```
 
-| Field | Required | Description |
-|---|---|---|
-| `appName` | ✅ | App name from AzamPay dashboard |
-| `clientId` | ✅ | Client ID from AzamPay dashboard |
-| `clientSecret` | ✅ | Client secret from AzamPay dashboard |
-| `apiKey` | ✅ | API key from AzamPay dashboard |
-| `senderName` | ✅ | Merchant display name for disbursement transfers |
-| `senderBank` | | Merchant bank name for disbursement. Defaults to `"AzamPay"`. |
-| `sandbox` | | Target sandbox (default: `true`). |
-| `authBaseUrl` | | Override auth base URL. |
-| `checkoutBaseUrl` | | Override checkout base URL. |
-| `disbursementBaseUrl` | | Override disbursement base URL. **AzamPay uses separate hosts** for checkout and disbursement — this defaults automatically per `sandbox`. |
+| Field                 | Required | Description                                                                                                                                |
+| --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `appName`             | ✅       | App name from AzamPay dashboard                                                                                                            |
+| `clientId`            | ✅       | Client ID from AzamPay dashboard                                                                                                           |
+| `clientSecret`        | ✅       | Client secret from AzamPay dashboard                                                                                                       |
+| `apiKey`              | ✅       | API key from AzamPay dashboard                                                                                                             |
+| `senderName`          | ✅       | Merchant display name for disbursement transfers                                                                                           |
+| `senderBank`          |          | Merchant bank name for disbursement. Defaults to `"AzamPay"`.                                                                              |
+| `sandbox`             |          | Target sandbox (default: `true`).                                                                                                          |
+| `authBaseUrl`         |          | Override auth base URL.                                                                                                                    |
+| `checkoutBaseUrl`     |          | Override checkout base URL.                                                                                                                |
+| `disbursementBaseUrl` |          | Override disbursement base URL. **AzamPay uses separate hosts** for checkout and disbursement — this defaults automatically per `sandbox`. |
 
 ```ts
 const pesa = createPesa({
   provider: new AzamPayPaymentProvider({
-    appName:      process.env.AZAMPAY_APP_NAME!,
-    clientId:     process.env.AZAMPAY_CLIENT_ID!,
+    appName: process.env.AZAMPAY_APP_NAME!,
+    clientId: process.env.AZAMPAY_CLIENT_ID!,
     clientSecret: process.env.AZAMPAY_CLIENT_SECRET!,
-    apiKey:       process.env.AZAMPAY_API_KEY!,
-    senderName:   process.env.AZAMPAY_SENDER_NAME!,
-    sandbox:      false,
+    apiKey: process.env.AZAMPAY_API_KEY!,
+    senderName: process.env.AZAMPAY_SENDER_NAME!,
+    sandbox: false,
   }),
-});
+})
+```
+
+### Snippe
+
+```ts
+import { SnippePaymentProvider } from '@borapesa/snippe'
+```
+
+| Field           | Required | Description                                                                                              |
+| --------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `apiKey`        | ✅       | Snippe API key (`snp_...`) from the Snippe dashboard                                                     |
+| `webhookSecret` | ✅       | HMAC-SHA256 signing key for webhook verification. Found in Snippe dashboard → Settings → Webhook Secret. |
+| `baseUrl`       |          | Defaults to `https://api.snippe.sh`. Override for proxies or staging.                                    |
+
+```ts
+const pesa = createPesa({
+  provider: new SnippePaymentProvider({
+    apiKey: process.env.SNIPPE_API_KEY!,
+    webhookSecret: process.env.SNIPPE_WEBHOOK_SECRET!,
+  }),
+})
 ```
 
 ## Provider-specific features
@@ -140,24 +167,42 @@ Some providers expose methods beyond the standard `BasePaymentProvider` interfac
 - **Disbursement routing** — separate base URL for disbursement endpoints (`disbursementBaseUrl` config).
 - **Provider tracking** — `raw._providerName` and `raw._checkoutProvider` on order results for status queries.
 
+### Snippe
+
+- **Card payments** — `createOrder` with `redirectUrl` routes to Snippe's card endpoint (Visa/Mastercard). Returns `checkoutUrl` for the payment page.
+- **Hosted checkout** — without `redirectUrl`, `createOrder` routes to mobile money USSD push.
+- **Balance query** — `getBalance()` returns available and total TZS balances.
+- **Order listing** — `listOrders()` supports date-range filtering for reconciliation.
+- **Credential validation** — `validateCredentials()` checks API key by calling the balance endpoint.
+
 ## Writing a provider
 
 Every provider extends [`BasePaymentProvider`](/docs/api/pesa/classes/BasePaymentProvider). Four methods are required, eight are optional.
 
 ```ts
-import { BasePaymentProvider } from '@borapesa/pesa';
+import { BasePaymentProvider } from '@borapesa/pesa'
 
 class MyProvider extends BasePaymentProvider {
-  readonly name = 'my-provider';
+  readonly name = 'my-provider'
 
   // Required
-  async createOrder(payload) { /* ... */ }
-  async getPaymentStatus(orderId) { /* ... */ }
-  async handleWebhook(body, headers) { /* ... */ }
-  async disburse(payload) { /* ... */ }
+  async createOrder(payload) {
+    /* ... */
+  }
+  async getPaymentStatus(orderId) {
+    /* ... */
+  }
+  async handleWebhook(body, headers) {
+    /* ... */
+  }
+  async disburse(payload) {
+    /* ... */
+  }
 
   // Optional — override what you support
-  async getNameLookup(phoneOrAccount) { /* ... */ }
+  async getNameLookup(phoneOrAccount) {
+    /* ... */
+  }
 }
 ```
 

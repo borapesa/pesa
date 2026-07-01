@@ -1,0 +1,47 @@
+{
+  "name": "@borapesa/snippe",
+  "version": "0.1.0",
+  "description": "Snippe provider adapter for Bora Pesa",
+  "license": "MIT",
+  "author": "Bora Pesa contributors",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "snippe",
+    "payments",
+    "tanzania",
+    "mobile-money"
+  ],
+  "packageManager": "pnpm@10.33.3",
+  "dependencies": {
+    "@borapesa/pesa": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "@vitest/coverage-v8": "^4.1.9",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

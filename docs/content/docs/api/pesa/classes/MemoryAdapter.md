@@ -2,7 +2,7 @@
 title: "Class: MemoryAdapter"
 ---
 
-Defined in: [packages/pesa/src/db/memory.ts:11](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/db/memory.ts#L11)
+Defined in: [packages/pesa/src/db/memory.ts:11](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/memory.ts#L11)
 
 In-memory event store — zero dependencies, perfect for dev and CI.
 
@@ -34,7 +34,7 @@ new MemoryAdapter(): MemoryAdapter;
 getEvent(id): Promise<PaymentEvent | null>;
 ```
 
-Defined in: [packages/pesa/src/db/memory.ts:18](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/db/memory.ts#L18)
+Defined in: [packages/pesa/src/db/memory.ts:18](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/memory.ts#L18)
 
 Retrieve a single event by its UUID.
 
@@ -60,7 +60,7 @@ Retrieve a single event by its UUID.
 getEventsByOrderId(orderId): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/memory.ts:26](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/db/memory.ts#L26)
+Defined in: [packages/pesa/src/db/memory.ts:26](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/memory.ts#L26)
 
 Retrieve all events for a given provider order ID.
 
@@ -86,7 +86,7 @@ Retrieve all events for a given provider order ID.
 getEventsByReference(reference): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/memory.ts:22](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/db/memory.ts#L22)
+Defined in: [packages/pesa/src/db/memory.ts:22](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/memory.ts#L22)
 
 Retrieve all events for a given merchant reference.
 
@@ -112,7 +112,7 @@ Retrieve all events for a given merchant reference.
 saveEvent(event): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/db/memory.ts:14](https://github.com/borapesa/pesa/blob/bb0341345be96209d9f1026440a10cf3f86d0e28/packages/pesa/src/db/memory.ts#L14)
+Defined in: [packages/pesa/src/db/memory.ts:14](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/memory.ts#L14)
 
 Persist a verified PaymentEvent.
 
