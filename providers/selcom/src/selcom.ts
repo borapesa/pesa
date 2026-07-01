@@ -58,6 +58,17 @@ export interface SelcomConfig {
    * {@link CreateOrderPayload.redirectUrl}.
    */
   redirectUrl?: string;
+  /**
+   * Cancel URL for checkout orders.  The customer is sent here if they
+   * abandon the payment.  Base64-encoded per Selcom spec.
+   */
+  cancelUrl?: string;
+  /**
+   * Webhook callback URL for payment status notifications.  Selcom POSTs
+   * the payment result here.  Typically your pesa.mountWebhook endpoint.
+   * Base64-encoded per Selcom spec.
+   */
+  webhookUrl?: string;
 }
 
 // ── Response types ──────────────────────────────────────────────────
@@ -76,10 +87,26 @@ interface SelcomResponse {
 export class SelcomPaymentProvider extends BasePaymentProvider {
   readonly name: ProviderName = 'selcom';
 
+  /** Tracks orderId → Selcom query endpoint so getPaymentStatus hits the right API. */
+  private orderTypes = new Map<string, 'checkout' | 'push'>();
+  private static readonly MAX_ORDER_MAP = 10_000;
+
   private config: Required<
-    Omit<SelcomConfig, 'baseUrl' | 'redirectUrl' | 'senderAccount' | 'senderName' | 'senderPhone'>
+    Omit<
+      SelcomConfig,
+      | 'baseUrl'
+      | 'redirectUrl'
+      | 'cancelUrl'
+      | 'webhookUrl'
+      | 'senderAccount'
+      | 'senderName'
+      | 'senderPhone'
+    >
   > &
-    Pick<SelcomConfig, 'redirectUrl' | 'senderAccount' | 'senderName' | 'senderPhone'> & {
+    Pick<
+      SelcomConfig,
+      'redirectUrl' | 'cancelUrl' | 'webhookUrl' | 'senderAccount' | 'senderName' | 'senderPhone'
+    > & {
       baseUrl: string;
     };
 
@@ -95,6 +122,8 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       senderName: config.senderName,
       senderPhone: config.senderPhone,
       redirectUrl: config.redirectUrl,
+      cancelUrl: config.cancelUrl,
+      webhookUrl: config.webhookUrl,
     };
   }
 
@@ -245,6 +274,8 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       throw new PesaValidationError('customer.email is required for Selcom checkout orders');
     }
 
+    const redirectUrl = payload.redirectUrl || this.config.redirectUrl;
+
     const body: Record<string, unknown> = {
       vendor: this.config.vendor,
       order_id: payload.reference,
@@ -253,13 +284,21 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
       buyer_phone: payload.customer.phone,
       amount: String(payload.amount),
       currency: payload.currency,
-      webhook: Buffer.from((payload.redirectUrl || this.config.redirectUrl) ?? '').toString(
-        'base64',
-      ),
+      no_of_items: 1,
       buyer_remarks: payload.description ?? '',
       merchant_remarks: '',
-      no_of_items: 1,
     };
+
+    // All URLs must be base64-encoded per Selcom spec
+    if (redirectUrl) {
+      body.redirect_url = Buffer.from(redirectUrl).toString('base64');
+    }
+    if (this.config.cancelUrl) {
+      body.cancel_url = Buffer.from(this.config.cancelUrl).toString('base64');
+    }
+    if (this.config.webhookUrl) {
+      body.webhook = Buffer.from(this.config.webhookUrl).toString('base64');
+    }
 
     const res = await this.request<SelcomResponse>(
       'POST',
@@ -268,6 +307,12 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
     );
 
     const firstItem = res.data[0] as Record<string, unknown> | undefined;
+
+    if (this.orderTypes.size >= SelcomPaymentProvider.MAX_ORDER_MAP) {
+      this.orderTypes.clear();
+    }
+    this.orderTypes.set(payload.reference, 'checkout');
+
     return {
       orderId: payload.reference,
       reference: payload.reference,
@@ -291,6 +336,11 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
 
     const res = await this.request<SelcomResponse>('POST', '/v1/wallet/pushussd', body);
 
+    if (this.orderTypes.size >= SelcomPaymentProvider.MAX_ORDER_MAP) {
+      this.orderTypes.clear();
+    }
+    this.orderTypes.set(transid, 'push');
+
     return {
       orderId: transid,
       reference: payload.reference,
@@ -302,6 +352,17 @@ export class SelcomPaymentProvider extends BasePaymentProvider {
 
   async getPaymentStatus(orderId: string): Promise<PaymentStatus> {
     try {
+      const orderType = this.orderTypes.get(orderId);
+
+      if (orderType === 'push') {
+        // C2B push orders use the C2B query endpoint
+        const res = await this.request<SelcomResponse>('GET', '/v1/c2b/query-status', {
+          transid: orderId,
+        });
+        return this.normalizeStatus(res.result, undefined);
+      }
+
+      // Checkout orders (and unknown — fall back to checkout endpoint)
       const res = await this.request<SelcomResponse>('GET', '/v1/checkout/order-status', {
         order_id: orderId,
       });
