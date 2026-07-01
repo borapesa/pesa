@@ -2,7 +2,7 @@
 title: "Interface: PesaDatabaseAdapter"
 ---
 
-Defined in: [packages/pesa/src/db/adapter.ts:10](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/adapter.ts#L10)
+Defined in: [packages/pesa/src/db/adapter.ts:10](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/db/adapter.ts#L10)
 
 Database adapter interface for the event store.
 
@@ -18,7 +18,7 @@ the `db` field in PesaConfig — the four methods work with any database.
 getEvent(id): Promise<PaymentEvent | null>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:15](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/adapter.ts#L15)
+Defined in: [packages/pesa/src/db/adapter.ts:15](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/db/adapter.ts#L15)
 
 Retrieve a single event by its UUID.
 
@@ -40,7 +40,7 @@ Retrieve a single event by its UUID.
 getEventsByOrderId(orderId): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:21](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/adapter.ts#L21)
+Defined in: [packages/pesa/src/db/adapter.ts:21](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/db/adapter.ts#L21)
 
 Retrieve all events for a given provider order ID.
 
@@ -62,7 +62,7 @@ Retrieve all events for a given provider order ID.
 getEventsByReference(reference): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:18](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/adapter.ts#L18)
+Defined in: [packages/pesa/src/db/adapter.ts:18](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/db/adapter.ts#L18)
 
 Retrieve all events for a given merchant reference.
 
@@ -84,7 +84,7 @@ Retrieve all events for a given merchant reference.
 saveEvent(event): Promise<void>;
 ```
 
-Defined in: [packages/pesa/src/db/adapter.ts:12](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/db/adapter.ts#L12)
+Defined in: [packages/pesa/src/db/adapter.ts:12](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/db/adapter.ts#L12)
 
 Persist a verified PaymentEvent.
 

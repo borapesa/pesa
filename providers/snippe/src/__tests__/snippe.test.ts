@@ -8,6 +8,7 @@ function mockFetch(response: unknown, status = 200) {
   return vi.spyOn(globalThis, 'fetch').mockResolvedValue({
     ok: status >= 200 && status < 300,
     status,
+    headers: new Map([['x-request-id', 'req_test_123']]) as unknown as Headers,
     text: async () => JSON.stringify(response),
     json: async () => response,
   } as Response);
@@ -448,5 +449,200 @@ describe('SnippePaymentProvider', () => {
     });
 
     expect(event.type).toBe('DISBURSEMENT_SUCCESS');
+  });
+
+  it('parses payout.pending as PAYMENT_PENDING', async () => {
+    const webhookSecret = 'whsec_test_secret';
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const payload = JSON.stringify({
+      id: 'evt_4',
+      type: 'payout.pending',
+      api_version: '2026-01-25',
+      created_at: '2026-01-25T12:00:00Z',
+      data: {
+        reference: 'payout_2',
+        status: 'pending',
+        amount: { currency: 'TZS', value: 10000 },
+      },
+    });
+
+    const signature = createHmac('sha256', webhookSecret)
+      .update(`${timestamp}.${payload}`)
+      .digest('hex');
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret,
+    });
+
+    const event = await provider.handleWebhook(payload, {
+      'x-webhook-signature': signature,
+      'x-webhook-timestamp': timestamp,
+    });
+
+    expect(event.type).toBe('PAYMENT_PENDING');
+  });
+
+  it('listOrders with only toDate sends to_date param', async () => {
+    mockFetch(snippeEnvelope([]));
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    await provider.listOrders({ toDate: new Date('2026-01-31') });
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('to_date=2026-01-31');
+    expect(url).not.toContain('from_date');
+  });
+
+  it('listOrders with no dates omits query string', async () => {
+    mockFetch(snippeEnvelope([]));
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    await provider.listOrders({});
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toBe('https://api.snippe.sh/v1/payments');
+  });
+
+  it('getBalance returns available TZS balance', async () => {
+    mockFetch(snippeEnvelope({ available: { currency: 'TZS', value: 250000 } }));
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    const result = await provider.getBalance();
+
+    expect(result.balances).toEqual([{ currency: 'TZS', amount: 250000 }]);
+    expect(result.raw).toBeDefined();
+  });
+
+  it('getBalance handles missing available field', async () => {
+    mockFetch(snippeEnvelope({}));
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    const result = await provider.getBalance();
+
+    expect(result.balances).toEqual([{ currency: 'TZS', amount: 0 }]);
+  });
+
+  it('listOrders returns mapped payments', async () => {
+    mockFetch(
+      snippeEnvelope([
+        {
+          reference: 'pay_1',
+          status: 'completed',
+          amount: { currency: 'TZS', value: 10000 },
+        },
+        {
+          reference: 'pay_2',
+          status: 'pending',
+          amount: { currency: 'TZS', value: 5000 },
+        },
+      ]),
+    );
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    const result = await provider.listOrders({});
+
+    expect(result.total).toBe(2);
+    expect(result.orders[0]?.orderId).toBe('pay_1');
+    expect(result.orders[0]?.status).toBe('SUCCESS');
+    expect(result.orders[1]?.status).toBe('PENDING');
+  });
+
+  it('listOrders passes date filters as query params', async () => {
+    mockFetch(snippeEnvelope([]));
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    await provider.listOrders({
+      fromDate: new Date('2026-01-01'),
+      toDate: new Date('2026-01-31'),
+    });
+
+    const url = (fetch as ReturnType<typeof mockFetch>).mock.calls[0]?.[0] as string;
+    expect(url).toContain('from_date=2026-01-01');
+    expect(url).toContain('to_date=2026-01-31');
+  });
+
+  it('validateCredentials returns valid on successful balance fetch', async () => {
+    mockFetch(snippeEnvelope({ available: { currency: 'TZS', value: 100000 } }));
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    const result = await provider.validateCredentials();
+
+    expect(result.valid).toBe(true);
+    expect(result.message).toBe('Snippe credentials valid');
+  });
+
+  it('validateCredentials returns invalid on API error', async () => {
+    mockFetch({ status: 'error', code: 401, message: 'Unauthorized' }, 401);
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret: 'whsec_test',
+    });
+
+    const result = await provider.validateCredentials();
+
+    expect(result.valid).toBe(false);
+    expect(result.message).toBeDefined();
+  });
+
+  it('parses payout.pending as PAYMENT_PENDING', async () => {
+    const webhookSecret = 'whsec_test_secret';
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const payload = JSON.stringify({
+      id: 'evt_4',
+      type: 'payout.pending',
+      api_version: '2026-01-25',
+      created_at: '2026-01-25T12:00:00Z',
+      data: {
+        reference: 'payout_2',
+        status: 'pending',
+        amount: { currency: 'TZS', value: 10000 },
+      },
+    });
+
+    const signature = createHmac('sha256', webhookSecret)
+      .update(`${timestamp}.${payload}`)
+      .digest('hex');
+
+    const provider = new SnippePaymentProvider({
+      apiKey: 'snp_test',
+      webhookSecret,
+    });
+
+    const event = await provider.handleWebhook(payload, {
+      'x-webhook-signature': signature,
+      'x-webhook-timestamp': timestamp,
+    });
+
+    expect(event.type).toBe('PAYMENT_PENDING');
   });
 });

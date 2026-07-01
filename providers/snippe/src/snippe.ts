@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import type {
   BalanceResult,
   CreateOrderPayload,
@@ -6,15 +6,20 @@ import type {
   DisburseResult,
   ListOrdersParams,
   ListOrdersResult,
+  NameLookupResult,
   OrderResult,
   PaymentEvent,
   PaymentStatus,
+  PreviewResult,
   ProviderName,
+  RefundResult,
 } from '@borapesa/pesa';
 import {
   BasePaymentProvider,
+  normalisePhone,
   PesaNetworkError,
   PesaProviderError,
+  PesaValidationError,
   PesaWebhookError,
 } from '@borapesa/pesa';
 
@@ -22,6 +27,9 @@ import {
 
 const DEFAULT_BASE_URL = 'https://api.snippe.sh';
 const API_VERSION = '2026-01-25';
+const DEFAULT_TIMEOUT_MS = 30_000;
+const MIN_PAYMENT_TZS = 500;
+const MIN_PAYOUT_TZS = 5000;
 
 // ── Config ──────────────────────────────────────────────────────────
 
@@ -32,6 +40,14 @@ export interface SnippeConfig {
   webhookSecret: string;
   /** Base URL override. Defaults to https://api.snippe.sh. */
   baseUrl?: string;
+  /**
+   * Default webhook URL applied to createOrder / disburse when the
+   * caller doesn't provide one.  Set this so you don't have to pass it
+   * on every call.  Provider callbacks POST here.
+   */
+  webhookUrl?: string;
+  /** Request timeout in milliseconds (default: 30_000). */
+  timeoutMs?: number;
 }
 
 // ── Response types ──────────────────────────────────────────────────
@@ -77,6 +93,13 @@ interface SnippePayout {
   metadata?: Record<string, unknown>;
 }
 
+interface SnippePayoutFee {
+  amount: number;
+  feeAmount: number;
+  totalAmount: number;
+  currency: 'TZS';
+}
+
 interface WebhookEvent {
   id: string;
   type: string;
@@ -98,6 +121,8 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       apiKey: config.apiKey,
       webhookSecret: config.webhookSecret,
       baseUrl: (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, ''),
+      webhookUrl: config.webhookUrl ?? '',
+      timeoutMs: config.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     };
   }
 
@@ -109,7 +134,13 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'Snippe-Version': API_VERSION,
+      'User-Agent': 'borapesa-snippe/1.0',
     };
+  }
+
+  private idempotencyKey(): string {
+    // Snippe format: snp- prefix + 20 hex chars = 24 total (≤ 30 limit)
+    return `snp-${randomUUID().replace(/-/g, '').slice(0, 20)}`;
   }
 
   // ── Helpers ──────────────────────────────────────────────────────
@@ -120,22 +151,36 @@ export class SnippePaymentProvider extends BasePaymentProvider {
     body?: Record<string, unknown>,
   ): Promise<T> {
     const url = `${this.config.baseUrl}${path}`;
-    const init: RequestInit = {
-      method,
-      headers: this.authHeaders(),
-    };
+    const headers = this.authHeaders();
 
-    if (body && (method === 'POST' || method === 'DELETE')) {
-      init.body = JSON.stringify(body);
+    // Snippe requires Idempotency-Key on all POSTs
+    if (method === 'POST') {
+      headers['Idempotency-Key'] = this.idempotencyKey();
     }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
 
     let res: Response;
     try {
-      res = await fetch(url, init);
+      res = await fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
     } catch (err) {
+      clearTimeout(timeoutId);
+      if ((err as Error).name === 'AbortError') {
+        throw new PesaNetworkError(
+          `Snippe ${method} ${path} timed out after ${this.config.timeoutMs}ms`,
+        );
+      }
       throw new PesaNetworkError(`Snippe ${method} ${path} failed: ${(err as Error).message}`);
     }
+    clearTimeout(timeoutId);
 
+    const requestId = res.headers.get('x-request-id') ?? undefined;
     const text = await res.text();
     let parsed: unknown;
     try {
@@ -144,20 +189,26 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       throw new PesaProviderError(
         `Snippe ${method} ${path}: non-JSON response (HTTP ${res.status})`,
         res.status,
+        { requestId, raw: text },
       );
     }
 
-    if (!res.ok) {
-      const envelope = parsed as { message?: string; error_code?: string } | undefined;
+    if (
+      !res.ok ||
+      (parsed &&
+        typeof parsed === 'object' &&
+        (parsed as Record<string, unknown>).status === 'error')
+    ) {
+      const envelope = parsed as { error_code?: string; message?: string } | undefined;
       throw new PesaProviderError(
         envelope?.message ?? `Snippe API error (HTTP ${res.status})`,
         res.status,
-        parsed,
+        { requestId, errorCode: envelope?.error_code, raw: parsed },
       );
     }
 
     // Snippe wraps successes in { status: "success", code, data }
-    const snippeEnvelope = parsed as SnippeEnvelope<T>;
+    const snippeEnvelope = parsed as SnippeEnvelope<T> | undefined;
     if (snippeEnvelope?.status === 'success' && 'data' in snippeEnvelope) {
       return snippeEnvelope.data;
     }
@@ -191,7 +242,6 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       case 'pending':
         return 'QUEUED';
       case 'failed':
-        return 'FAILED';
       case 'reversed':
         return 'FAILED';
       default:
@@ -199,10 +249,27 @@ export class SnippePaymentProvider extends BasePaymentProvider {
     }
   }
 
+  private coercePhone(phone: string): string {
+    try {
+      return normalisePhone(phone);
+    } catch {
+      // normalisePhone throws on non-TZ numbers — pass through as-is
+      // for the API to reject with a clearer error
+      return phone;
+    }
+  }
+
   // ── Required Methods ─────────────────────────────────────────────
 
   async createOrder(payload: CreateOrderPayload): Promise<OrderResult> {
+    if (payload.amount < MIN_PAYMENT_TZS) {
+      throw new PesaValidationError(
+        `amount must be at least ${MIN_PAYMENT_TZS} TZS (got ${payload.amount})`,
+      );
+    }
+
     const isCard = !!payload.redirectUrl;
+    const phone = payload.customer.phone;
 
     const body: Record<string, unknown> = {
       payment_type: isCard ? 'card' : 'mobile',
@@ -211,15 +278,20 @@ export class SnippePaymentProvider extends BasePaymentProvider {
         currency: 'TZS',
         ...(isCard ? { redirect_url: payload.redirectUrl, cancel_url: payload.redirectUrl } : {}),
       },
-      phone_number: payload.customer.phone,
+      phone_number: this.coercePhone(phone),
       customer: {
         firstname: payload.customer.name.split(' ')[0] ?? payload.customer.name,
         lastname: payload.customer.name.split(' ').slice(1).join(' ') || '',
         email: payload.customer.email ?? '',
       },
-      webhook_url: payload.redirectUrl,
+      webhook_url: this.config.webhookUrl || undefined,
       metadata: payload.description ? { description: payload.description } : undefined,
     };
+
+    // Remove undefined fields — Snippe is strict about absent vs null
+    for (const key of Object.keys(body)) {
+      if (body[key] === undefined) delete body[key];
+    }
 
     const res = await this.request<SnippePayment>('POST', '/v1/payments', body);
 
@@ -317,6 +389,12 @@ export class SnippePaymentProvider extends BasePaymentProvider {
   }
 
   async disburse(payload: DisbursePayload): Promise<DisburseResult> {
+    if (payload.amount < MIN_PAYOUT_TZS) {
+      throw new PesaValidationError(
+        `amount must be at least ${MIN_PAYOUT_TZS} TZS for payouts (got ${payload.amount})`,
+      );
+    }
+
     const isBank = !!payload.recipient.accountNumber;
 
     const body: Record<string, unknown> = {
@@ -329,11 +407,16 @@ export class SnippePaymentProvider extends BasePaymentProvider {
             recipient_name: payload.recipient.name ?? '',
           }
         : {
-            recipient_phone: payload.recipient.phone,
+            recipient_phone: this.coercePhone(payload.recipient.phone ?? ''),
             recipient_name: payload.recipient.name ?? '',
           }),
       narration: payload.remarks ?? '',
+      webhook_url: this.config.webhookUrl || undefined,
     };
+
+    for (const key of Object.keys(body)) {
+      if (body[key] === undefined) delete body[key];
+    }
 
     const res = await this.request<SnippePayout>('POST', '/v1/payouts/send', body);
 
@@ -345,29 +428,24 @@ export class SnippePaymentProvider extends BasePaymentProvider {
     };
   }
 
-  // ── Optional Methods ─────────────────────────────────────────────
+  // ── Optional: Balances ───────────────────────────────────────────
 
   async getBalance(): Promise<BalanceResult> {
     const res = await this.request<SnippeBalance>('GET', '/v1/payments/balance');
     return {
-      balances: [
-        {
-          currency: 'TZS',
-          amount: res.available?.value ?? 0,
-        },
-      ],
+      balances: [{ currency: 'TZS', amount: res.available?.value ?? 0 }],
       raw: res,
     };
   }
 
+  // ── Optional: Order listing + search ─────────────────────────────
+
   async listOrders(params: ListOrdersParams): Promise<ListOrdersResult> {
     const query: Record<string, string> = {};
-    if (params.fromDate) {
-      query.from_date = params.fromDate.toISOString().slice(0, 10);
-    }
-    if (params.toDate) {
-      query.to_date = params.toDate.toISOString().slice(0, 10);
-    }
+    if (params.fromDate) query.from_date = params.fromDate.toISOString().slice(0, 10);
+    if (params.toDate) query.to_date = params.toDate.toISOString().slice(0, 10);
+    if (params.limit !== undefined) query.limit = String(params.limit);
+    if (params.offset !== undefined) query.offset = String(params.offset);
 
     const qs = new URLSearchParams(query).toString();
     const path = `/v1/payments${qs ? `?${qs}` : ''}`;
@@ -380,12 +458,14 @@ export class SnippePaymentProvider extends BasePaymentProvider {
         status: this.normalizeStatus(item.status),
         amount: item.amount?.value ?? 0,
         currency: 'TZS' as const,
-        createdAt: new Date(),
+        createdAt: new Date(item.expires_at ?? Date.now()),
         raw: item,
       })),
       total: res.length,
     };
   }
+
+  // ── Optional: Credentials ────────────────────────────────────────
 
   async validateCredentials(): Promise<{ valid: boolean; message?: string }> {
     try {
@@ -397,5 +477,86 @@ export class SnippePaymentProvider extends BasePaymentProvider {
         message: err instanceof Error ? err.message : 'Validation failed',
       };
     }
+  }
+
+  // ── Optional: USSD push retrigger ────────────────────────────────
+
+  /**
+   * Re-send the USSD push prompt for a pending mobile payment.
+   * Returns the updated payment object.
+   */
+  async retriggerPush(reference: string): Promise<OrderResult> {
+    const res = await this.request<SnippePayment>(
+      'POST',
+      `/v1/payments/${encodeURIComponent(reference)}/push`,
+    );
+
+    return {
+      orderId: res.reference,
+      reference,
+      status: this.normalizeStatus(res.status),
+      checkoutUrl: res.payment_url,
+      raw: res,
+    };
+  }
+
+  // ── Optional: Name lookup ────────────────────────────────────────
+
+  async getNameLookup(phoneOrAccount: string): Promise<NameLookupResult> {
+    try {
+      // Use the search endpoint to find payments for this phone number.
+      // This is a lightweight probe — if the number has been seen by
+      // Snippe before, the customer name will be in the response.
+      const qs = new URLSearchParams({ phone_number: phoneOrAccount, limit: '1' });
+      const res = await this.request<SnippePayment[]>(
+        'GET',
+        `/v1/payments/search?${qs.toString()}`,
+      );
+
+      const match = (Array.isArray(res) ? res : []).find(
+        (p) => (p as SnippePayment & { customer?: { phone?: string } }).amount,
+      );
+
+      return {
+        found: !!match,
+        accountNumber: phoneOrAccount,
+        raw: res,
+      };
+    } catch {
+      return { found: false, accountNumber: phoneOrAccount };
+    }
+  }
+
+  // ── Optional: Payout fee preview ─────────────────────────────────
+
+  async previewDisburse(payload: DisbursePayload): Promise<PreviewResult> {
+    const qs = new URLSearchParams({ amount: String(payload.amount) });
+    const res = await this.request<SnippePayoutFee>('GET', `/v1/payouts/fee?${qs.toString()}`);
+
+    return {
+      valid: true,
+      fee: res.feeAmount,
+      message: `Fee: TZS ${res.feeAmount} / Total: TZS ${res.totalAmount}`,
+      raw: res,
+    };
+  }
+
+  // ── Optional: Refund (void a payment) ────────────────────────────
+
+  async refund(orderId: string, _amount?: number): Promise<RefundResult> {
+    // Snippe doesn't have a dedicated refund endpoint, but voiding a
+    // pending payment has the same effect for most use cases.
+    const res = await this.request<SnippePayment>(
+      'DELETE',
+      `/v1/payments/${encodeURIComponent(orderId)}`,
+    );
+
+    return {
+      refundId: res.reference,
+      orderId,
+      amount: _amount ?? res.amount?.value ?? 0,
+      status: this.normalizeStatus(res.status) === 'CANCELLED' ? 'SUCCESS' : 'FAILED',
+      raw: res,
+    };
   }
 }

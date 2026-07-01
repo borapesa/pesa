@@ -2,7 +2,7 @@
 title: "Abstract Class: BasePaymentProvider"
 ---
 
-Defined in: [packages/pesa/src/providers/base.ts:75](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L75)
+Defined in: [packages/pesa/src/providers/base.ts:75](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L75)
 
 Abstract base class every provider adapter must implement.
 
@@ -77,7 +77,7 @@ new BasePaymentProvider(): BasePaymentProvider;
 
 | Property | Modifier | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="name"></a> `name` | `abstract` | [`ProviderName`](../type-aliases/ProviderName) | Unique provider identifier. | [packages/pesa/src/providers/base.ts:77](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L77) |
+| <a id="name"></a> `name` | `abstract` | [`ProviderName`](../type-aliases/ProviderName) | Unique provider identifier. | [packages/pesa/src/providers/base.ts:77](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L77) |
 
 ## Methods
 
@@ -87,7 +87,7 @@ new BasePaymentProvider(): BasePaymentProvider;
 optional cancelOrder(_orderId): Promise<CancelOrderResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:132](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L132)
+Defined in: [packages/pesa/src/providers/base.ts:132](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L132)
 
 Cancel a pending or in-progress order.
 
@@ -115,7 +115,7 @@ Cancel a pending or in-progress order.
 abstract createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:88](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L88)
+Defined in: [packages/pesa/src/providers/base.ts:88](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L88)
 
 Initiate a checkout / USSD push / redirect.
 
@@ -141,7 +141,7 @@ and `customer.phone` is in MSISDN format.
 abstract disburse(payload): Promise<DisburseResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:114](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L114)
+Defined in: [packages/pesa/src/providers/base.ts:114](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L114)
 
 B2C / wallet-out disbursement.
 
@@ -165,7 +165,7 @@ The SDK calls `validateDisbursePayload()` before this.
 optional getBalance(): Promise<BalanceResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:160](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L160)
+Defined in: [packages/pesa/src/providers/base.ts:160](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L160)
 
 Retrieve available balances across all active currencies.
 
@@ -197,7 +197,7 @@ data for advanced use.
 optional getNameLookup(_phoneOrAccount): Promise<NameLookupResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:191](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L191)
+Defined in: [packages/pesa/src/providers/base.ts:191](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L191)
 
 Resolve the account holder name for a phone or account number.
 
@@ -227,7 +227,7 @@ Useful for verifying recipient identity before disbursing.
 abstract getPaymentStatus(orderId): Promise<PaymentStatus>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:91](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L91)
+Defined in: [packages/pesa/src/providers/base.ts:91](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L91)
 
 Poll or fetch the current payment status for an order.
 
@@ -249,7 +249,7 @@ Poll or fetch the current payment status for an order.
 abstract handleWebhook(rawBody, headers): Promise<PaymentEvent>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:104](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L104)
+Defined in: [packages/pesa/src/providers/base.ts:104](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L104)
 
 Parse + verify an incoming webhook.
 
@@ -280,7 +280,7 @@ and user-registered handler emission after this method returns.
 optional listOrders(_params): Promise<ListOrdersResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:200](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L200)
+Defined in: [packages/pesa/src/providers/base.ts:200](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L200)
 
 List payment orders for a date range.
 
@@ -308,7 +308,7 @@ List payment orders for a date range.
 optional previewDisburse(_payload): Promise<PreviewResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:180](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L180)
+Defined in: [packages/pesa/src/providers/base.ts:180](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L180)
 
 Preview / dry-run a disbursement before committing.
 
@@ -336,7 +336,7 @@ Preview / dry-run a disbursement before committing.
 optional previewOrder(_payload): Promise<PreviewResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:171](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L171)
+Defined in: [packages/pesa/src/providers/base.ts:171](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L171)
 
 Preview / dry-run a payment before committing.
 
@@ -366,7 +366,7 @@ Returns expected fees and validity without charging the customer.
 optional refund(_orderId, _amount?): Promise<RefundResult>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:123](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L123)
+Defined in: [packages/pesa/src/providers/base.ts:123](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L123)
 
 Refund a completed payment.
 
@@ -398,7 +398,7 @@ optional validateCredentials(): Promise<{
 }>;
 ```
 
-Defined in: [packages/pesa/src/providers/base.ts:144](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/providers/base.ts#L144)
+Defined in: [packages/pesa/src/providers/base.ts:144](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/providers/base.ts#L144)
 
 Validate that a provider config works (health check).
 

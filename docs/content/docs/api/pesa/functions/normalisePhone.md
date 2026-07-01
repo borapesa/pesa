@@ -6,7 +6,7 @@ title: "Function: normalisePhone()"
 function normalisePhone(input): string;
 ```
 
-Defined in: [packages/pesa/src/validate.ts:22](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/packages/pesa/src/validate.ts#L22)
+Defined in: [packages/pesa/src/validate.ts:22](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/validate.ts#L22)
 
 Normalise a Tanzania phone number to canonical MSISDN format (255XXXXXXXXX).
 

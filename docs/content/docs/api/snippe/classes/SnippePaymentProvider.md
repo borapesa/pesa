@@ -2,7 +2,7 @@
 title: "Class: SnippePaymentProvider"
 ---
 
-Defined in: providers/snippe/src/snippe.ts:90
+Defined in: [providers/snippe/src/snippe.ts:90](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L90)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: providers/snippe/src/snippe.ts:90
 new SnippePaymentProvider(config): SnippePaymentProvider;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:95
+Defined in: [providers/snippe/src/snippe.ts:95](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L95)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ BasePaymentProvider.constructor
 
 | Property | Modifier | Type | Default value | Description | Overrides | Defined in |
 | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
-| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'snippe'` | Unique provider identifier. | `BasePaymentProvider.name` | providers/snippe/src/snippe.ts:91 |
+| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'snippe'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/snippe/src/snippe.ts:91](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L91) |
 
 ## Methods
 
@@ -82,7 +82,7 @@ BasePaymentProvider.cancelOrder
 createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:204
+Defined in: [providers/snippe/src/snippe.ts:204](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L204)
 
 Initiate a checkout / USSD push / redirect.
 
@@ -114,7 +114,7 @@ BasePaymentProvider.createOrder
 disburse(payload): Promise<DisburseResult>;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:321
+Defined in: [providers/snippe/src/snippe.ts:319](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L319)
 
 B2C / wallet-out disbursement.
 
@@ -144,7 +144,7 @@ BasePaymentProvider.disburse
 getBalance(): Promise<BalanceResult>;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:352
+Defined in: [providers/snippe/src/snippe.ts:350](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L350)
 
 Retrieve available balances across all active currencies.
 
@@ -218,7 +218,7 @@ BasePaymentProvider.getNameLookup
 getPaymentStatus(orderId): Promise<PaymentStatus>;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:237
+Defined in: [providers/snippe/src/snippe.ts:235](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L235)
 
 Poll or fetch the current payment status for an order.
 
@@ -246,7 +246,7 @@ BasePaymentProvider.getPaymentStatus
 handleWebhook(rawBody, headers): Promise<PaymentEvent>;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:247
+Defined in: [providers/snippe/src/snippe.ts:248](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L248)
 
 Parse + verify an incoming webhook.
 
@@ -283,7 +283,7 @@ BasePaymentProvider.handleWebhook
 listOrders(params): Promise<ListOrdersResult>;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:365
+Defined in: [providers/snippe/src/snippe.ts:363](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L363)
 
 List payment orders for a date range.
 
@@ -425,7 +425,7 @@ validateCredentials(): Promise<{
 }>;
 ```
 
-Defined in: providers/snippe/src/snippe.ts:392
+Defined in: [providers/snippe/src/snippe.ts:390](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/providers/snippe/src/snippe.ts#L390)
 
 Validate that a provider config works (health check).
 

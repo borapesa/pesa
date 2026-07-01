@@ -2,7 +2,7 @@
 title: "Class: SQLiteAdapter"
 ---
 
-Defined in: [adapters/sqlite/src/index.ts:19](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/adapters/sqlite/src/index.ts#L19)
+Defined in: [adapters/sqlite/src/index.ts:19](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/adapters/sqlite/src/index.ts#L19)
 
 SQLite event store adapter powered by better-sqlite3.
 
@@ -30,7 +30,7 @@ const pesa = createPesa({
 new SQLiteAdapter(dbPath?): SQLiteAdapter;
 ```
 
-Defined in: [adapters/sqlite/src/index.ts:23](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/adapters/sqlite/src/index.ts#L23)
+Defined in: [adapters/sqlite/src/index.ts:23](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/adapters/sqlite/src/index.ts#L23)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [adapters/sqlite/src/index.ts:23](https://github.com/borapesa/pesa/b
 getEvent(id): Promise<PaymentEvent | null>;
 ```
 
-Defined in: [adapters/sqlite/src/index.ts:72](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/adapters/sqlite/src/index.ts#L72)
+Defined in: [adapters/sqlite/src/index.ts:72](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/adapters/sqlite/src/index.ts#L72)
 
 Retrieve a single event by its UUID.
 
@@ -78,7 +78,7 @@ PesaDatabaseAdapter.getEvent
 getEventsByOrderId(orderId): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [adapters/sqlite/src/index.ts:88](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/adapters/sqlite/src/index.ts#L88)
+Defined in: [adapters/sqlite/src/index.ts:88](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/adapters/sqlite/src/index.ts#L88)
 
 Retrieve all events for a given provider order ID.
 
@@ -106,7 +106,7 @@ PesaDatabaseAdapter.getEventsByOrderId
 getEventsByReference(reference): Promise<PaymentEvent[]>;
 ```
 
-Defined in: [adapters/sqlite/src/index.ts:80](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/adapters/sqlite/src/index.ts#L80)
+Defined in: [adapters/sqlite/src/index.ts:80](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/adapters/sqlite/src/index.ts#L80)
 
 Retrieve all events for a given merchant reference.
 
@@ -134,7 +134,7 @@ PesaDatabaseAdapter.getEventsByReference
 saveEvent(event): Promise<void>;
 ```
 
-Defined in: [adapters/sqlite/src/index.ts:51](https://github.com/borapesa/pesa/blob/f7f1079d11b2fc8432fd4be7b3c2a35c6c7f87ee/adapters/sqlite/src/index.ts#L51)
+Defined in: [adapters/sqlite/src/index.ts:51](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/adapters/sqlite/src/index.ts#L51)
 
 Persist a verified PaymentEvent.
 
