@@ -82,6 +82,7 @@ The signing string is built as `timestamp=<ts>&field1=val1&field2=val2...` with 
 | `senderAccount` | `string` | ❌ | Source account for Qwiksend bank transfers |
 | `senderName` | `string` | ❌ | Account holder display name for bank transfers |
 | `senderPhone` | `string` | ❌ | Sender mobile number for bank transfers |
+| `redirectUrl` | `string` | ❌ | Default redirect URL for checkout orders. Overridable per-payment via `payload.redirectUrl` |
 
 ## Supported Operations
 

@@ -50,9 +50,11 @@ const order = await pesa.createOrder({
 | `@borapesa/selcom`    | Selcom provider adapter                           |
 | `@borapesa/azampay`   | AzamPay provider adapter                          |
 | `@borapesa/clickpesa` | ClickPesa provider adapter                        |
+| `@borapesa/snippe`    | Snippe provider adapter                           |
 | `@borapesa/dpo`       | DPO provider adapter (planned)                    |
 | `@borapesa/pesapal`   | Pesapal provider adapter (planned)                |
 | `@borapesa/sqlite`    | SQLite event store adapter                        |
+| `@borapesa/devtools`  | Developer tools (cloudflared tunnel)              |
 
 ## Quick Start
 

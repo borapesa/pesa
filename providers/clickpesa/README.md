@@ -45,6 +45,7 @@ const status = await pesa.getPaymentStatus(order.orderId);
 | `sandbox` | `boolean` | ❌ | Target sandbox environment (`api-sandbox.clickpesa.com`) |
 | `baseUrl` | `string` | ❌ | Override base URL (takes precedence over `sandbox`) |
 | `checksumKey` | `string` | ❌ | HMAC-SHA256 secret for request signing + webhook verification |
+| `redirectUrl` | `string` | ❌ | Default redirect URL for hosted checkout. Overridable per-payment via `payload.redirectUrl` |
 
 ## Auth
 

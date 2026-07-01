@@ -50,13 +50,15 @@ import { ClickPesaProvider } from '@borapesa/clickpesa'
 | `checksumKey` |          | HMAC-SHA256 signing key for webhook verification. Generate in the ClickPesa dashboard. When set, all POST/PUT/PATCH bodies are signed and incoming webhooks are verified. **Without it, webhooks are accepted unverified.** |
 | `sandbox`     |          | `true` → `https://api-sandbox.clickpesa.com`. `false` (default) → `https://api.clickpesa.com`.                                                                                                                              |
 | `baseUrl`     |          | Explicit base URL override — takes precedence over `sandbox`.                                                                                                                                                               |
+| `redirectUrl` |          | Default redirect URL for hosted checkout. Overridable per-payment via `payload.redirectUrl`.                                                                                                                                 |
 
 ```ts
 const pesa = createPesa({
   provider: new ClickPesaProvider({
-    clientId: process.env.CLICKPESA_CLIENT_ID!,
-    apiKey: process.env.CLICKPESA_API_KEY!,
-    sandbox: false,
+    clientId:    process.env.CLICKPESA_CLIENT_ID!,
+    apiKey:      process.env.CLICKPESA_API_KEY!,
+    sandbox:     false,
+    redirectUrl: 'https://mysite.com/success',
   }),
 })
 ```
@@ -77,14 +79,16 @@ import { SelcomPaymentProvider } from '@borapesa/selcom'
 | `senderAccount` |          | Source account number for Qwiksend bank transfers. Defaults to `vendor`.          |
 | `senderName`    |          | Account holder display name for bank transfers. Defaults to `vendor`.             |
 | `senderPhone`   |          | Sender mobile number for bank transfers.                                          |
+| `redirectUrl`   |          | Default redirect URL for checkout orders. Overridable per-payment via `payload.redirectUrl`. |
 
 ```ts
 const pesa = createPesa({
   provider: new SelcomPaymentProvider({
-    apiKey: process.env.SELCOM_API_KEY!,
-    apiSecret: process.env.SELCOM_API_SECRET!,
-    vendor: process.env.SELCOM_VENDOR!,
-    pin: process.env.SELCOM_PIN!,
+    apiKey:      process.env.SELCOM_API_KEY!,
+    apiSecret:   process.env.SELCOM_API_SECRET!,
+    vendor:      process.env.SELCOM_VENDOR!,
+    pin:         process.env.SELCOM_PIN!,
+    redirectUrl: 'https://mysite.com/return',
   }),
 })
 ```
@@ -132,12 +136,19 @@ import { SnippePaymentProvider } from '@borapesa/snippe'
 | `apiKey`        | ✅       | Snippe API key (`snp_...`) from the Snippe dashboard                                                     |
 | `webhookSecret` | ✅       | HMAC-SHA256 signing key for webhook verification. Found in Snippe dashboard → Settings → Webhook Secret. |
 | `baseUrl`       |          | Defaults to `https://api.snippe.sh`. Override for proxies or staging.                                    |
+| `webhookUrl`    |          | Default webhook URL set on create/disburse calls. Provider callbacks POST here.                          |
+| `redirectUrl`   |          | Default redirect URL for card payments. Overridable per-payment via `payload.redirectUrl`.              |
+| `cancelUrl`     |          | Cancel URL for card payments. Falls back to `redirectUrl` if not set.                                   |
+| `timeoutMs`     |          | Request timeout in milliseconds (default: 30_000).                                                       |
 
 ```ts
 const pesa = createPesa({
   provider: new SnippePaymentProvider({
-    apiKey: process.env.SNIPPE_API_KEY!,
+    apiKey:        process.env.SNIPPE_API_KEY!,
     webhookSecret: process.env.SNIPPE_WEBHOOK_SECRET!,
+    webhookUrl:    'https://mysite.com/pesa/webhook',
+    redirectUrl:   'https://mysite.com/success',
+    cancelUrl:     'https://mysite.com/cancelled',
   }),
 })
 ```
@@ -169,11 +180,13 @@ Some providers expose methods beyond the standard `BasePaymentProvider` interfac
 
 ### Snippe
 
-- **Card payments** — `createOrder` with `redirectUrl` routes to Snippe's card endpoint (Visa/Mastercard). Returns `checkoutUrl` for the payment page.
-- **Hosted checkout** — without `redirectUrl`, `createOrder` routes to mobile money USSD push.
-- **Balance query** — `getBalance()` returns available and total TZS balances.
-- **Order listing** — `listOrders()` supports date-range filtering for reconciliation.
-- **Credential validation** — `validateCredentials()` checks API key by calling the balance endpoint.
+- **Card payments** — `createOrder` with `redirectUrl` (config or payload) routes to Snippe's card endpoint (Visa/Mastercard). Returns `checkoutUrl` for the payment page.
+- **Hosted checkout sessions** — `createCheckoutSession()` / `getCheckoutSession()` / `listCheckoutSessions()` / `cancelCheckoutSession()` provider-specific methods for Snippe's hosted payment page. Returns `checkoutUrl` + `paymentLinkUrl` for sharing via SMS/WhatsApp.
+- **USSD push retrigger** — `retriggerPush(reference)` re-sends the PIN prompt for a pending mobile payment.
+- **Payout fee preview** — `previewDisburse()` returns the transaction fee before committing a payout.
+- **Search** — `listOrders()` accepts optional Snippe-specific filters: `status`, `paymentType`, and free-text `q`.
+- **Payout failure reason** — `raw.failure_reason` on failed disbursements for debugging.
+- **HMAC webhook verification** — signature verification with replay protection (5-minute window).
 
 ## Writing a provider
 
