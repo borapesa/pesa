@@ -1,5 +1,14 @@
 # @borapesa/azampay
 
+## 0.1.5
+
+### Patch Changes
+
+- - AzamPay status query, retry on network errors, remove dead webhook secret
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.0
+
 ## 0.1.4
 
 ### Patch Changes

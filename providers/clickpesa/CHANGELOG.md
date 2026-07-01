@@ -1,5 +1,16 @@
 # @borapesa/clickpesa
 
+## 0.3.0
+
+### Minor Changes
+
+- - add redirectUrl to provider config
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.0
+
 ## 0.2.5
 
 ### Patch Changes

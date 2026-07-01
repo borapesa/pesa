@@ -1,6 +1,6 @@
 {
   "name": "@borapesa/clickpesa",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "ClickPesa provider adapter for Bora Pesa",
   "license": "MIT",
   "author": "Bora Pesa contributors",
