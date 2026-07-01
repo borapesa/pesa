@@ -42,10 +42,20 @@ export interface SnippeConfig {
   baseUrl?: string;
   /**
    * Default webhook URL applied to createOrder / disburse when the
-   * caller doesn't provide one.  Set this so you don't have to pass it
-   * on every call.  Provider callbacks POST here.
+   * caller doesn't provide one.  Provider callbacks POST here.
    */
   webhookUrl?: string;
+  /**
+   * Default redirect URL for card payments.  The customer is sent here
+   * after completing payment.  Overridable per-payment via
+   * {@link CreateOrderPayload.redirectUrl}.
+   */
+  redirectUrl?: string;
+  /**
+   * Cancel URL for card payments.  The customer is sent here if they
+   * abandon the checkout.
+   */
+  cancelUrl?: string;
   /** Request timeout in milliseconds (default: 30_000). */
   timeoutMs?: number;
 }
@@ -122,6 +132,8 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       webhookSecret: config.webhookSecret,
       baseUrl: (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, ''),
       webhookUrl: config.webhookUrl ?? '',
+      redirectUrl: config.redirectUrl ?? '',
+      cancelUrl: config.cancelUrl ?? config.redirectUrl ?? '',
       timeoutMs: config.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     };
   }
@@ -268,7 +280,9 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       );
     }
 
-    const isCard = !!payload.redirectUrl;
+    // Card payment when either config or payload provides a redirect URL
+    const redirectUrl = payload.redirectUrl || this.config.redirectUrl;
+    const isCard = !!redirectUrl;
     const phone = payload.customer.phone;
 
     const body: Record<string, unknown> = {
@@ -276,7 +290,7 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       details: {
         amount: payload.amount,
         currency: 'TZS',
-        ...(isCard ? { redirect_url: payload.redirectUrl, cancel_url: payload.redirectUrl } : {}),
+        ...(isCard ? { redirect_url: redirectUrl, cancel_url: this.config.cancelUrl } : {}),
       },
       phone_number: this.coercePhone(phone),
       customer: {
@@ -440,15 +454,34 @@ export class SnippePaymentProvider extends BasePaymentProvider {
 
   // ── Optional: Order listing + search ─────────────────────────────
 
-  async listOrders(params: ListOrdersParams): Promise<ListOrdersResult> {
+  async listOrders(
+    params: ListOrdersParams & {
+      /** Snippe-specific: filter by payment status. */
+      status?: string;
+      /** Snippe-specific: filter by payment type ('mobile' | 'card'). */
+      paymentType?: string;
+      /** Snippe-specific: search by phone number, reference, or free text. */
+      q?: string;
+    },
+  ): Promise<ListOrdersResult> {
     const query: Record<string, string> = {};
+
+    // Standard ListOrdersParams
     if (params.fromDate) query.from_date = params.fromDate.toISOString().slice(0, 10);
     if (params.toDate) query.to_date = params.toDate.toISOString().slice(0, 10);
     if (params.limit !== undefined) query.limit = String(params.limit);
     if (params.offset !== undefined) query.offset = String(params.offset);
 
+    // Snippe-specific search filters
+    if (params.status) query.status = params.status;
+    if (params.paymentType) query.payment_type = params.paymentType;
+    if (params.q) query.q = params.q;
+
+    // Use the search endpoint when free-text query is present; list otherwise
+    const isSearch = !!params.q;
+    const basePath = isSearch ? '/v1/payments/search' : '/v1/payments';
     const qs = new URLSearchParams(query).toString();
-    const path = `/v1/payments${qs ? `?${qs}` : ''}`;
+    const path = `${basePath}${qs ? `?${qs}` : ''}`;
     const res = await this.request<SnippePayment[]>('GET', path);
 
     return {
@@ -559,4 +592,88 @@ export class SnippePaymentProvider extends BasePaymentProvider {
       raw: res,
     };
   }
+
+  // ── Provider-specific: Checkout Sessions ──────────────────────────
+  //
+  // Snippe's hosted checkout renders the payment UI on its own page,
+  // handling method selection (mobile money, card) automatically.
+  // Use these directly on pesa.provider — they are not part of the
+  // unified PesaInstance API.
+
+  /**
+   * Create a hosted checkout session.
+   *
+   * Returns a `checkoutUrl` for embedding and a `paymentLinkUrl` for
+   * sharing via SMS / WhatsApp.  The session expires after `expiresIn`
+   * seconds (default 3600).
+   */
+  async createCheckoutSession(params: {
+    amount: number;
+    redirectUrl?: string;
+    description?: string;
+    expiresIn?: number;
+    metadata?: Record<string, unknown>;
+  }): Promise<SnippeCheckoutSession> {
+    const body: Record<string, unknown> = {
+      currency: 'TZS',
+      amount: params.amount,
+      redirectUrl: (params.redirectUrl ?? this.config.redirectUrl) || undefined,
+      webhookUrl: this.config.webhookUrl || undefined,
+      description: params.description,
+      expiresIn: params.expiresIn ?? 3600,
+      metadata: params.metadata,
+    };
+
+    for (const key of Object.keys(body)) {
+      if (body[key] === undefined) delete body[key];
+    }
+
+    const res = await this.request<SnippeCheckoutSession>('POST', '/api/v1/sessions', body);
+    return res;
+  }
+
+  /** Fetch a checkout session by reference. */
+  async getCheckoutSession(reference: string): Promise<SnippeCheckoutSession> {
+    return this.request<SnippeCheckoutSession>(
+      'GET',
+      `/api/v1/sessions/${encodeURIComponent(reference)}`,
+    );
+  }
+
+  /** List checkout sessions (paginated). */
+  async listCheckoutSessions(params?: {
+    limit?: number;
+    offset?: number;
+    status?: string;
+  }): Promise<SnippeCheckoutSession[]> {
+    const query: Record<string, string> = {};
+    if (params?.limit !== undefined) query.limit = String(params.limit);
+    if (params?.offset !== undefined) query.offset = String(params.offset);
+    if (params?.status) query.status = params.status;
+
+    const qs = new URLSearchParams(query).toString();
+    const path = `/api/v1/sessions${qs ? `?${qs}` : ''}`;
+    return this.request<SnippeCheckoutSession[]>('GET', path);
+  }
+
+  /** Cancel a pending or active checkout session. */
+  async cancelCheckoutSession(reference: string): Promise<SnippeCheckoutSession> {
+    return this.request<SnippeCheckoutSession>(
+      'POST',
+      `/api/v1/sessions/${encodeURIComponent(reference)}/cancel`,
+    );
+  }
+}
+
+/** A Snippe hosted checkout session. */
+export interface SnippeCheckoutSession {
+  reference: string;
+  status: 'pending' | 'active' | 'completed' | 'expired' | 'cancelled';
+  amount?: number;
+  currency: 'TZS';
+  checkoutUrl: string;
+  shortCode: string;
+  paymentLinkUrl: string;
+  expiresAt: string;
+  metadata?: Record<string, unknown>;
 }
