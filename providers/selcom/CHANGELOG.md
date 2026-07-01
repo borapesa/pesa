@@ -1,5 +1,18 @@
 # @borapesa/selcom
 
+## 0.2.0
+
+### Minor Changes
+
+- - add provider-specific methods for all Selcom APIs
+  - separate webhook/redirect URLs, correct push status query
+  - add redirectUrl to provider config
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.0
+
 ## 0.1.4
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @borapesa/pesa
 
+## 0.6.0
+
+### Minor Changes
+
+- - add Snippe payment provider (@borapesa/snippe)
+  - AzamPay status query, retry on network errors, remove dead webhook secret
+
 ## 0.5.0
 
 ### Minor Changes
