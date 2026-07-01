@@ -6,7 +6,7 @@ title: "Function: createPesaWebhookHandler()"
 function createPesaWebhookHandler(pesa, basePath?): (request) => Promise<Response>;
 ```
 
-Defined in: [packages/pesa/src/handler.ts:26](https://github.com/borapesa/pesa/blob/5a6826bdcf9bdf66e849b708b5bc0fddc6567473/packages/pesa/src/handler.ts#L26)
+Defined in: [packages/pesa/src/handler.ts:26](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/packages/pesa/src/handler.ts#L26)
 
 Creates a webhook handler — the one route that must be publicly exposed.
 

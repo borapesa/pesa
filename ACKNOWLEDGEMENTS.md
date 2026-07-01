@@ -52,6 +52,8 @@ The provider adapters integrate with the following Tanzanian payment gateways. C
   - [JAXPARROW/clickpesa-python-sdk](https://github.com/JAXPARROW/clickpesa-python-sdk) — Python SDK.
 - [**Selcom**](https://selcom.net) — USSD push, Qwiksend bank payouts, and checkout APIs.
   - [selcompaytechltd/selcom-apigw-client-nodejs](https://github.com/selcompaytechltd/selcom-apigw-client-nodejs) — Official Node.js API client.
+- [**Snippe**](https://snippe.sh) — Mobile money, card payments, hosted checkout sessions, and disbursement APIs.
+  - [Neurotech-HQ/snippe-js-sdk](https://github.com/Neurotech-HQ/snippe-js-sdk) — Official Node.js SDK (`@snippe/sdk`). Referenced as the canonical implementation for field names, envelope handling, HMAC webhook verification, status mapping, and idempotency key format in the `@borapesa/snippe` provider.
 
 ## Development
 
