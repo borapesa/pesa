@@ -62,8 +62,6 @@ const order = await pesa.createOrder({
 pnpm add @borapesa/pesa @borapesa/selcom
 ```
 
-See [examples/](./examples/) for full working integrations.
-
 ## Documentation
 
 Full docs at [borapesa.dev](https://borapesa.dev).
