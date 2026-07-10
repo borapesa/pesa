@@ -2,7 +2,7 @@
 title: "Class: SelcomPaymentProvider"
 ---
 
-Defined in: [providers/selcom/src/selcom.ts:76](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L76)
+Defined in: [providers/selcom/src/selcom.ts:87](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L87)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [providers/selcom/src/selcom.ts:76](https://github.com/borapesa/pesa
 new SelcomPaymentProvider(config): SelcomPaymentProvider;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:86](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L86)
+Defined in: [providers/selcom/src/selcom.ts:113](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L113)
 
 #### Parameters
 
@@ -38,9 +38,49 @@ BasePaymentProvider.constructor
 
 | Property | Modifier | Type | Default value | Description | Overrides | Defined in |
 | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
-| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'selcom'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/selcom/src/selcom.ts:77](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L77) |
+| <a id="name"></a> `name` | `readonly` | `ProviderName` | `'selcom'` | Unique provider identifier. | `BasePaymentProvider.name` | [providers/selcom/src/selcom.ts:88](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L88) |
 
 ## Methods
+
+### agentCashout()
+
+```ts
+agentCashout(
+   msisdn, 
+   amount, 
+   name?): Promise<{
+  message: string;
+  reference: string;
+  status: string;
+  transid: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:868](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L868)
+
+Send funds to a customer for cash pickup at any Selcom Huduma agent.
+
+The customer dials `*150*50#`, selects Huduma Cashout, enters the
+agent code and amount to complete the withdrawal.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `msisdn` | `string` | — customer mobile number (receives the cashout token). |
+| `amount` | `number` | — amount in TZS. |
+| `name?` | `string` | — customer name (optional). |
+
+#### Returns
+
+`Promise`\<\{
+  `message`: `string`;
+  `reference`: `string`;
+  `status`: `string`;
+  `transid`: `string`;
+\}\>
+
+***
 
 ### cancelOrder()
 
@@ -52,7 +92,7 @@ cancelOrder(orderId): Promise<{
 }>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:497](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L497)
+Defined in: [providers/selcom/src/selcom.ts:558](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L558)
 
 Cancel a pending or in-progress order.
 
@@ -84,13 +124,48 @@ BasePaymentProvider.cancelOrder
 
 ***
 
+### checkoutWalletPayment()
+
+```ts
+checkoutWalletPayment(orderId, msisdn): Promise<{
+  reference: string;
+  status: string;
+  transid: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:672](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L672)
+
+Trigger a USSD push from an existing checkout order.
+
+Use this for in-app payments where the customer is already on your
+checkout page and you want to trigger a mobile money PIN prompt
+without redirecting to Selcom's payment gateway.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `orderId` | `string` |
+| `msisdn` | `string` |
+
+#### Returns
+
+`Promise`\<\{
+  `reference`: `string`;
+  `status`: `string`;
+  `transid`: `string`;
+\}\>
+
+***
+
 ### createOrder()
 
 ```ts
 createOrder(payload): Promise<OrderResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:235](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L235)
+Defined in: [providers/selcom/src/selcom.ts:264](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L264)
 
 Initiate a checkout / USSD push / redirect.
 
@@ -116,13 +191,42 @@ BasePaymentProvider.createOrder
 
 ***
 
+### deleteStoredCard()
+
+```ts
+deleteStoredCard(id, gatewayBuyerUuid): Promise<{
+  message: string;
+  status: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:942](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L942)
+
+Delete a stored card token.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `id` | `string` |
+| `gatewayBuyerUuid` | `string` |
+
+#### Returns
+
+`Promise`\<\{
+  `message`: `string`;
+  `status`: `string`;
+\}\>
+
+***
+
 ### disburse()
 
 ```ts
 disburse(payload): Promise<DisburseResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:317](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L317)
+Defined in: [providers/selcom/src/selcom.ts:378](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L378)
 
 B2C / wallet-out disbursement.
 
@@ -146,13 +250,54 @@ BasePaymentProvider.disburse
 
 ***
 
+### fetchStoredCards()
+
+```ts
+fetchStoredCards(gatewayBuyerUuid, buyerUserid): Promise<{
+  cards: {
+     cardToken: string;
+     cardType: string;
+     creationDate: string;
+     id: string;
+     maskedCard: string;
+     name: string;
+  }[];
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:909](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L909)
+
+Fetch stored (tokenized) cards for a buyer.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `gatewayBuyerUuid` | `string` | — returned from the first create-order call for this buyer (`raw.data[0].gateway_buyer_uuid`). |
+| `buyerUserid` | `string` | — your internal user ID for the buyer. |
+
+#### Returns
+
+`Promise`\<\{
+  `cards`: \{
+     `cardToken`: `string`;
+     `cardType`: `string`;
+     `creationDate`: `string`;
+     `id`: `string`;
+     `maskedCard`: `string`;
+     `name`: `string`;
+  \}[];
+\}\>
+
+***
+
 ### getBalance()
 
 ```ts
 getBalance(): Promise<BalanceResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:541](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L541)
+Defined in: [providers/selcom/src/selcom.ts:602](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L602)
 
 Retrieve available balances across all active currencies.
 
@@ -190,7 +335,7 @@ BasePaymentProvider.getBalance
 getNameLookup(phoneOrAccount): Promise<NameLookupResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:562](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L562)
+Defined in: [providers/selcom/src/selcom.ts:623](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L623)
 
 Resolve the account holder name for a phone or account number.
 
@@ -226,7 +371,7 @@ BasePaymentProvider.getNameLookup
 getPaymentStatus(orderId): Promise<PaymentStatus>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:303](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L303)
+Defined in: [providers/selcom/src/selcom.ts:353](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L353)
 
 Poll or fetch the current payment status for an order.
 
@@ -254,7 +399,7 @@ BasePaymentProvider.getPaymentStatus
 handleWebhook(rawBody, headers): Promise<PaymentEvent>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:424](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L424)
+Defined in: [providers/selcom/src/selcom.ts:485](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L485)
 
 Parse + verify an incoming webhook.
 
@@ -291,7 +436,7 @@ BasePaymentProvider.handleWebhook
 listOrders(params): Promise<ListOrdersResult>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:511](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L511)
+Defined in: [providers/selcom/src/selcom.ts:572](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L572)
 
 List payment orders for a date range.
 
@@ -316,6 +461,79 @@ List payment orders for a date range.
 ```ts
 BasePaymentProvider.listOrders
 ```
+
+***
+
+### lookupUtility()
+
+```ts
+lookupUtility(utilitycode, utilityref): Promise<{
+  data: unknown[];
+  message: string;
+  reference: string;
+  status: string;
+  transid: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:743](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L743)
+
+Look up a utility account before payment.
+
+Returns the account holder name and (for some utilities) amount due.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `utilitycode` | `string` |
+| `utilityref` | `string` |
+
+#### Returns
+
+`Promise`\<\{
+  `data`: `unknown`[];
+  `message`: `string`;
+  `reference`: `string`;
+  `status`: `string`;
+  `transid`: `string`;
+\}\>
+
+***
+
+### payUtility()
+
+```ts
+payUtility(params): Promise<{
+  message: string;
+  reference: string;
+  status: string;
+  transid: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:705](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L705)
+
+Pay a utility bill (electricity, water, TV, airtime, etc.).
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `params` | \{ `amount`: `number`; `msisdn?`: `string`; `utilitycode`: `string`; `utilityref`: `string`; \} |
+| `params.amount` | `number` |
+| `params.msisdn?` | `string` |
+| `params.utilitycode` | `string` |
+| `params.utilityref` | `string` |
+
+#### Returns
+
+`Promise`\<\{
+  `message`: `string`;
+  `reference`: `string`;
+  `status`: `string`;
+  `transid`: `string`;
+\}\>
 
 ***
 
@@ -389,6 +607,38 @@ BasePaymentProvider.previewOrder
 
 ***
 
+### queryUtilityStatus()
+
+```ts
+queryUtilityStatus(transid): Promise<{
+  data: unknown[];
+  message: string;
+  reference: string;
+  status: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:772](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L772)
+
+Query the status of a utility payment.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `transid` | `string` |
+
+#### Returns
+
+`Promise`\<\{
+  `data`: `unknown`[];
+  `message`: `string`;
+  `reference`: `string`;
+  `status`: `string`;
+\}\>
+
+***
+
 ### refund()?
 
 ```ts
@@ -424,6 +674,77 @@ BasePaymentProvider.refund
 
 ***
 
+### selcomPesaCashin()
+
+```ts
+selcomPesaCashin(
+   utilityref, 
+   amount, 
+   msisdn?): Promise<{
+  message: string;
+  reference: string;
+  status: string;
+  transid: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:799](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L799)
+
+Send funds to a Selcom Pesa account.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `utilityref` | `string` | — Selcom Pesa account number or mobile number. |
+| `amount` | `number` | — amount in TZS. |
+| `msisdn?` | `string` | — sender mobile number (optional). |
+
+#### Returns
+
+`Promise`\<\{
+  `message`: `string`;
+  `reference`: `string`;
+  `status`: `string`;
+  `transid`: `string`;
+\}\>
+
+***
+
+### selcomPesaNameLookup()
+
+```ts
+selcomPesaNameLookup(utilityref): Promise<{
+  message: string;
+  name?: string;
+  reference: string;
+  status: string;
+  transid: string;
+}>;
+```
+
+Defined in: [providers/selcom/src/selcom.ts:833](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L833)
+
+Look up a Selcom Pesa account holder name.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `utilityref` | `string` |
+
+#### Returns
+
+`Promise`\<\{
+  `message`: `string`;
+  `name?`: `string`;
+  `reference`: `string`;
+  `status`: `string`;
+  `transid`: `string`;
+\}\>
+
+***
+
 ### validateCredentials()
 
 ```ts
@@ -433,7 +754,7 @@ validateCredentials(): Promise<{
 }>;
 ```
 
-Defined in: [providers/selcom/src/selcom.ts:583](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/providers/selcom/src/selcom.ts#L583)
+Defined in: [providers/selcom/src/selcom.ts:644](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/providers/selcom/src/selcom.ts#L644)
 
 Validate that a provider config works (health check).
 

@@ -12,7 +12,7 @@ type PaymentStatus =
   | "AMBIGUOUS";
 ```
 
-Defined in: [packages/pesa/src/types/order.ts:24](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/packages/pesa/src/types/order.ts#L24)
+Defined in: [packages/pesa/src/types/order.ts:24](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/order.ts#L24)
 
 Payment lifecycle statuses.
 

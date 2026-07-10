@@ -6,7 +6,7 @@ title: "Function: tunnelPlugin()"
 function tunnelPlugin(opts?): PesaPlugin;
 ```
 
-Defined in: [packages/devtools/src/tunnel.ts:247](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/packages/devtools/src/tunnel.ts#L247)
+Defined in: [packages/devtools/src/tunnel.ts:247](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/devtools/src/tunnel.ts#L247)
 
 A borapesa plugin that starts a Cloudflare Quick Tunnel for local
 webhook development.  Requires `cloudflared` on the system PATH

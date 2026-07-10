@@ -6,7 +6,7 @@ title: "Function: startTunnel()"
 function startTunnel(port, binary?): Promise<Tunnel>;
 ```
 
-Defined in: [packages/devtools/src/tunnel.ts:111](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/packages/devtools/src/tunnel.ts#L111)
+Defined in: [packages/devtools/src/tunnel.ts:111](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/devtools/src/tunnel.ts#L111)
 
 ## Parameters
 

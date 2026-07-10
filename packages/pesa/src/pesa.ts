@@ -192,8 +192,7 @@ export interface PesaInstance {
  * plugin pipeline, and event store wired together.
  *
  * @param config — only `provider` is required. Everything else has
- * sensible defaults (in-memory event store, no plugins, webhook secret
- * from `BORAPESA_WEBHOOK_SECRET` environment variable).
+ * sensible defaults (in-memory event store, no plugins).
  *
  * @example
  * **Production setup with Selcom**

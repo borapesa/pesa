@@ -6,7 +6,7 @@ title: "Function: createPesa()"
 function createPesa(config): PesaInstance;
 ```
 
-Defined in: [packages/pesa/src/pesa.ts:236](https://github.com/borapesa/pesa/blob/551532cd94bf0bd50a5389b05b48dbc5bf485d02/packages/pesa/src/pesa.ts#L236)
+Defined in: [packages/pesa/src/pesa.ts:235](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/pesa.ts#L235)
 
 The single entry point for the entire Bora Pesa SDK.
 
@@ -14,7 +14,7 @@ The single entry point for the entire Bora Pesa SDK.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `config` | [`PesaConfig`](../interfaces/PesaConfig) | — only `provider` is required. Everything else has sensible defaults (in-memory event store, no plugins, webhook secret from `BORAPESA_WEBHOOK_SECRET` environment variable). |
+| `config` | [`PesaConfig`](../interfaces/PesaConfig) | — only `provider` is required. Everything else has sensible defaults (in-memory event store, no plugins). |
 
 ## Returns
 

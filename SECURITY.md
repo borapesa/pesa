@@ -48,5 +48,4 @@ We follow coordinated disclosure. Please give us a reasonable time to fix before
 ## Security model
 
 - All provider API calls happen server-side. Credentials never reach the browser.
-- Webhook verification uses HMAC with `BORAPESA_WEBHOOK_SECRET`
 - The SDK itself does **not** handle authentication — that's your application's responsibility

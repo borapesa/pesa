@@ -82,7 +82,6 @@ All errors extend `PesaError`. `normalizeError()` passes through:
 
 - Currency: TZS only, whole integers
 - Auth: Out of SDK scope (use better-auth or similar)
-- Webhook security: `BORAPESA_WEBHOOK_SECRET` env var for HMAC verification
 - Event store default: SQLite via better-sqlite3 (zero config)
 - Client/server split: Server owns all API calls; client contains zero secrets
 - Multi-currency: Post-v1 (driven by community issues/PRs)

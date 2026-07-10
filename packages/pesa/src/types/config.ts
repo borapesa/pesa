@@ -8,7 +8,6 @@ import type { BasePaymentProvider } from '../providers/base';
  * Only `provider` is required. Everything else ships with sensible defaults:
  * - In-memory event store (lost on restart — swap to a persistent adapter for production)
  * - No plugins
- * - `BORAPESA_WEBHOOK_SECRET` read from environment
  *
  * @example
  * ```ts
@@ -28,9 +27,6 @@ import type { BasePaymentProvider } from '../providers/base';
  *     retryPlugin({ maxAttempts: 3 }),
  *     loggingPlugin({ level: 'info' }),
  *   ],
- *   webhooks: {
- *     secret: process.env.BORAPESA_WEBHOOK_SECRET,
- *   },
  *   // Override for production:
  *   // db: new SQLiteAdapter({ path: './pesa.db' }),
  * });
@@ -69,17 +65,6 @@ export interface PesaConfig {
    * - `loggingPlugin` — structured logging with PII redaction
    */
   plugins?: PesaPlugin[];
-
-  /** Webhook configuration. Reserved for future hosted verification services. */
-  webhooks?: {
-    /**
-     * Reserved for future hosted webhook verification.
-     *
-     * Provider-level signature verification (HMAC, RSA, checksum) happens
-     * automatically in each provider adapter — no additional secret needed.
-     */
-    secret?: string;
-  };
 
   /**
    * Database adapter for the event store.
