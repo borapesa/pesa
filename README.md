@@ -68,7 +68,13 @@ Full docs at [borapesa.dev](https://borapesa.dev).
 
 ## Contributing
 
-We welcome contributions. Read our [AI Usage Policy](./AI_USAGE_POLICY.md) before submitting AI-assisted PRs.
+We welcome contributions from the community. See [CONTRIBUTING.md](./CONTRIBUTING.md) to get started and [SUPPORT.md](./SUPPORT.md) for help.
+
+This project follows the [Contributor Covenant](./CODE_OF_CONDUCT.md) code of conduct.
+
+## Security
+
+Report vulnerabilities privately. See [SECURITY.md](./SECURITY.md) for details.
 
 ## License
 

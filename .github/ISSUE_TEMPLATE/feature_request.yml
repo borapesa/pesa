@@ -1,0 +1,51 @@
+name: Feature request
+description: Suggest a new feature or improvement
+title: "[feat]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! We're especially interested in features that make payment integration in Tanzania easier.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the use case — what are you trying to do that isn't possible today?
+      placeholder: "I need to batch disburse payments to multiple phone numbers at once"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How do you envision this working? Code snippets welcome.
+      placeholder: |
+        ```ts
+        await pesa.disburseBatch([
+          { amount: 5000, phone: '255712345678' },
+          { amount: 5000, phone: '255712345679' },
+        ])
+        ```
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Where does this change belong?
+      options:
+        - Core SDK (@borapesa/pesa)
+        - Provider adapter (selcom, azampay, clickpesa, snippe)
+        - Adapter (sqlite)
+        - Dev tools
+        - Documentation
+        - Other / not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: willing-to-implement
+    attributes:
+      label: Willing to contribute?
+      description: Would you be interested in implementing this yourself?
+      options:
+        - label: I'd like to implement this feature
+        - label: I'm looking for guidance on implementation

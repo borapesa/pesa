@@ -1,0 +1,50 @@
+name: Bug report
+description: Report a bug in Bora Pesa
+title: "[bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill this out as completely as you can.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect to happen, and what happened instead?
+      placeholder: "Expected: order status returns SUCCESS. Actual: got PesaNetworkError after 10s"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce this?
+      placeholder: |
+        1. Create a pesa instance with Selcom provider
+        2. Call pesa.createOrder({...})
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: packages
+    attributes:
+      label: Which packages are you using?
+      description: Comma-separated list of `@borapesa/*` packages and their versions
+      placeholder: "@borapesa/pesa@0.6.0, @borapesa/selcom@0.2.0"
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime environment
+      description: "Node.js version, runtime, and platform"
+      placeholder: "Node.js 22.4, macOS 15, Bun 1.2, etc."
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or error output
+      description: Paste any error messages, stack traces, or logs here.
+      render: shell
