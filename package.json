@@ -22,9 +22,9 @@
     "clean": "turbo run clean",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "turbo run build && changeset publish",
+    "release": "turbo run build && changeset publish --provenance",
     "ci:version": "changeset version",
-    "ci:release": "turbo run build && changeset publish"
+    "ci:release": "turbo run build && changeset publish --provenance"
   },
   "keywords": [],
   "packageManager": "pnpm@10.33.3",
