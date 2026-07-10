@@ -4,6 +4,15 @@
   "description": "Selcom provider adapter for Bora Pesa",
   "license": "MIT",
   "author": "Bora Pesa contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/borapesa/pesa.git",
+    "directory": "providers/selcom"
+  },
+  "homepage": "https://borapesa.dev",
+  "bugs": {
+    "url": "https://github.com/borapesa/pesa/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

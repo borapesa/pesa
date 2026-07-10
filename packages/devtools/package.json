@@ -4,6 +4,15 @@
   "description": "Developer tools for Bora Pesa — cloudflared tunnel, webhook dev utilities",
   "license": "MIT",
   "author": "Bora Pesa contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/borapesa/pesa.git",
+    "directory": "packages/devtools"
+  },
+  "homepage": "https://borapesa.dev",
+  "bugs": {
+    "url": "https://github.com/borapesa/pesa/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -40,5 +49,9 @@
     "@types/node": "^26.0.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "provenance": true
   }
 }
