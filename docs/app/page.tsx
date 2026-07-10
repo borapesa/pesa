@@ -137,12 +137,14 @@ export default function Page() {
         </div>
 
         <h2 className="text-2xl font-bold mb-6">Supported Providers</h2>
-        <div className="providers-grid flex justify-center gap-8 mb-16 overflow-x-auto py-3">
-          {providers.map(({ name, logo, href, bg }) => (
-            <Link key={name} href={href} className="provider-card" style={{ background: bg }}>
-              <img src={logo} alt={`${name} provider`} />
-            </Link>
-          ))}
+        <div className="max-w-full overflow-hidden">
+          <div className="providers-grid flex justify-center gap-8 mb-16 overflow-x-auto py-3">
+            {providers.map(({ name, logo, href, bg }) => (
+              <Link key={name} href={href} className="provider-card" style={{ background: bg }}>
+                <img src={logo} alt={`${name} provider`} />
+              </Link>
+            ))}
+          </div>
         </div>
       </main>
     </HomeLayout>
