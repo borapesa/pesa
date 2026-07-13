@@ -55,6 +55,7 @@ const order = await pesa.createOrder({
 | `@borapesa/pesapal`   | Pesapal provider adapter (planned)                |
 | `@borapesa/sqlite`    | SQLite event store adapter                        |
 | `@borapesa/devtools`  | Developer tools (cloudflared tunnel)              |
+| `@borapesa/mcp`       | MCP server: searchable docs and examples for AI agents |
 
 ## Quick Start
 
@@ -65,6 +66,24 @@ pnpm add @borapesa/pesa @borapesa/selcom
 ## Documentation
 
 Full docs at [borapesa.dev](https://borapesa.dev).
+
+## Using AI agents with Bora Pesa
+
+Bora Pesa is built to be integrated by AI coding agents as well as humans:
+
+- **MCP server**: give your agent searchable docs, provider comparisons, and runnable examples.
+
+  ```bash
+  claude mcp add borapesa -- npx -y @borapesa/mcp
+  ```
+
+  Works with Claude Code, Cursor, VS Code, Windsurf, and any MCP client. This repo ships a [`.mcp.json`](./.mcp.json) so agents working here pick it up automatically.
+
+- **llms.txt**: the full documentation is served as plain markdown at [borapesa.dev/llms.txt](https://borapesa.dev/llms.txt) (index), [borapesa.dev/llms-full.txt](https://borapesa.dev/llms-full.txt) (everything in one file), and `borapesa.dev/llms/<path>/index.md` (per page).
+
+- **AGENTS.md**: agents contributing to this repo read [AGENTS.md](./AGENTS.md) for conventions.
+
+See the [AI tools guide](https://borapesa.dev/docs/ai-tools) for setup in each editor.
 
 ## Contributing
 
