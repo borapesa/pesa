@@ -40,6 +40,11 @@ const PACKAGES = [
     name: '@borapesa/devtools',
     desc: 'Developer tools — cloudflared tunnel, webhook dev utilities',
   },
+  {
+    dir: 'packages/mcp/src',
+    name: '@borapesa/mcp',
+    desc: 'MCP server — searchable docs, provider registry, and examples for AI agents',
+  },
 ]
 
 // ── Step 1: Flatten directory structure ─────────────────────────

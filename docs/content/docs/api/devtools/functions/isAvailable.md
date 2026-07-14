@@ -6,7 +6,7 @@ title: "Function: isAvailable()"
 function isAvailable(binary?): boolean;
 ```
 
-Defined in: [packages/devtools/src/tunnel.ts:301](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/devtools/src/tunnel.ts#L301)
+Defined in: [packages/devtools/src/tunnel.ts:301](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/devtools/src/tunnel.ts#L301)
 
 ## Parameters
 

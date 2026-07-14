@@ -15,3 +15,4 @@ Bora Pesa API reference — auto-generated from JSDoc.
 | [@borapesa/snippe](snippe) | Snippe provider adapter |
 | [@borapesa/sqlite](sqlite) | SQLite event store adapter |
 | [@borapesa/devtools](devtools) | Developer tools — cloudflared tunnel, webhook dev utilities |
+| [@borapesa/mcp](mcp) | MCP server — searchable docs, provider registry, and examples for AI agents |

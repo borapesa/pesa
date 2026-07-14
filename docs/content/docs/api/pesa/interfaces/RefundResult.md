@@ -2,7 +2,7 @@
 title: "Interface: RefundResult"
 ---
 
-Defined in: [packages/pesa/src/types/refund.ts:19](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/refund.ts#L19)
+Defined in: [packages/pesa/src/types/refund.ts:19](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/pesa/src/types/refund.ts#L19)
 
 Result returned after initiating a refund.
 
@@ -24,9 +24,9 @@ if (pesa.refund) {
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="amount"></a> `amount` | `number` | Amount refunded in whole TZS. | [packages/pesa/src/types/refund.ts:25](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/refund.ts#L25) |
-| <a id="message"></a> `message?` | `string` | Optional human-readable message from the provider. | [packages/pesa/src/types/refund.ts:34](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/refund.ts#L34) |
-| <a id="orderid"></a> `orderId` | `string` | The original order ID being refunded. | [packages/pesa/src/types/refund.ts:23](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/refund.ts#L23) |
-| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. | [packages/pesa/src/types/refund.ts:36](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/refund.ts#L36) |
-| <a id="refundid"></a> `refundId` | `string` | Provider-assigned refund ID. | [packages/pesa/src/types/refund.ts:21](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/refund.ts#L21) |
-| <a id="status"></a> `status` | `"SUCCESS"` \| `"FAILED"` \| `"QUEUED"` | Refund status. - `SUCCESS` — refund processed - `QUEUED` — refund initiated, poll for updates - `FAILED` — refund failed | [packages/pesa/src/types/refund.ts:32](https://github.com/borapesa/pesa/blob/d80176dbaeb846a33302a30c19d7d4eba629ed0c/packages/pesa/src/types/refund.ts#L32) |
+| <a id="amount"></a> `amount` | `number` | Amount refunded in whole TZS. | [packages/pesa/src/types/refund.ts:25](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/pesa/src/types/refund.ts#L25) |
+| <a id="message"></a> `message?` | `string` | Optional human-readable message from the provider. | [packages/pesa/src/types/refund.ts:34](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/pesa/src/types/refund.ts#L34) |
+| <a id="orderid"></a> `orderId` | `string` | The original order ID being refunded. | [packages/pesa/src/types/refund.ts:23](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/pesa/src/types/refund.ts#L23) |
+| <a id="raw"></a> `raw?` | `unknown` | Raw provider response. | [packages/pesa/src/types/refund.ts:36](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/pesa/src/types/refund.ts#L36) |
+| <a id="refundid"></a> `refundId` | `string` | Provider-assigned refund ID. | [packages/pesa/src/types/refund.ts:21](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/pesa/src/types/refund.ts#L21) |
+| <a id="status"></a> `status` | `"SUCCESS"` \| `"FAILED"` \| `"QUEUED"` | Refund status. - `SUCCESS` — refund processed - `QUEUED` — refund initiated, poll for updates - `FAILED` — refund failed | [packages/pesa/src/types/refund.ts:32](https://github.com/borapesa/pesa/blob/c75801713de76259f5fc4269849309a91857c509/packages/pesa/src/types/refund.ts#L32) |

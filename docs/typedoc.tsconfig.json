@@ -17,7 +17,8 @@
     "../providers/azampay/src/**/*.ts",
     "../providers/clickpesa/src/**/*.ts",
     "../providers/selcom/src/**/*.ts",
-    "../providers/snippe/src/**/*.ts"
+    "../providers/snippe/src/**/*.ts",
+    "../packages/mcp/src/**/*.ts"
   ],
   "exclude": ["**/*.test.ts", "**/node_modules/**"]
 }

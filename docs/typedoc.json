@@ -8,7 +8,8 @@
     "../providers/azampay/src/index.ts",
     "../providers/clickpesa/src/index.ts",
     "../providers/selcom/src/index.ts",
-    "../providers/snippe/src/index.ts"
+    "../providers/snippe/src/index.ts",
+    "../packages/mcp/src/index.ts"
   ],
   "entryPointStrategy": "expand",
   "entryModule": "index",
