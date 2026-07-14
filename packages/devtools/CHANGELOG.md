@@ -1,5 +1,12 @@
 # @borapesa/devtools
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.5
+
 ## 0.0.6
 
 ### Patch Changes
