@@ -1,6 +1,6 @@
 {
   "name": "@borapesa/devtools",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Developer tools for Bora Pesa — cloudflared tunnel, webhook dev utilities",
   "license": "MIT",
   "author": "Bora Pesa contributors",
