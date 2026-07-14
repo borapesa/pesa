@@ -1,2 +1,12 @@
 /og
   Content-Type: image/png
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+
+/llms/*
+  Content-Type: text/markdown; charset=utf-8
+  X-Robots-Tag: all

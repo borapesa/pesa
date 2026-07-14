@@ -7,10 +7,12 @@ dist/
 .env
 .env.local
 .DS_Store
+.idea/
 coverage/
 out/
 .source/
 docs/public/llms/
 docs/public/llms.txt
 docs/public/llms-full.txt
+docs/public/sitemap.xml
 docs/next-env.d.ts

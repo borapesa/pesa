@@ -1,0 +1,140 @@
+---
+title: AI Tools
+description: MCP server, llms.txt, and markdown endpoints that let AI agents read, search, and integrate Bora Pesa.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Bora Pesa is built to be integrated by AI coding agents as well as humans. Three complementary surfaces expose the same documentation:
+
+1. **MCP server** (`@borapesa/mcp`): searchable docs, provider registry, and code examples inside your agent
+2. **llms.txt endpoints**: the whole site as plain markdown over HTTPS
+3. **AGENTS.md**: contributor conventions for agents working inside the repository
+
+## MCP server
+
+The [Model Context Protocol](https://modelcontextprotocol.io) server ships the full documentation snapshot inside the package, so it works offline and stays versioned with each release. Once connected, your agent can answer provider questions, look up config fields, and pull runnable examples while it writes your integration.
+
+### Tools
+
+| Tool             | What it does                                                                  |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `search_docs`    | Keyword search across all guides and API reference pages                       |
+| `get_doc`        | Read any docs page as markdown                                                 |
+| `list_docs`      | List every page with title and description                                     |
+| `list_providers` | Compare Selcom, AzamPay, ClickPesa, Snippe, and the Bogus test provider        |
+| `get_provider`   | Config fields, capabilities, and webhook verification notes for one provider   |
+| `get_example`    | Runnable TypeScript for quickstart, webhooks, events, disbursement, and more   |
+
+Every docs page is also exposed as an MCP resource under `borapesa://docs/<path>`.
+
+### Claude Code
+
+```bash
+claude mcp add borapesa -- npx -y @borapesa/mcp
+```
+
+Or check a `.mcp.json` into your project root so every contributor's agent picks it up:
+
+```json
+{
+  "mcpServers": {
+    "borapesa": {
+      "command": "npx",
+      "args": ["-y", "@borapesa/mcp"]
+    }
+  }
+}
+```
+
+### Cursor
+
+Add to `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project):
+
+```json
+{
+  "mcpServers": {
+    "borapesa": {
+      "command": "npx",
+      "args": ["-y", "@borapesa/mcp"]
+    }
+  }
+}
+```
+
+### VS Code (GitHub Copilot)
+
+Add to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "borapesa": {
+      "command": "npx",
+      "args": ["-y", "@borapesa/mcp"]
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "borapesa": {
+      "command": "npx",
+      "args": ["-y", "@borapesa/mcp"]
+    }
+  }
+}
+```
+
+<Callout variant="info">
+  The server runs locally over stdio and makes no network calls. It bundles the docs that shipped
+  with its release, so pin the package version if you want docs matching an older SDK version.
+</Callout>
+
+## llms.txt endpoints
+
+For agents that fetch over HTTPS instead of MCP, the site follows the [llms.txt convention](https://llmstxt.org):
+
+| URL                                        | Contents                                          |
+| ------------------------------------------ | ------------------------------------------------- |
+| [`/llms.txt`](/llms.txt)                   | Index of every page with absolute markdown links   |
+| [`/llms-full.txt`](/llms-full.txt)         | The entire documentation in a single file          |
+| `/llms/<path>/index.md`                    | Any single page as markdown                        |
+
+Examples:
+
+```text
+https://borapesa.dev/llms/getting-started/index.md
+https://borapesa.dev/llms/errors/index.md
+https://borapesa.dev/llms/api/pesa/functions/createPesa/index.md
+```
+
+Every docs page also has a copy-as-markdown button in its header, and the same content is linked for crawlers via `robots.txt` and `sitemap.xml`.
+
+## AGENTS.md
+
+The repository root carries an [`AGENTS.md`](https://github.com/borapesa/pesa/blob/master/AGENTS.md) with the conventions agents must follow when contributing: whole-integer TZS amounts, MSISDN phone validation, extensionless imports, Biome formatting, and the test coverage bar. If you point a coding agent at the repo, it reads this file automatically.
+
+## Prompting tips
+
+When asking an agent to integrate Bora Pesa, a prompt like this works well once the MCP server is connected:
+
+```text
+Add mobile money checkout to this app using @borapesa/pesa with the ClickPesa
+provider. Use the borapesa MCP tools to check provider config fields and copy
+the webhook mounting pattern for my framework.
+```
+
+Useful facts agents should know (all enforced by SDK validation):
+
+- Amounts are whole TZS integers: `15000` means TZS 15,000. Floats are rejected.
+- Phone numbers use MSISDN format `255XXXXXXXXX`. Local `07XX` numbers are rejected.
+- Only `provider` is required in `createPesa()`. The event store defaults to in-memory.
+- `pesa.mountWebhook` is a standard fetch handler serving `POST {basePath}/webhook`, `basePath` defaults to `/pesa`.
+- All provider calls are server-side. Never expose credentials to the browser.

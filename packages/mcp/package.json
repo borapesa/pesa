@@ -1,0 +1,61 @@
+{
+  "name": "@borapesa/mcp",
+  "version": "0.0.0",
+  "description": "Model Context Protocol server for Bora Pesa. Gives AI agents searchable docs, provider registry data, and ready-to-run integration examples.",
+  "license": "MIT",
+  "author": "Bora Pesa contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/borapesa/pesa.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://borapesa.dev",
+  "bugs": {
+    "url": "https://github.com/borapesa/pesa/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "borapesa-mcp": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "sync-content": "node scripts/sync-content.mjs",
+    "build": "node scripts/sync-content.mjs && tsc --noEmit && node scripts/bundle.mjs",
+    "dev": "tsc --noEmit --watch",
+    "test": "node scripts/sync-content.mjs && node scripts/bundle.mjs && vitest run",
+    "coverage": "node scripts/sync-content.mjs && node scripts/bundle.mjs && vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "borapesa",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "agents",
+    "payments",
+    "tanzania",
+    "mobile-money"
+  ],
+  "packageManager": "pnpm@10.33.3",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "@vitest/coverage-v8": "^4.1.9",
+    "esbuild": "^0.28.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "provenance": true
+  }
+}
