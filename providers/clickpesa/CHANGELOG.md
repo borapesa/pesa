@@ -1,5 +1,14 @@
 # @borapesa/clickpesa
 
+## 0.3.4
+
+### Patch Changes
+
+- - move provenance flag to publishConfig
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.4
+
 ## 0.3.3
 
 ### Patch Changes
