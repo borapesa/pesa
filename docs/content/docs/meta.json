@@ -10,6 +10,7 @@
     "plugins",
     "testing",
     "errors",
+    "ai-tools",
     "api"
   ]
 }

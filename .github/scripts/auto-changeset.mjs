@@ -20,8 +20,10 @@ const SCOPE_TO_PKG = {
   azampay: '@borapesa/azampay',
   selcom: '@borapesa/selcom',
   clickpesa: '@borapesa/clickpesa',
+  snippe: '@borapesa/snippe',
   devtools: '@borapesa/devtools',
   sqlite: '@borapesa/sqlite',
+  mcp: '@borapesa/mcp',
 };
 
 const PKG_TO_DIR = {
@@ -29,8 +31,10 @@ const PKG_TO_DIR = {
   '@borapesa/azampay': 'providers/azampay',
   '@borapesa/selcom': 'providers/selcom',
   '@borapesa/clickpesa': 'providers/clickpesa',
+  '@borapesa/snippe': 'providers/snippe',
   '@borapesa/devtools': 'packages/devtools',
   '@borapesa/sqlite': 'adapters/sqlite',
+  '@borapesa/mcp': 'packages/mcp',
 };
 
 const IGNORED_SCOPES = new Set(['docs', 'chore', 'ci', 'test', 'style', 'refactor']);

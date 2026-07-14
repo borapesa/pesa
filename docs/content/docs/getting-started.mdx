@@ -76,14 +76,11 @@ import { SQLiteAdapter } from '@borapesa/sqlite';
 
 const pesa = createPesa({
   provider: new ClickPesaProvider({
-    baseUrl:  'https://api.clickpesa.com',
-    clientId: process.env.CLICKPESA_CLIENT_ID!,
-    apiKey:   process.env.CLICKPESA_API_KEY!,
+    clientId:    process.env.CLICKPESA_CLIENT_ID!,
+    apiKey:      process.env.CLICKPESA_API_KEY!,
+    checksumKey: process.env.CLICKPESA_CHECKSUM_KEY, // enables webhook verification
   }),
   db: new SQLiteAdapter('./pesa.db'),
-  webhooks: {
-    secret: process.env.BORAPESA_WEBHOOK_SECRET!,
-  },
   plugins: [
     idempotencyPlugin(),
     retryPlugin({ maxAttempts: 3 }),

@@ -5,6 +5,15 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"]
     },
+    "@borapesa/mcp#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/content/docs/**"],
+      "outputs": ["dist/**"]
+    },
+    "@borapesa/mcp#test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/content/docs/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
