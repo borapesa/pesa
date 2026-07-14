@@ -14,6 +14,9 @@
     "url": "https://github.com/borapesa/pesa/issues"
   },
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "bin": {
     "borapesa-mcp": "./dist/bin.js"
   },
@@ -24,8 +27,8 @@
     "sync-content": "node scripts/sync-content.mjs",
     "build": "node scripts/sync-content.mjs && tsc --noEmit && node scripts/bundle.mjs",
     "dev": "tsc --noEmit --watch",
-    "test": "node scripts/sync-content.mjs && vitest run",
-    "coverage": "node scripts/sync-content.mjs && vitest run --coverage",
+    "test": "node scripts/sync-content.mjs && node scripts/bundle.mjs && vitest run",
+    "coverage": "node scripts/sync-content.mjs && node scripts/bundle.mjs && vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },

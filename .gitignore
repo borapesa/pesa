@@ -14,8 +14,5 @@ out/
 docs/public/llms/
 docs/public/llms.txt
 docs/public/llms-full.txt
-docs/next-env.d.ts
-
-.idea
 docs/public/sitemap.xml
-
+docs/next-env.d.ts

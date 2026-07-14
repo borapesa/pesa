@@ -8,12 +8,14 @@
  * URL so agents can fetch pages directly without HTML parsing.
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const SITE_URL = 'https://borapesa.dev';
-const OUT_DIR = join(import.meta.dirname, '..', 'out');
-const PUBLIC_DIR = join(import.meta.dirname, '..', 'public');
-const CONTENT_DIR = join(import.meta.dirname, '..', 'content', 'docs');
+const OUT_DIR = join(SCRIPT_DIR, '..', 'out');
+const PUBLIC_DIR = join(SCRIPT_DIR, '..', 'public');
+const CONTENT_DIR = join(SCRIPT_DIR, '..', 'content', 'docs');
 
 // ── Collect pages ────────────────────────────────────────────────
 function collect(dir, items = []) {

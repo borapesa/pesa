@@ -190,7 +190,7 @@ export const PROVIDERS: ProviderInfo[] = [
         name: 'checksumKey',
         required: false,
         description:
-          'HMAC-SHA256 signing key. Signs outgoing POST/PUT/PATCH bodies and verifies incoming webhooks. Generate it in the ClickPesa dashboard.',
+          'HMAC-SHA256 signing key. Signs outgoing POST/PUT/PATCH bodies and verifies incoming webhooks. Generate it in the ClickPesa dashboard. Strongly recommended for production: without it, incoming webhooks are accepted unverified.',
       },
       {
         name: 'sandbox',
