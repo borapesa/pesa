@@ -1,6 +1,6 @@
 {
   "name": "@borapesa/selcom",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Selcom provider adapter for Bora Pesa",
   "license": "MIT",
   "author": "Bora Pesa contributors",
