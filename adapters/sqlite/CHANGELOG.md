@@ -1,5 +1,14 @@
 # @borapesa/sqlite
 
+## 0.0.6
+
+### Patch Changes
+
+- - move provenance flag to publishConfig
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.3
+
 ## 0.0.5
 
 ### Patch Changes
