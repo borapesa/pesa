@@ -31,20 +31,14 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 22
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
 
       - run: pnpm install --frozen-lockfile
 
       - name: Auto-generate changesets from commits
         run: node .github/scripts/auto-changeset.mjs
-
-      - name: Configure pnpm for OIDC publishing
-        run: |
-          pnpm config set registry https://registry.npmjs.org
-          pnpm config set @borapesa:registry https://registry.npmjs.org
-          pnpm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
-          echo "=== pnpm config ===" && pnpm config list
 
       - name: Create Release Pull Request or Publish
         id: changesets
