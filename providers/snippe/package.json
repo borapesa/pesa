@@ -1,6 +1,6 @@
 {
   "name": "@borapesa/snippe",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Snippe provider adapter for Bora Pesa",
   "license": "MIT",
   "author": "Bora Pesa contributors",
