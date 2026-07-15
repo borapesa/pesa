@@ -1,6 +1,6 @@
 {
   "name": "@borapesa/mcp",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Model Context Protocol server for Bora Pesa. Gives AI agents searchable docs, provider registry data, and ready-to-run integration examples.",
   "license": "MIT",
   "author": "Bora Pesa contributors",

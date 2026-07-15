@@ -1,6 +1,6 @@
 {
   "name": "@borapesa/sqlite",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "SQLite event store adapter for Bora Pesa",
   "license": "MIT",
   "author": "Bora Pesa contributors",

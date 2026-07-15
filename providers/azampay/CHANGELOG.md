@@ -1,5 +1,14 @@
 # @borapesa/azampay
 
+## 0.1.15
+
+### Patch Changes
+
+- - move provenance flag to publishConfig
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.10
+
 ## 0.1.14
 
 ### Patch Changes
