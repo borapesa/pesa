@@ -1,5 +1,12 @@
 # @borapesa/snippe
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.9
+
 ## 0.1.9
 
 ### Patch Changes
