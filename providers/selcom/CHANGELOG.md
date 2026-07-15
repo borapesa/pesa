@@ -1,5 +1,14 @@
 # @borapesa/selcom
 
+## 0.2.8
+
+### Patch Changes
+
+- - move provenance flag to publishConfig
+
+- Updated dependencies []:
+  - @borapesa/pesa@0.6.8
+
 ## 0.2.7
 
 ### Patch Changes
