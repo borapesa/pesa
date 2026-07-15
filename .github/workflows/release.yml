@@ -21,30 +21,30 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
           token: ${{ secrets.RELEASE_TOKEN }}
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: 'pnpm'
 
-      - name: Create clean user .npmrc (prevents changesets from writing broken auth)
-        run: |
-          cat > ~/.npmrc << 'EOF'
-          registry=https://registry.npmjs.org
-          @borapesa:registry=https://registry.npmjs.org
-          EOF
-
       - run: pnpm install --frozen-lockfile
 
       - name: Auto-generate changesets from commits
         run: node .github/scripts/auto-changeset.mjs
+
+      - name: Configure pnpm for OIDC publishing
+        run: |
+          pnpm config set registry https://registry.npmjs.org
+          pnpm config set @borapesa:registry https://registry.npmjs.org
+          pnpm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+          echo "=== pnpm config ===" && pnpm config list
 
       - name: Create Release Pull Request or Publish
         id: changesets
@@ -57,3 +57,4 @@ jobs:
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
