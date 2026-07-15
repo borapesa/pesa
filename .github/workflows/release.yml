@@ -33,17 +33,11 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
 
       - run: pnpm install --frozen-lockfile
 
       - name: Auto-generate changesets from commits
         run: node .github/scripts/auto-changeset.mjs
-
-      - name: Remove broken _authToken from setup-node's .npmrc
-        run: |
-          sed -i '/:_authToken=/d' "${NPM_CONFIG_USERCONFIG:-/home/runner/work/_temp/.npmrc}"
-          echo "=== .npmrc contents ===" && cat "${NPM_CONFIG_USERCONFIG:-/home/runner/work/_temp/.npmrc}"
 
       - name: Create Release Pull Request or Publish
         id: changesets
@@ -56,4 +50,3 @@ jobs:
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
