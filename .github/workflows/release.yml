@@ -40,10 +40,10 @@ jobs:
       - name: Auto-generate changesets from commits
         run: node .github/scripts/auto-changeset.mjs
 
-      - name: Remove setup-node's broken auth (let npm OIDC handle it)
+      - name: Remove broken _authToken from setup-node's .npmrc
         run: |
-          rm -f "${NPM_CONFIG_USERCONFIG:-/dev/null}"
-          echo "NPM_CONFIG_USERCONFIG=" >> "$GITHUB_ENV"
+          sed -i '/:_authToken=/d' "${NPM_CONFIG_USERCONFIG:-/home/runner/work/_temp/.npmrc}"
+          echo "=== .npmrc contents ===" && cat "${NPM_CONFIG_USERCONFIG:-/home/runner/work/_temp/.npmrc}"
 
       - name: Create Release Pull Request or Publish
         id: changesets
