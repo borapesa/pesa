@@ -1,5 +1,11 @@
 # @borapesa/pesa
 
+## 0.6.11
+
+### Patch Changes
+
+- - move provenance flag to publishConfig
+
 ## 0.6.10
 
 ### Patch Changes
