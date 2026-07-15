@@ -33,34 +33,13 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
 
-      - name: Exchange OIDC token for npm publish token
+      - name: Create clean user .npmrc (prevents changesets from writing broken auth)
         run: |
-          echo "::group::OIDC token exchange"
-          OIDC_RESP=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org")
-          echo "OIDC token obtained (length: ${#OIDC_RESP})"
-          OIDC_TOKEN=$(echo "$OIDC_RESP" | jq -r .value)
-          if [ -z "$OIDC_TOKEN" ] || [ "$OIDC_TOKEN" = "null" ]; then
-            echo "Failed to get OIDC token. Response:"
-            echo "$OIDC_RESP" | head -5
-            exit 1
-          fi
-          NPM_RESP=$(curl -sS -X POST \
-            -H "Authorization: Bearer $OIDC_TOKEN" \
-            -H "Content-Type: application/json" \
-            "https://registry.npmjs.org/-/npm/v1/oidc/token")
-          echo "npm OIDC exchange response:"
-          echo "$NPM_RESP" | head -5
-          NPM_TOKEN=$(echo "$NPM_RESP" | jq -r .token)
-          if [ -z "$NPM_TOKEN" ] || [ "$NPM_TOKEN" = "null" ]; then
-            echo "Failed to exchange OIDC for npm token."
-            exit 1
-          fi
-          echo "NPM_TOKEN obtained successfully"
-          echo "NPM_TOKEN=$NPM_TOKEN" >> $GITHUB_ENV
-          echo "::endgroup::"
+          cat > ~/.npmrc << 'EOF'
+          registry=https://registry.npmjs.org
+          @borapesa:registry=https://registry.npmjs.org
+          EOF
 
       - run: pnpm install --frozen-lockfile
 
