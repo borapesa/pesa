@@ -1,5 +1,11 @@
 # @borapesa/mcp
 
+## 0.0.16
+
+### Patch Changes
+
+- - address review feedback (engines, node18 paths, checksum warning, bin smoke test)
+
 ## 0.0.15
 
 ### Patch Changes
