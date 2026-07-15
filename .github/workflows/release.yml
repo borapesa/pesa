@@ -33,12 +33,8 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
 
       - run: pnpm install --frozen-lockfile
-
-      - name: Verify npm OIDC auth
-        run: npm whoami
 
       - name: Auto-generate changesets from commits
         run: node .github/scripts/auto-changeset.mjs
