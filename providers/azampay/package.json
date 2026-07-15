@@ -1,6 +1,6 @@
 {
   "name": "@borapesa/azampay",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "AzamPay provider adapter for Bora Pesa",
   "license": "MIT",
   "author": "Bora Pesa contributors",
